@@ -78,10 +78,10 @@ const TechnicianSupport: React.FC = () => {
                         </View>
 
 
-                        <Text style={styles.cardText}>Technician Name: {technician.name}</Text>
-                        <Text style={styles.cardText}>Alternate Number: {technician.altNumber}</Text>
-                        <Text style={styles.cardText}>Technician Type: {technician.type}</Text>
-                        <Text style={styles.cardText}>Vehicle Type: {technician.vehicleType}</Text>
+                        <Text style={styles.cardText}>Technician Name: <Text style={{ color: "black" }}> {technician.name}</Text></Text>
+                        <Text style={styles.cardText}>Alternate Number: <Text style={{ color: "black" }}> {technician.altNumber}</Text></Text>
+                        <Text style={styles.cardText}>Technician Type: <Text style={{ color: "black" }}> {technician.type}</Text></Text>
+                        <Text style={styles.cardText}>Vehicle Type: <Text style={{ color: "black" }}> {technician.vehicleType}</Text></Text>
                     </View>
                 ))}
             </ScrollView>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, StatusBar, View, Text, Image, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import Carousel from 'react-native-reanimated-carousel';
 import { useGlobalContext } from '@/context/GlobalProvider';
@@ -9,16 +9,18 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AntDesign } from '@expo/vector-icons';
 
 const carouselImages = [
-  'https://imgd.aeplcdn.com/664x374/n/cw/ec/107719/range-rover-exterior-right-front-three-quarter-46.jpeg?isig=0&q=80',
-  'https://imgd.aeplcdn.com/664x374/n/cw/ec/107719/range-rover-exterior-right-front-three-quarter-23.jpeg?isig=0&q=80',
-  'https://imgd.aeplcdn.com/664x374/n/cw/ec/107719/new-range-rover-exterior-right-side-view.jpeg?isig=0&q=80'
+  require('@/assets/images/carousel1.png'),
+  require('@/assets/images/carousel2.png'),
+  require('@/assets/images/carousel3.png'),
+  require('@/assets/images/carousel4.png'),
+  require('@/assets/images/carousel5.png'),
+  require('@/assets/images/carousel6.png')
 ];
 
 const { width: deviceWidth } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const { isLogged, loading } = useGlobalContext();
-  const [showMore, setShowMore] = useState(false);
 
   if (!loading && isLogged) return <Redirect href="/(modals)/onbording" />;
 
@@ -30,10 +32,11 @@ export default function HomeScreen() {
     );
   }
 
-  const toggleShowMore = () => setShowMore(!showMore);
-
   return (
     <GestureHandlerRootView style={styles.container}>
+      <View style={{ padding: 20 }}>
+        <Text style={{ fontSize:15, fontWeight:"500"}}>Hi, Riya</Text>
+      </View>
       <ScrollView>
         <View style={styles.carouselContainer}>
           <Carousel
@@ -42,7 +45,7 @@ export default function HomeScreen() {
             autoPlay
             data={carouselImages}
             renderItem={({ item }) => (
-              <Image source={{ uri: item }} style={styles.carouselImage} />
+              <Image source={item} style={styles.carouselImage} />
             )}
           />
         </View>
@@ -55,54 +58,41 @@ export default function HomeScreen() {
 
         <View style={styles.grid}>
           <TouchableOpacity onPress={() => router.push('daily_route_vehicles')} style={styles.gridItem}>
-            <Image source={require(`@/assets/images/route.png`)} style={styles.icon} />
+            <Image source={require('@/assets/images/route.png')} style={styles.icon} />
             <Text style={styles.iconText}>Daily Route Vehicles</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('package_vehicle_booking')} style={styles.gridItem}>
-            <Image source={require(`@/assets/images/package.png`)} style={styles.icon} />
+            <Image source={require('@/assets/images/package.png')} style={styles.icon} />
             <Text style={styles.iconText}>Package Vehicle Booking</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('vehicle_servicing_history')} style={styles.gridItem}>
-            <Image source={require(`@/assets/images/vehicle_servicing_history.png`)} style={styles.icon} />
+            <Image source={require('@/assets/images/vehicle_servicing_history.png')} style={styles.icon} />
             <Text style={styles.iconText}>Vehicle Servicing History</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('employee_list')} style={styles.gridItem}>
-            <Image source={require(`@/assets/images/staff_details.png`)} style={styles.icon} />
+            <Image source={require('@/assets/images/staff_details.png')} style={styles.icon} />
             <Text style={styles.iconText}>Employee Details</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('drivers_list')} style={styles.gridItem}>
-            <Image source={require(`@/assets/images/drivers_list.png`)} style={styles.icon} />
+            <Image source={require('@/assets/images/drivers_list.png')} style={styles.icon} />
             <Text style={styles.iconText}>Driver’s List</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('cleaners_list')} style={styles.gridItem}>
-            <Image source={require(`@/assets/images/cleaners_list.png`)} style={styles.icon} />
+            <Image source={require('@/assets/images/cleaners_list.png')} style={styles.icon} />
             <Text style={styles.iconText}>Cleaner’s List</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('vehicle_documents')} style={styles.gridItem}>
-            <Image source={require(`@/assets/images/vehicle_documents.png`)} style={styles.icon} />
+            <Image source={require('@/assets/images/vehicle_documents.png')} style={styles.icon} />
             <Text style={styles.iconText}>Vehicle Documents</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('all_vehicle_list')} style={styles.gridItem}>
-            <Image source={require(`@/assets/images/vehicle_management.png`)} style={styles.icon} />
+            <Image source={require('@/assets/images/vehicle_management.png')} style={styles.icon} />
             <Text style={styles.iconText}>All Vehicle List</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('technician_support')} style={styles.gridItem}>
-            <Image source={require(`@/assets/images/technician_support.png`)} style={styles.icon} />
+            <Image source={require('@/assets/images/technician_support.png')} style={styles.icon} />
             <Text style={styles.iconText}>Technician Support</Text>
           </TouchableOpacity>
-
-          {showMore && (
-            <>
-              <TouchableOpacity onPress={() => router.push('vehicle_maintenance')} style={styles.gridItem}>
-                <Image source={require(`@/assets/images/vehicle_maintenance.png`)} style={styles.icon} />
-                <Text style={styles.iconText}>Vehicle Maintenance</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => router.push('vehicle_inspection')} style={styles.gridItem}>
-                <Image source={require(`@/assets/images/vehicle_inspection.png`)} style={styles.icon} />
-                <Text style={styles.iconText}>Vehicle Inspection</Text>
-              </TouchableOpacity>
-            </>
-          )}
         </View>
 
         <View style={styles.dividerContainer}>
@@ -110,7 +100,7 @@ export default function HomeScreen() {
             <Text style={styles.dividerText}>Lorem Ipsum</Text>
           </View>
         </View>
-        
+
         <View style={styles.card}>
           <Image
             source={{ uri: 'https://via.placeholder.com/300x200.png?text=Random+Image' }}
@@ -126,15 +116,15 @@ export default function HomeScreen() {
         />
         <View style={styles.socialMediaContainer}>
           <View style={styles.socialMediaIcon}>
-          <AntDesign name="instagram" size={24} color={Colors.primary}  />
+            <AntDesign name="instagram" size={24} color={Colors.primary} />
             <Text style={styles.socialText}>Instagram</Text>
           </View>
           <View style={styles.socialMediaIcon}>
-          <AntDesign name="facebook-square" size={24} color={Colors.primary} />
+            <AntDesign name="facebook-square" size={24} color={Colors.primary} />
             <Text style={styles.socialText}>Facebook</Text>
           </View>
           <View style={styles.socialMediaIcon}>
-          <AntDesign name="youtube" size={24} color={Colors.primary} />
+            <AntDesign name="youtube" size={24} color={Colors.primary} />
             <Text style={styles.socialText}>YouTube</Text>
           </View>
         </View>
@@ -151,11 +141,11 @@ const styles = StyleSheet.create({
   },
   carouselContainer: {
     alignItems: 'center',
-    marginVertical: 20,
   },
   carouselImage: {
-    height: deviceWidth * 0.6,
+    height: deviceWidth * 0.5,
     borderRadius: 10,
+    width: deviceWidth * 0.9
   },
   dividerContainer: {
     marginHorizontal: 20,
@@ -190,7 +180,7 @@ const styles = StyleSheet.create({
   icon: {
     width: 50,
     height: 50,
-    objectFit: 'contain',
+    resizeMode: 'contain',
   },
   iconText: {
     marginTop: 5,
@@ -235,12 +225,12 @@ const styles = StyleSheet.create({
   },
   cardText: {
     marginTop: 10,
-    marginBottom:5,
+    marginBottom: 5,
     fontSize: 13,
     textAlign: 'center',
-    paddingHorizontal:12,
-    paddingVertical:2,
-    fontWeight:"600"
+    paddingHorizontal: 12,
+    paddingVertical: 2,
+    fontWeight: "600"
   },
   whatsNewHeading: {
     fontSize: 24,

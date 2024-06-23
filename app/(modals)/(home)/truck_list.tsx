@@ -77,14 +77,31 @@ const TruckListScreen: React.FC = () => {
                                 <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                             </TouchableOpacity>
                         </View>
-                        <Text style={styles.cardText}>Vehicle Number: {truck.vehicleNumber}</Text>
-                        <Text style={styles.cardText}>Number of Tyres: {truck.numberOfTyres}</Text>
-                        <Text style={styles.cardText}>Vehicle Weight: {truck.vehicleWeight}</Text>
-                        <Text style={styles.cardText}>Model: {truck.model}</Text>
-                        <Text style={styles.cardText}>Body Type: {truck.bodyType}</Text>
-                        <Text style={styles.cardText}>Location: {truck.location}</Text>
-                        <Text style={styles.cardText}>Chassis Number: {truck.chassisNumber}</Text>
-                        <Text style={styles.cardText}>For Rent/Sell: {truck.forRentOrSell}</Text>
+                        <Text style={styles.cardText}>
+                            Vehicle Number: <Text style={{ color: "black" }}>{truck.vehicleNumber}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Number of Tyres: <Text style={{ color: "black" }}>{truck.numberOfTyres}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Vehicle Weight: <Text style={{ color: "black" }}>{truck.vehicleWeight}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Model: <Text style={{ color: "black" }}>{truck.model}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Body Type: <Text style={{ color: "black" }}>{truck.bodyType}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Location: <Text style={{ color: "black" }}>{truck.location}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Chassis Number: <Text style={{ color: "black" }}>{truck.chassisNumber}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            For Rent/Sell: <Text style={{ color: "black" }}>{truck.forRentOrSell}</Text>
+                        </Text>
+
                         <TouchableOpacity style={styles.viewPhotoButton} onPress={() => handleViewPhoto(truck.imageUrl)}>
                             <Text style={styles.viewPhotoButtonText}>View Photos</Text>
                         </TouchableOpacity>

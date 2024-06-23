@@ -63,11 +63,11 @@ const ServiceHistoryScreen: React.FC = () => {
             <ScrollView style={styles.recordsList}>
                 {serviceRecords.map((record, index) => (
                     <View key={index} style={styles.card}>
-                        <Text style={styles.cardText}>Vehicle Number: {record.vehicleNumber}</Text>
-                        <Text style={styles.cardText}>Garage Number: {record.garageNumber}</Text>
-                        <Text style={styles.cardText}>Garage Name: {record.garageName}</Text>
-                        <Text style={styles.cardText}>Date: {record.date}</Text>
-                        <Text style={styles.cardText}>Work Details: {record.workDetails}</Text>
+                        <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{record.vehicleNumber}</Text></Text>
+                        <Text style={styles.cardText}>Garage Number: <Text style={{ color: "black" }}>{record.garageNumber}</Text></Text>
+                        <Text style={styles.cardText}>Garage Name: <Text style={{ color: "black" }}>{record.garageName}</Text></Text>
+                        <Text style={styles.cardText}>Date: <Text style={{ color: "black" }}>{record.date}</Text></Text>
+                        <Text style={styles.cardText}>Work Details: <Text style={{ color: "black" }}>{record.workDetails}</Text></Text>
                         <TouchableOpacity style={styles.viewBillButton} onPress={() => handleViewBill(record.billUrl)}>
                             <Text style={styles.viewBillButtonText}>View Bill</Text>
                         </TouchableOpacity>

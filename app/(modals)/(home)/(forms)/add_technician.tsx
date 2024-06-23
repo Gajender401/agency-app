@@ -109,7 +109,7 @@ const AddTechnicianScreen: React.FC = () => {
                             {loading ? (
                                 <ActivityIndicator color="#fff" />
                             ) : (
-                                <Text style={[styles.buttonText, { color: "#fff" }]}>Add Technician</Text>
+                                <Text style={[styles.buttonText, { color: "#fff" }]}>Submit</Text>
                             )}
                         </TouchableOpacity>
                     </View>

@@ -55,7 +55,7 @@ const CleanerListScreen: React.FC = () => {
                 />
             </View>
 
-            <TouchableOpacity onPress={()=>router.push("add_cleaner")} style={styles.addButton}>
+            <TouchableOpacity onPress={() => router.push("add_cleaner")} style={styles.addButton}>
                 <Text style={styles.addButtonText}>Add cleaner</Text>
             </TouchableOpacity>
 
@@ -74,11 +74,11 @@ const CleanerListScreen: React.FC = () => {
                                 <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                             </TouchableOpacity>
                         </View>
-                        <Text style={styles.cardText}>Name: {cleaner.name}</Text>
-                        <Text style={styles.cardText}>Mobile: {cleaner.mobile}</Text>
-                        <Text style={styles.cardText}>City: {cleaner.city}</Text>
-                        <Text style={styles.cardText}>State: {cleaner.state}</Text>
-                        <Text style={styles.cardText}>Type: {cleaner.type}</Text>
+                        <Text style={styles.cardText}>Name: <Text style={{ color: "black" }}>{cleaner.name}</Text></Text>
+                        <Text style={styles.cardText}>Mobile: <Text style={{ color: "black" }}>{cleaner.mobile}</Text></Text>
+                        <Text style={styles.cardText}>City: <Text style={{ color: "black" }}>{cleaner.city}</Text></Text>
+                        <Text style={styles.cardText}>State: <Text style={{ color: "black" }}>{cleaner.state}</Text></Text>
+                        <Text style={styles.cardText}>Type: <Text style={{ color: "black" }}>{cleaner.type}</Text></Text>
                         <View style={styles.aadharContainer}>
                             <Text style={styles.cardText}>Aadhar card</Text>
                             <TouchableOpacity style={styles.viewAadharButton}>
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         alignItems: "center",
         marginBottom: 20,
-        width:140
+        width: 140
     },
     addButtonText: {
         color: "#fff",
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.darkBlue,
         paddingHorizontal: 10,
         borderRadius: 5,
-        paddingVertical:5
+        paddingVertical: 5
     },
     viewAadharButtonText: {
         color: "#fff",
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        marginHorizontal:5
+        marginHorizontal: 5
     },
     modalContent: {
         backgroundColor: "#fff",

@@ -258,7 +258,7 @@ const PackageBookingForm: React.FC = () => {
                             {loading ? (
                                 <ActivityIndicator color="#fff" />
                             ) : (
-                                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Add Booking</Text>
+                                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Submit</Text>
                             )}
                         </TouchableOpacity>
                     </View>

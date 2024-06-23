@@ -71,10 +71,10 @@ const PackageVehicleListScreen: React.FC = () => {
             </View>
 
             {/* Updated cardText section */}
-            <Text style={styles.cardText}>Customer Name: {pkg.customerName}</Text>
-            <Text style={styles.cardText}>Journey Duration: {pkg.departureTime} to {pkg.returnTime}</Text>
-            <Text style={styles.cardText}>Vehicle Number: {pkg.vehicleNumber}</Text>
-            <Text style={styles.cardText}>Other Vehicle: {pkg.otherVehicleNumber}</Text>
+            <Text style={styles.cardText}>Customer Name: <Text style={{color:"black"}}> {pkg.customerName}</Text></Text>
+            <Text style={styles.cardText}>Journey Duration: <Text style={{color:"black"}}> {pkg.departureTime} to {pkg.returnTime}</Text></Text>
+            <Text style={styles.cardText}>Vehicle Number: <Text style={{color:"black"}}> {pkg.vehicleNumber}</Text></Text>
+            <Text style={styles.cardText}>Other Vehicle: <Text style={{color:"black"}}> {pkg.otherVehicleNumber}</Text></Text>
 
             {/* View More Button */}
             <TouchableOpacity
@@ -163,12 +163,12 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     marginBottom: 20,
-    width: 140,
+    width: 150,
   },
   addButtonText: {
     color: "#fff",
     fontWeight: "semibold",
-    fontSize:10
+    fontSize:12,
   },
   packagesList: {
     flex: 1,
@@ -196,12 +196,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 5,
     paddingVertical: 5,
-    height:16
+    height:25
   },
   editButtonText: {
     color: "#fff",
     fontWeight: "semibold",
-    fontSize:6
+    fontSize:10
   },
   cardText: {
     marginBottom: 6,

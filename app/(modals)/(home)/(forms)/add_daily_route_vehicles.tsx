@@ -96,7 +96,7 @@ const AddRouteScreen: React.FC = () => {
                             {loading ? (
                                 <ActivityIndicator color="#fff" />
                             ) : (
-                                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Add Route</Text>
+                                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Submit</Text>
                             )}
                         </TouchableOpacity>
                     </View>

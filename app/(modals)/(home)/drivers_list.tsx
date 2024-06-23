@@ -75,11 +75,22 @@ const DriverListScreen: React.FC = () => {
                                 <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                             </TouchableOpacity>
                         </View>
-                        <Text style={styles.cardText}>Name: {driver.name}</Text>
-                        <Text style={styles.cardText}>Mobile: {driver.mobile}</Text>
-                        <Text style={styles.cardText}>City: {driver.city}</Text>
-                        <Text style={styles.cardText}>State: {driver.state}</Text>
-                        <Text style={styles.cardText}>Type: {driver.type}</Text>
+                        <Text style={styles.cardText}>
+                            Name: <Text style={{ color: "black" }}>{driver.name}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Mobile: <Text style={{ color: "black" }}>{driver.mobile}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            City: <Text style={{ color: "black" }}>{driver.city}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            State: <Text style={{ color: "black" }}>{driver.state}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Type: <Text style={{ color: "black" }}>{driver.type}</Text>
+                        </Text>
+
                         <View style={styles.aadharContainer}>
                             <Text style={styles.cardText}>Aadhar card</Text>
                             <TouchableOpacity style={styles.viewAadharButton}>

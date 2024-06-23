@@ -77,13 +77,13 @@ const CarListScreen: React.FC = () => {
                                 <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                             </TouchableOpacity>
                         </View>
-                        <Text style={styles.cardText}>Vehicle Number: {car.vehicleNumber}</Text>
-                        <Text style={styles.cardText}>Seating Capacity: {car.seatingCapacity}</Text>
-                        <Text style={styles.cardText}>Vehicle Model: {car.vehicleModel}</Text>
-                        <Text style={styles.cardText}>Location: {car.location}</Text>
-                        <Text style={styles.cardText}>Car Name: {car.carName}</Text>
-                        <Text style={styles.cardText}>Contact Number: {car.contactNumber}</Text>
-                        <Text style={styles.cardText}>Features: {car.features.join(', ')}</Text>
+                        <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{car.vehicleNumber}</Text></Text>
+                        <Text style={styles.cardText}>Seating Capacity: <Text style={{ color: "black" }}>{car.seatingCapacity}</Text></Text>
+                        <Text style={styles.cardText}>Vehicle Model: <Text style={{ color: "black" }}>{car.vehicleModel}</Text></Text>
+                        <Text style={styles.cardText}>Location: <Text style={{ color: "black" }}>{car.location}</Text></Text>
+                        <Text style={styles.cardText}>Car Name: <Text style={{ color: "black" }}>{car.carName}</Text></Text>
+                        <Text style={styles.cardText}>Contact Number: <Text style={{ color: "black" }}>{car.contactNumber}</Text></Text>
+                        <Text style={styles.cardText}>Features: <Text style={{ color: "black" }}>{car.features.join(', ')}</Text></Text>
                         <TouchableOpacity style={styles.viewPhotoButton} onPress={() => handleViewPhoto(car.imageUrl)}>
                             <Text style={styles.viewPhotoButtonText}>View Photos</Text>
                         </TouchableOpacity>

@@ -154,7 +154,7 @@ const AddVehicleDocumentsScreen: React.FC = () => {
                             {loading ? (
                                 <ActivityIndicator color="#fff" />
                             ) : (
-                                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Add Documents</Text>
+                                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Submit</Text>
                             )}
                         </TouchableOpacity>
                     </View>

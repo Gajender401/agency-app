@@ -164,7 +164,7 @@ const AddTempoScreen: React.FC = () => {
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Add Tempo</Text>
+                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Submit</Text>
               )}
             </TouchableOpacity>
           </View>

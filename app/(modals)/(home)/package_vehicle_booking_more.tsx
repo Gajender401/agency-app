@@ -118,7 +118,6 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 13,
     marginBottom: 4,
-    color: Colors.secondary,
   },
 });
 

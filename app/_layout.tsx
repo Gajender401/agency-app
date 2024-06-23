@@ -40,9 +40,6 @@ export default function RootLayout() {
         <Stack.Screen name="(modals)/editProfile" options={{ headerShown: false }} />
 
         <Stack.Screen name="(modals)/(home)/route" options={{ headerShown: false }} />
-        <Stack.Screen name="(modals)/(home)/package" options={{ headerShown: false }} />
-        <Stack.Screen name="(modals)/(home)/staff" options={{ headerShown: false }} />
-        <Stack.Screen name="(modals)/(home)/staff_details" options={{ headerShown: false }} />
         <Stack.Screen name="(modals)/(home)/drivers_list" options={{  headerShadowVisible:false, headerTitle:"Driver List", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/cleaners_list" options={{ headerShadowVisible:false, headerTitle:"Cleaner List", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/employee_list" options={{ headerShadowVisible:false, headerTitle:"Employee List", headerTitleAlign:"center" }} />

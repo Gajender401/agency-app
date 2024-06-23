@@ -77,13 +77,14 @@ const BusListScreen: React.FC = () => {
                                 <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                             </TouchableOpacity>
                         </View>
-                        <Text style={styles.cardText}>Vehicle Number: {bus.vehicleNumber}</Text>
-                        <Text style={styles.cardText}>Seating Capacity: {bus.seatingCapacity}</Text>
-                        <Text style={styles.cardText}>Vehicle Model: {bus.vehicleModel}</Text>
-                        <Text style={styles.cardText}>Body Type: {bus.bodyType}</Text>
-                        <Text style={styles.cardText}>Location: {bus.location}</Text>
-                        <Text style={styles.cardText}>Chassis Number: {bus.chassisNumber}</Text>
-                        <Text style={styles.cardText}>Ac/ Non Ac / Rent/ Sell: {bus.forRentOrSell}</Text>
+                        <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{bus.vehicleNumber}</Text></Text>
+                        <Text style={styles.cardText}>Seating Capacity: <Text style={{ color: "black" }}>{bus.seatingCapacity}</Text></Text>
+                        <Text style={styles.cardText}>Vehicle Model: <Text style={{ color: "black" }}>{bus.vehicleModel}</Text></Text>
+                        <Text style={styles.cardText}>Body Type: <Text style={{ color: "black" }}>{bus.bodyType}</Text></Text>
+                        <Text style={styles.cardText}>Location: <Text style={{ color: "black" }}>{bus.location}</Text></Text>
+                        <Text style={styles.cardText}>Chassis Number: <Text style={{ color: "black" }}>{bus.chassisNumber}</Text></Text>
+                        <Text style={styles.cardText}>Ac/ Non Ac / Rent/ Sell: <Text style={{ color: "black" }}>{bus.forRentOrSell}</Text></Text>
+
                         <TouchableOpacity style={styles.viewPhotoButton} onPress={() => handleViewPhoto(bus.imageUrl)}>
                             <Text style={styles.viewPhotoButtonText}>View Photos</Text>
                         </TouchableOpacity>

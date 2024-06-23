@@ -120,11 +120,22 @@ const DailyRouteVehicles: React.FC = () => {
                             <Text style={{ fontWeight: "semibold", fontSize: 15 }} >{route.destination}</Text>
                         </View>
 
-                        <Text style={styles.cardText}>Vehicle Number: {route.vehicleNumber}</Text>
-                        <Text style={styles.cardText}>Departure Time: {route.departureTime}</Text>
-                        <Text style={styles.cardText}>Cleaner Name: {route.cleanerName}</Text>
-                        <Text style={styles.cardText}>Driver Name 1: {route.driverName1}</Text>
-                        <Text style={styles.cardText}>Driver Name 2: {route.driverName2}</Text>
+                        <Text style={styles.cardText}>
+                            Vehicle Number: <Text style={{ color: "black" }}>{route.vehicleNumber}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Departure Time: <Text style={{ color: "black" }}>{route.departureTime}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Cleaner Name: <Text style={{ color: "black" }}>{route.cleanerName}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Driver Name 1: <Text style={{ color: "black" }}>{route.driverName1}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Driver Name 2: <Text style={{ color: "black" }}>{route.driverName2}</Text>
+                        </Text>
+
                     </View>
                 ))}
             </ScrollView>
@@ -285,7 +296,7 @@ const styles = StyleSheet.create({
     editButtonText: {
         color: "#fff",
         fontWeight: "bold",
-        fontSize:12
+        fontSize: 12
     },
     cardText: {
         marginBottom: 8,
@@ -332,7 +343,7 @@ const styles = StyleSheet.create({
         marginBottom: 5,
         fontSize: 13,
         color: Colors.secondary,
-        fontWeight:"500"
+        fontWeight: "500"
     },
     input: {
         borderColor: Colors.secondary,

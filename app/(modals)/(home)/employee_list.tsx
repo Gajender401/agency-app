@@ -74,11 +74,22 @@ const EmployeeListScreen: React.FC = () => {
                                 <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                             </TouchableOpacity>
                         </View>
-                        <Text style={styles.cardText}>Name: {employee.name}</Text>
-                        <Text style={styles.cardText}>Role: {employee.role}</Text>
-                        <Text style={styles.cardText}>Department: {employee.department}</Text>
-                        <Text style={styles.cardText}>Email: {employee.email}</Text>
-                        <Text style={styles.cardText}>Phone: {employee.phone}</Text>
+                        <Text style={styles.cardText}>
+                            Name: <Text style={{ color: "black" }}>{employee.name}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Role: <Text style={{ color: "black" }}>{employee.role}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Department: <Text style={{ color: "black" }}>{employee.department}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Email: <Text style={{ color: "black" }}>{employee.email}</Text>
+                        </Text>
+                        <Text style={styles.cardText}>
+                            Phone: <Text style={{ color: "black" }}>{employee.phone}</Text>
+                        </Text>
+
                     </View>
                 ))}
             </ScrollView>

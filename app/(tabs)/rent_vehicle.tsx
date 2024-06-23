@@ -68,10 +68,10 @@ const SellVehicleScreen: React.FC = () => {
                                 />
                             ))}
                         </View>
-                        <Text style={styles.cardText}>Vehicle No: {car.vehicleNumber}</Text>
-                        <Text style={styles.cardText}>Model: {car.vehicleModel}</Text>
-                        <Text style={styles.cardText}>Contact No: {car.contactNumber}</Text>
-                        <Text style={styles.cardText}>Location: {car.location}</Text>
+                        <Text style={styles.cardText}>Vehicle No: <Text style={{ color: "black" }}>{car.vehicleNumber}</Text></Text>
+                        <Text style={styles.cardText}>Model: <Text style={{ color: "black" }}>{car.vehicleModel}</Text></Text>
+                        <Text style={styles.cardText}>Contact No: <Text style={{ color: "black" }}>{car.contactNumber}</Text></Text>
+                        <Text style={styles.cardText}>Location: <Text style={{ color: "black" }}>{car.location}</Text></Text>
                     </View>
                 ))}
             </ScrollView>
@@ -125,11 +125,11 @@ const styles = StyleSheet.create({
         overflow: "hidden",
     },
     carouselImage: {
-        width: viewportWidth *0.9,
+        width: viewportWidth * 0.9,
         height: 200,
     },
     pagerView: {
-        width: viewportWidth *0.8,
+        width: viewportWidth * 0.8,
         height: 200,
     },
     paginationContainer: {
