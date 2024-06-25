@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Modal,
@@ -8,24 +8,89 @@ import {
   TextInput,
   SafeAreaView,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
-import { packageData } from "@/constants/dummy";
+import { useGlobalContext } from "@/context/GlobalProvider";
+
+interface Package {
+  _id: string;
+  vehicle: string;
+  otherVehicle: string;
+  customerName: string;
+  mobileNumber: string;
+  alternateNumber: string;
+  kmStarting: string;
+  perKmRateInINR: number;
+  advanceAmountInINR: number;
+  remainingAmountInINR: number;
+  advancePlace: string;
+  departurePlace: string;
+  destinationPlace: string;
+  departureTime: string;
+  returnTime: string;
+  tollInINR: number;
+  otherStateTaxInINR: number;
+  note: string;
+  instructions: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function formatDate(dateString: string): string {
+  // Step 1: Parse the input date string into a Date object
+  const date = new Date(dateString);
+
+  // Step 2: Extract year, month, and day from the Date object
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth() + 1; // Months are zero-indexed, so we add 1
+  const day = date.getUTCDate();
+
+  // Step 3: Format the date as "MM/DD/YYYY"
+  const formattedDate = `${month}/${day}/${year}`;
+
+  return formattedDate;
+}
 
 const PackageVehicleListScreen: React.FC = () => {
-  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
+  const { apiCaller, token } = useGlobalContext();
 
-  const handleDelete = () => {
-    // Implement delete logic here
-    console.log("Deleting package...");
-    setShowDeleteModal(false);
+  useEffect(() => {
+    const fetchPackages = async () => {
+      try {
+        setLoading(true);
+        const response = await apiCaller.get('/api/packageBooking');
+        setPackages(response.data.data);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPackages();
+  }, []);
+
+  const handleDelete = async () => {
+    if (selectedPackage) {
+      try {
+        await apiCaller.delete(`/api/packageBooking/${selectedPackage._id}`);
+        setPackages(packages.filter(pkg => pkg._id !== selectedPackage._id));
+        setShowDeleteModal(false);
+      } catch (err) {
+        console.error(err);
+      }
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-
       {/* Search bar */}
       <View style={styles.searchContainer}>
         <FontAwesome5 name="search" size={18} color={Colors.secondary} />
@@ -42,50 +107,54 @@ const PackageVehicleListScreen: React.FC = () => {
       </TouchableOpacity>
 
       {/* Package List */}
-      <ScrollView style={styles.packagesList}>
-        {packageData.map((pkg, index) => (
-          <View key={index} style={styles.card}>
-            <View style={styles.cardHeader}>
-              <TouchableOpacity style={styles.editButton}>
-                <Text style={styles.editButtonText}>Edit Booking</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.editButton}>
-                <Text style={styles.editButtonText}>View Invoice</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.editButton}>
-                <Text style={styles.editButtonText}>Add Driver</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
-                <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
+      {loading ? (
+        <ActivityIndicator size="large" color={Colors.darkBlue} />
+      ) : (
+        <ScrollView style={styles.packagesList}>
+          {packages.map((pkg) => (
+            <View key={pkg._id} style={styles.card}>
+              <View style={styles.cardHeader}>
+                <TouchableOpacity style={styles.editButton}>
+                  <Text style={styles.editButtonText}>Edit Booking</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.editButton}>
+                  <Text style={styles.editButtonText}>View Invoice</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.editButton}>
+                  <Text style={styles.editButtonText}>Add Driver</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => { setShowDeleteModal(true); setSelectedPackage(pkg); }}>
+                  <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
+                </TouchableOpacity>
+              </View>
+
+              <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-between" }} >
+                <Text style={{ fontWeight: "bold", fontSize: 14 }} >Departure</Text>
+                <Text style={{ fontWeight: "bold", fontSize: 14 }} >Destination</Text>
+              </View>
+              <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-around", marginVertical: 5 }} >
+                <Text style={{ fontWeight: "bold", fontSize: 16 }} >{pkg.departurePlace}</Text>
+                <MaterialIcons name="keyboard-double-arrow-right" size={24} color={Colors.darkBlue} />
+                <Text style={{ fontWeight: "bold", fontSize: 16 }} >{pkg.destinationPlace}</Text>
+              </View>
+
+              {/* Updated cardText section */}
+              <Text style={styles.cardText}>Customer Name: <Text style={styles.textValue}>{pkg.customerName}</Text></Text>
+              <Text style={styles.cardText}>Journey Duration: <Text style={styles.textValue}>{formatDate(pkg.departureTime)} to {formatDate(pkg.returnTime)}</Text></Text>
+              <Text style={styles.cardText}>Vehicle Number: <Text style={styles.textValue}>{pkg.vehicle}</Text></Text>
+              <Text style={styles.cardText}>Other Vehicle: <Text style={styles.textValue}>{pkg.otherVehicle}</Text></Text>
+
+              {/* View More Button */}
+              <TouchableOpacity
+                style={styles.viewMoreButton}
+                onPress={() => router.push(`/package_vehicle_booking_more/${pkg._id}`)}
+              >
+                <Text style={styles.viewMoreButtonText}>View More</Text>
               </TouchableOpacity>
             </View>
-
-            <View style={{width:"100%", flexDirection:"row", justifyContent:"space-between"}} >
-              <Text style={{fontWeight:"semibold", fontSize:14}} >Departure</Text>
-              <Text style={{fontWeight:"semibold", fontSize:14}} >Destination</Text>
-            </View>
-            <View style={{width:"100%", flexDirection:"row", justifyContent:"space-around", marginVertical:5}} >
-              <Text style={{fontWeight:"semibold", fontSize:15}} >{pkg.departurePlace}</Text>
-              <MaterialIcons name="keyboard-double-arrow-right" size={24} color={Colors.darkBlue} />
-              <Text style={{fontWeight:"semibold", fontSize:15}} >{pkg.destinationPlace}</Text>
-            </View>
-
-            {/* Updated cardText section */}
-            <Text style={styles.cardText}>Customer Name: <Text style={{color:"black"}}> {pkg.customerName}</Text></Text>
-            <Text style={styles.cardText}>Journey Duration: <Text style={{color:"black"}}> {pkg.departureTime} to {pkg.returnTime}</Text></Text>
-            <Text style={styles.cardText}>Vehicle Number: <Text style={{color:"black"}}> {pkg.vehicleNumber}</Text></Text>
-            <Text style={styles.cardText}>Other Vehicle: <Text style={{color:"black"}}> {pkg.otherVehicleNumber}</Text></Text>
-
-            {/* View More Button */}
-            <TouchableOpacity
-              style={styles.viewMoreButton}
-              onPress={() => router.push("package_vehicle_booking_more")}
-            >
-              <Text style={styles.viewMoreButtonText}>View More</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-      </ScrollView>
+          ))}
+        </ScrollView>
+      )}
 
       {/* Delete Confirmation Modal */}
       <Modal
@@ -94,9 +163,6 @@ const PackageVehicleListScreen: React.FC = () => {
         visible={showDeleteModal}
         onRequestClose={() => setShowDeleteModal(false)}
       >
-        {/* Blur Overlay */}
-        {/* Implement BlurOverlay component */}
-
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalText}>Are you sure you want to delete this package?</Text>
@@ -127,21 +193,6 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#ffffff",
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  headerButton: {
-    backgroundColor: Colors.darkBlue,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  headerButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -168,7 +219,7 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: "#fff",
     fontWeight: "semibold",
-    fontSize:12,
+    fontSize: 12,
   },
   packagesList: {
     flex: 1,
@@ -188,26 +239,42 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-end",
     marginBottom: 10,
-    alignItems:"center",
-    gap:5
+    alignItems: "center",
+    gap: 5,
   },
   editButton: {
     backgroundColor: Colors.darkBlue,
     paddingHorizontal: 10,
     borderRadius: 5,
     paddingVertical: 5,
-    height:25
+    height: 25,
   },
   editButtonText: {
     color: "#fff",
     fontWeight: "semibold",
-    fontSize:10
+    fontSize: 10,
+  },
+  packageInfo: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 5,
+  },
+  label: {
+    fontWeight: "semibold",
+    fontSize: 14,
+  },
+  value: {
+    fontWeight: "semibold",
+    fontSize: 15,
   },
   cardText: {
     marginBottom: 6,
     color: Colors.secondary,
     fontWeight: "500",
     fontSize: 12,
+  },
+  textValue: {
+    color: "black",
   },
   viewMoreButton: {
     backgroundColor: Colors.darkBlue,
@@ -221,7 +288,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
-  // Modal Styles
   modalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -230,26 +296,30 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: "#fff",
+    borderRadius: 5,
     padding: 20,
-    borderRadius: 10,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
     elevation: 5,
-    minWidth: 300,
   },
   modalText: {
+    fontSize: 16,
     marginBottom: 20,
-    fontSize: 18,
-    textAlign: "center",
   },
   modalButtons: {
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    width: "100%",
   },
   modalButton: {
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
-    marginHorizontal: 10,
+    alignItems: "center",
+    width: "45%",
   },
   modalButtonText: {
     fontSize: 16,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Modal,
@@ -10,12 +10,13 @@ import {
     TextInput,
     SafeAreaView,
     ScrollView,
+    ActivityIndicator,
 } from "react-native";
 import { BlurView } from 'expo-blur';
 import { Colors } from "@/constants/Colors";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import { cleaners } from "@/constants/dummy";
 import { router } from "expo-router";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 interface BlurOverlayProps {
     visible: boolean;
@@ -35,13 +36,50 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
     </Modal>
 );
 
+interface Cleaner {
+    _id: string;
+    name: string;
+    mobileNumber: string;
+    city: string;
+    state: string;
+    cleanerType: string;
+    photo: string;
+    aadharCard: string;
+}
+
 const CleanerListScreen: React.FC = () => {
-    const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+    const [cleaners, setCleaners] = useState<Cleaner[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [showImageModal, setShowImageModal] = useState(false);
+    const { apiCaller, token } = useGlobalContext();
+
+    useEffect(() => {
+        const fetchCleaners = async () => {
+            try {
+                setLoading(true);
+                const response = await apiCaller.get('/api/cleaner');
+                setCleaners(response.data.data);
+            } catch (err) {
+                console.log(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCleaners();
+    }, []);
 
     const handleDelete = () => {
         // Implement delete logic here
         console.log("Deleting cleaner...");
         setShowDeleteModal(false);
+    };
+
+    const handleViewImage = (imageUri: string) => {
+        setSelectedImage(imageUri);
+        setShowImageModal(true);
     };
 
     return (
@@ -59,35 +97,39 @@ const CleanerListScreen: React.FC = () => {
                 <Text style={styles.addButtonText}>Add cleaner</Text>
             </TouchableOpacity>
 
-            <ScrollView style={styles.cleanersList}>
-                {cleaners.map((cleaner, index) => (
-                    <View key={index} style={styles.card}>
-                        <Image
-                            source={{ uri: cleaner.imageUrl }}
-                            style={styles.cleanerImage}
-                        />
-                        <View style={styles.cardHeader}>
-                            <TouchableOpacity style={styles.editButton}>
-                                <Text style={styles.editButtonText}>Edit form</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
-                                <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
-                            </TouchableOpacity>
+            {loading ? (
+                <ActivityIndicator size="large" color={Colors.darkBlue} />
+            ) : (
+                <ScrollView style={styles.cleanersList}>
+                    {cleaners.map((cleaner) => (
+                        <View key={cleaner._id} style={styles.card}>
+                            <Image
+                                source={{ uri: cleaner.photo }}
+                                style={styles.cleanerImage}
+                            />
+                            <View style={styles.cardHeader}>
+                                <TouchableOpacity style={styles.editButton}>
+                                    <Text style={styles.editButtonText}>Edit form</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
+                                    <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
+                                </TouchableOpacity>
+                            </View>
+                            <Text style={styles.cardText}>Name: <Text style={{ color: "black" }}>{cleaner.name}</Text></Text>
+                            <Text style={styles.cardText}>Mobile: <Text style={{ color: "black" }}>{cleaner.mobileNumber}</Text></Text>
+                            <Text style={styles.cardText}>City: <Text style={{ color: "black" }}>{cleaner.city}</Text></Text>
+                            <Text style={styles.cardText}>State: <Text style={{ color: "black" }}>{cleaner.state}</Text></Text>
+                            <Text style={styles.cardText}>Type: <Text style={{ color: "black" }}>{cleaner.cleanerType}</Text></Text>
+                            <View style={styles.aadharContainer}>
+                                <Text style={styles.cardText}>Aadhar card</Text>
+                                <TouchableOpacity style={styles.viewAadharButton} onPress={() => handleViewImage(cleaner.aadharCard)}>
+                                    <Text style={styles.viewAadharButtonText}>View Aadhar</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                        <Text style={styles.cardText}>Name: <Text style={{ color: "black" }}>{cleaner.name}</Text></Text>
-                        <Text style={styles.cardText}>Mobile: <Text style={{ color: "black" }}>{cleaner.mobile}</Text></Text>
-                        <Text style={styles.cardText}>City: <Text style={{ color: "black" }}>{cleaner.city}</Text></Text>
-                        <Text style={styles.cardText}>State: <Text style={{ color: "black" }}>{cleaner.state}</Text></Text>
-                        <Text style={styles.cardText}>Type: <Text style={{ color: "black" }}>{cleaner.type}</Text></Text>
-                        <View style={styles.aadharContainer}>
-                            <Text style={styles.cardText}>Aadhar card</Text>
-                            <TouchableOpacity style={styles.viewAadharButton}>
-                                <Text style={styles.viewAadharButtonText}>View Aadhar</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                ))}
-            </ScrollView>
+                    ))}
+                </ScrollView>
+            )}
 
             {/* Delete Confirmation Modal */}
             <Modal
@@ -100,7 +142,7 @@ const CleanerListScreen: React.FC = () => {
 
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalText}>Are you sure you want to delete this cleaner ?</Text>
+                        <Text style={styles.modalText}>Are you sure you want to delete this cleaner?</Text>
                         <View style={styles.modalButtons}>
                             <TouchableOpacity style={[styles.modalButton, { backgroundColor: "#ccc" }]} onPress={() => setShowDeleteModal(false)}>
                                 <Text style={styles.modalButtonText}>Cancel</Text>
@@ -110,6 +152,27 @@ const CleanerListScreen: React.FC = () => {
                             </TouchableOpacity>
                         </View>
                     </View>
+                </View>
+            </Modal>
+
+            {/* Image View Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={showImageModal}
+                onRequestClose={() => setShowImageModal(false)}
+            >
+                <BlurOverlay visible={showImageModal} onRequestClose={() => setShowImageModal(false)} />
+
+                <View style={styles.modalContainer}>
+                    {selectedImage && 
+                    <View style={styles.modalContent}>
+                        <Image source={{ uri: selectedImage }} style={styles.modalImage} />
+                        <TouchableOpacity style={styles.closeButton} onPress={() => setShowImageModal(false)}>
+                            <Text style={styles.closeButtonText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                    }
                 </View>
             </Modal>
         </SafeAreaView>
@@ -143,7 +206,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         alignItems: "center",
         marginBottom: 20,
-        width: 140
+        width: 140,
     },
     addButtonText: {
         color: "#fff",
@@ -203,51 +266,64 @@ const styles = StyleSheet.create({
     viewAadharButton: {
         backgroundColor: Colors.darkBlue,
         paddingHorizontal: 10,
+        paddingVertical: 5,
         borderRadius: 5,
-        paddingVertical: 5
     },
     viewAadharButtonText: {
         color: "#fff",
         fontWeight: "bold",
     },
-    // Modal Styles
     modalContainer: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        marginHorizontal: 5
     },
     modalContent: {
         backgroundColor: "#fff",
+        borderRadius: 5,
         padding: 20,
-        borderRadius: 10,
+        width: "80%",
         alignItems: "center",
-        elevation: 5,
-        minWidth: 300,
     },
     modalText: {
+        fontSize: 16,
         marginBottom: 20,
-        fontSize: 18,
-        textAlign: "center",
     },
     modalButtons: {
         flexDirection: "row",
-        justifyContent: "center",
+        gap: 20,
+        alignItems: "center",
     },
     modalButton: {
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 5,
+    },
+    modalButtonText: {
+        fontWeight: "bold",
+    },
+    modalImage: {
+        width: 200,
+        height: 200,
+        resizeMode: "contain",
+        marginBottom: 20,
+    },
+    closeButton: {
+        backgroundColor: Colors.darkBlue,
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,
-        marginHorizontal: 10,
     },
-    modalButtonText: {
-        fontSize: 16,
+    closeButtonText: {
+        color: "#fff",
         fontWeight: "bold",
     },
     overlay: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
     },
 });
 

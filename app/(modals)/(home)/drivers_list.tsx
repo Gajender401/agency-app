@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Modal,
@@ -10,13 +10,13 @@ import {
     TextInput,
     SafeAreaView,
     ScrollView,
-    StatusBar,
+    ActivityIndicator,
 } from "react-native";
-import { BlurView } from 'expo-blur'; // Import BlurView from expo-blur
+import { BlurView } from 'expo-blur';
 import { Colors } from "@/constants/Colors";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import { drivers } from "@/constants/dummy";
 import { router } from "expo-router";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 interface BlurOverlayProps {
     visible: boolean;
@@ -36,13 +36,51 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
     </Modal>
 );
 
+interface Driver {
+    _id: string;
+    name: string;
+    mobileNumber: string;
+    city: string;
+    state: string;
+    driverType: string;
+    photo: string;
+    aadharCard: string;
+    license: string;
+}
+
 const DriverListScreen: React.FC = () => {
+    const [drivers, setDrivers] = useState<Driver[]>([]);
+    const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const { apiCaller, token } = useGlobalContext();
+
+    useEffect(() => {
+        const fetchDrivers = async () => {
+            try {
+                setLoading(true);
+                const response = await apiCaller.get('/api/driver');
+                setDrivers(response.data.data);
+            } catch (err) {
+                console.log(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDrivers();
+    }, []);
 
     const handleDelete = () => {
         // Implement delete logic here
         console.log("Deleting driver...");
         setShowDeleteModal(false);
+    };
+
+    const handleViewImage = (imageUri: string) => {
+        setSelectedImage(imageUri);
+        setShowImageModal(true);
     };
 
     return (
@@ -60,52 +98,55 @@ const DriverListScreen: React.FC = () => {
                 <Text style={styles.addButtonText}>Add driver</Text>
             </TouchableOpacity>
 
-            <ScrollView style={styles.driversList}>
-                {drivers.map((driver, index) => (
-                    <View key={index} style={styles.card}>
-                        <Image
-                            source={{ uri: driver.imageUrl }}
-                            style={styles.driverImage}
-                        />
-                        <View style={styles.cardHeader}>
-                            <TouchableOpacity style={styles.editButton}>
-                                <Text style={styles.editButtonText}>Edit form</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
-                                <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
-                            </TouchableOpacity>
+            {loading ? (
+                <ActivityIndicator size="large" color={Colors.darkBlue} />
+            ) : (
+                <ScrollView style={styles.driversList}>
+                    {drivers.map((driver) => (
+                        <View key={driver._id} style={styles.card}>
+                            <Image
+                                source={{ uri: driver.photo }}
+                                style={styles.driverImage}
+                            />
+                            <View style={styles.cardHeader}>
+                                <TouchableOpacity style={styles.editButton}>
+                                    <Text style={styles.editButtonText}>Edit form</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
+                                    <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
+                                </TouchableOpacity>
+                            </View>
+                            <Text style={styles.cardText}>
+                                Name: <Text style={{ color: "black" }}>{driver.name}</Text>
+                            </Text>
+                            <Text style={styles.cardText}>
+                                Mobile: <Text style={{ color: "black" }}>{driver.mobileNumber}</Text>
+                            </Text>
+                            <Text style={styles.cardText}>
+                                City: <Text style={{ color: "black" }}>{driver.city}</Text>
+                            </Text>
+                            <Text style={styles.cardText}>
+                                State: <Text style={{ color: "black" }}>{driver.state}</Text>
+                            </Text>
+                            <Text style={styles.cardText}>
+                                Type: <Text style={{ color: "black" }}>{driver.driverType}</Text>
+                            </Text>
+                            <View style={styles.aadharContainer}>
+                                <Text style={styles.cardText}>Aadhar card</Text>
+                                <TouchableOpacity style={styles.viewAadharButton} onPress={() => handleViewImage(driver.aadharCard)}>
+                                    <Text style={styles.viewAadharButtonText}>View Aadhar</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <View style={styles.aadharContainer}>
+                                <Text style={styles.cardText}>Driver License</Text>
+                                <TouchableOpacity style={styles.viewAadharButton} onPress={() => handleViewImage(driver.license)}>
+                                    <Text style={styles.viewAadharButtonText}>View License</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                        <Text style={styles.cardText}>
-                            Name: <Text style={{ color: "black" }}>{driver.name}</Text>
-                        </Text>
-                        <Text style={styles.cardText}>
-                            Mobile: <Text style={{ color: "black" }}>{driver.mobile}</Text>
-                        </Text>
-                        <Text style={styles.cardText}>
-                            City: <Text style={{ color: "black" }}>{driver.city}</Text>
-                        </Text>
-                        <Text style={styles.cardText}>
-                            State: <Text style={{ color: "black" }}>{driver.state}</Text>
-                        </Text>
-                        <Text style={styles.cardText}>
-                            Type: <Text style={{ color: "black" }}>{driver.type}</Text>
-                        </Text>
-
-                        <View style={styles.aadharContainer}>
-                            <Text style={styles.cardText}>Aadhar card</Text>
-                            <TouchableOpacity style={styles.viewAadharButton}>
-                                <Text style={styles.viewAadharButtonText}>View Aadhar</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.aadharContainer}>
-                            <Text style={styles.cardText}>Driver License</Text>
-                            <TouchableOpacity style={styles.viewAadharButton}>
-                                <Text style={styles.viewAadharButtonText}>View License</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                ))}
-            </ScrollView>
+                    ))}
+                </ScrollView>
+            )}
 
             {/* Delete Confirmation Modal */}
             <Modal
@@ -128,6 +169,27 @@ const DriverListScreen: React.FC = () => {
                             </TouchableOpacity>
                         </View>
                     </View>
+                </View>
+            </Modal>
+
+            {/* Image View Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={showImageModal}
+                onRequestClose={() => setShowImageModal(false)}
+            >
+                <BlurOverlay visible={showImageModal} onRequestClose={() => setShowImageModal(false)} />
+
+                <View style={styles.modalContainer}>
+                    {selectedImage && 
+                    <View style={styles.modalContent}>
+                        <Image source={{ uri: selectedImage }} style={styles.modalImage} />
+                        <TouchableOpacity style={styles.closeButton} onPress={() => setShowImageModal(false)}>
+                            <Text style={styles.closeButtonText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                    }
                 </View>
             </Modal>
         </SafeAreaView>
@@ -228,6 +290,11 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
     },
+    errorText: {
+        color: 'red',
+        textAlign: 'center',
+        marginTop: 20,
+    },
     // Modal Styles
     modalContainer: {
         flex: 1,
@@ -266,6 +333,23 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    modalImage: {
+        width: 300,
+        height: 400,
+        resizeMode: 'contain',
+        marginBottom: 20,
+    },
+    closeButton: {
+        backgroundColor: Colors.darkBlue,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 5,
+    },
+    closeButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
+        fontSize: 16,
     },
 });
 

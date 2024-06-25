@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Modal,
@@ -10,12 +10,13 @@ import {
     TextInput,
     SafeAreaView,
     ScrollView,
+    ActivityIndicator,
 } from "react-native";
 import { BlurView } from 'expo-blur';
-import { Colors } from "@/constants/Colors"; // Replace with your colors constant
-import { FontAwesome5, MaterialIcons } from "@expo/vector-icons"; // Replace with your icon libraries
-import { employees } from "@/constants/dummy"; // Replace with your data source
-import { router } from "expo-router"; // Replace with your router logic
+import { Colors } from "@/constants/Colors";
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 interface BlurOverlayProps {
     visible: boolean;
@@ -35,13 +36,52 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
     </Modal>
 );
 
+interface Employee {
+    _id: string;
+    name: string;
+    mobileNumber: string;
+    employeeType: string;
+    photo: string;
+    aadharCard: string;
+    email: string;
+    phone: string;
+    department: string;
+    role: string;
+}
+
 const EmployeeListScreen: React.FC = () => {
-    const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+    const [employees, setEmployees] = useState<Employee[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [showImageModal, setShowImageModal] = useState(false);
+    const { apiCaller, token } = useGlobalContext();
+
+    useEffect(() => {
+        const fetchEmployees = async () => {
+            try {
+                setLoading(true);
+                const response = await apiCaller.get('/api/employee');
+                setEmployees(response.data.data);
+            } catch (err) {
+                console.log(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchEmployees();
+    }, []);
 
     const handleDelete = () => {
         // Implement delete logic here
         console.log("Deleting employee...");
         setShowDeleteModal(false);
+    };
+
+    const handleViewImage = (imageUri: string) => {
+        setSelectedImage(imageUri);
+        setShowImageModal(true);
     };
 
     return (
@@ -59,40 +99,43 @@ const EmployeeListScreen: React.FC = () => {
                 <Text style={styles.addButtonText}>Add employee</Text>
             </TouchableOpacity>
 
-            <ScrollView style={styles.employeesList}>
-                {employees.map((employee, index) => (
-                    <View key={index} style={styles.card}>
-                        <Image
-                            source={{ uri: employee.imageUrl }}
-                            style={styles.employeeImage}
-                        />
-                        <View style={styles.cardHeader}>
-                            <TouchableOpacity style={styles.editButton}>
-                                <Text style={styles.editButtonText}>Edit form</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
-                                <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
-                            </TouchableOpacity>
+            {loading ? (
+                <ActivityIndicator size="large" color={Colors.darkBlue} />
+            ) : (
+                <ScrollView style={styles.employeesList}>
+                    {employees.map((employee) => (
+                        <View key={employee._id} style={styles.card}>
+                            <Image
+                                source={{ uri: employee.photo }}
+                                style={styles.employeeImage}
+                            />
+                            <View style={styles.cardHeader}>
+                                <TouchableOpacity style={styles.editButton}>
+                                    <Text style={styles.editButtonText}>Edit form</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
+                                    <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
+                                </TouchableOpacity>
+                            </View>
+                            <Text style={styles.cardText}>
+                                Name: <Text style={{ color: "black" }}>{employee.name}</Text>
+                            </Text>
+                            <Text style={styles.cardText}>
+                                Type: <Text style={{ color: "black" }}>{employee.employeeType}</Text>
+                            </Text>
+                            <Text style={styles.cardText}>
+                                Phone: <Text style={{ color: "black" }}>{employee.mobileNumber}</Text>
+                            </Text>
+                            <View style={styles.cardActions}>
+                                <Text style={styles.cardText}>Aadhar Card</Text>
+                                <TouchableOpacity style={styles.viewButton} onPress={() => handleViewImage(employee.aadharCard)}>
+                                    <Text style={styles.viewButtonText}>View Aadhaar</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                        <Text style={styles.cardText}>
-                            Name: <Text style={{ color: "black" }}>{employee.name}</Text>
-                        </Text>
-                        <Text style={styles.cardText}>
-                            Role: <Text style={{ color: "black" }}>{employee.role}</Text>
-                        </Text>
-                        <Text style={styles.cardText}>
-                            Department: <Text style={{ color: "black" }}>{employee.department}</Text>
-                        </Text>
-                        <Text style={styles.cardText}>
-                            Email: <Text style={{ color: "black" }}>{employee.email}</Text>
-                        </Text>
-                        <Text style={styles.cardText}>
-                            Phone: <Text style={{ color: "black" }}>{employee.phone}</Text>
-                        </Text>
-
-                    </View>
-                ))}
-            </ScrollView>
+                    ))}
+                </ScrollView>
+            )}
 
             {/* Delete Confirmation Modal */}
             <Modal
@@ -115,6 +158,27 @@ const EmployeeListScreen: React.FC = () => {
                             </TouchableOpacity>
                         </View>
                     </View>
+                </View>
+            </Modal>
+
+            {/* Image View Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={showImageModal}
+                onRequestClose={() => setShowImageModal(false)}
+            >
+                <BlurOverlay visible={showImageModal} onRequestClose={() => setShowImageModal(false)} />
+
+                <View style={styles.modalContainer}>
+                    {selectedImage && 
+                    <View style={styles.modalContent}>
+                        <Image source={{ uri: selectedImage }} style={styles.modalImage} />
+                        <TouchableOpacity style={styles.closeButton} onPress={() => setShowImageModal(false)}>
+                            <Text style={styles.closeButtonText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                    }
                 </View>
             </Modal>
         </SafeAreaView>
@@ -200,6 +264,20 @@ const styles = StyleSheet.create({
         fontWeight: "500",
         fontSize: 15,
     },
+    cardActions: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+    viewButton: {
+        backgroundColor: Colors.darkBlue,
+        paddingHorizontal: 10,
+        borderRadius: 5,
+        paddingVertical: 5,
+    },
+    viewButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
+    },
     // Modal Styles
     modalContainer: {
         flex: 1,
@@ -238,6 +316,22 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    modalImage: {
+        width: 200,
+        height: 200,
+        resizeMode: "contain",
+        marginBottom: 20,
+    },
+    closeButton: {
+        backgroundColor: Colors.darkBlue,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+    },
+    closeButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
     },
 });
 

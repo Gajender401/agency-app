@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Modal,
@@ -12,12 +12,13 @@ import {
     Alert,
     Platform,
     ActivityIndicator,
+    Linking,
 } from "react-native";
 import { BlurView } from 'expo-blur';
 import { Colors } from "@/constants/Colors";
 import { FontAwesome5, MaterialIcons, Feather } from "@expo/vector-icons";
-import { technicians } from "@/constants/dummy";
 import { router } from "expo-router";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 interface BlurOverlayProps {
     visible: boolean;
@@ -37,14 +38,49 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
     </Modal>
 );
 
+interface Technician {
+    _id: string;
+    technicianType: string;
+    name: string;
+    city: string;
+    mobileNumber: string;
+    alternateNumber: string;
+    vehicleType: string;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
+}
+
 const TechnicianSupport: React.FC = () => {
+    const [technicians, setTechnicians] = useState<Technician[]>([]);
+    const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const { apiCaller, token } = useGlobalContext();
+
+    useEffect(() => {
+        const fetchTechnicians = async () => {
+            try {
+                setLoading(true);
+                const response = await apiCaller.get('/api/technician');
+                setTechnicians(response.data.data);
+            } catch (err) {
+                console.log(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTechnicians();
+    }, []);
 
     const handleDelete = () => {
         // Implement delete logic here
         console.log("Deleting technician...");
         setShowDeleteModal(false);
+    };
+
+    const dialNumber = (number: string) => {
+        Linking.openURL(`tel:${number}`);
     };
 
     return (
@@ -62,29 +98,33 @@ const TechnicianSupport: React.FC = () => {
                 <Text style={styles.addButtonText}>Add Technician</Text>
             </TouchableOpacity>
 
-            <ScrollView style={styles.techniciansList}>
-                {technicians.map((technician, index) => (
-                    <View key={index} style={styles.card}>
-                        <View style={styles.cardHeader}>
-                            <TouchableOpacity style={styles.editButton}>
-                                <Text style={styles.editButtonText}>Edit form</Text>
-                            </TouchableOpacity>
-                            {/* <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
-                                <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
-                            </TouchableOpacity> */}
+            {loading ? (
+                <ActivityIndicator size="large" color={Colors.darkBlue} />
+            ) : (
+                <ScrollView style={styles.techniciansList}>
+                    {technicians.map((technician) => (
+                        <View key={technician._id} style={styles.card}>
+                            <View style={styles.cardHeader}>
+                                <TouchableOpacity style={styles.editButton}>
+                                    <Text style={styles.editButtonText}>Edit form</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
+                                    <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
+                                </TouchableOpacity>
+                            </View>
+                            <View style={[styles.cardHeader, { marginBottom: 2, marginTop: 5 }]}>
+                                <TouchableOpacity onPress={() => dialNumber(technician.mobileNumber)}>
+                                    <MaterialIcons name="phone-in-talk" size={24} color={Colors.darkBlue} />
+                                </TouchableOpacity>
+                            </View>
+                            <Text style={styles.cardText}>Technician Name: <Text style={{ color: "black" }}> {technician.name}</Text></Text>
+                            <Text style={styles.cardText}>Alternate Number: <Text style={{ color: "black" }}> {technician.alternateNumber}</Text></Text>
+                            <Text style={styles.cardText}>Technician Type: <Text style={{ color: "black" }}> {technician.technicianType}</Text></Text>
+                            <Text style={styles.cardText}>Vehicle Type: <Text style={{ color: "black" }}> {technician.vehicleType}</Text></Text>
                         </View>
-                        <View style={[styles.cardHeader, {marginBottom:2, marginTop:5}]}>
-                        <MaterialIcons name="phone-in-talk" size={24} color={Colors.darkBlue} />
-                        </View>
-
-
-                        <Text style={styles.cardText}>Technician Name: <Text style={{ color: "black" }}> {technician.name}</Text></Text>
-                        <Text style={styles.cardText}>Alternate Number: <Text style={{ color: "black" }}> {technician.altNumber}</Text></Text>
-                        <Text style={styles.cardText}>Technician Type: <Text style={{ color: "black" }}> {technician.type}</Text></Text>
-                        <Text style={styles.cardText}>Vehicle Type: <Text style={{ color: "black" }}> {technician.vehicleType}</Text></Text>
-                    </View>
-                ))}
-            </ScrollView>
+                    ))}
+                </ScrollView>
+            )}
 
             {/* Delete Confirmation Modal */}
             <Modal
@@ -240,23 +280,21 @@ const styles = StyleSheet.create({
     },
     modalButtons: {
         flexDirection: "row",
-        justifyContent: "center",
-        marginTop: 20,
+        width: '100%',
+        justifyContent: "space-between"
     },
     modalButton: {
-        paddingVertical: 10,
         paddingHorizontal: 20,
+        paddingVertical: 10,
         borderRadius: 5,
-        marginHorizontal: 10,
+        alignItems: "center",
+        width: '48%'
     },
     modalButtonText: {
-        fontSize: 16,
         fontWeight: "bold",
     },
     overlay: {
         ...StyleSheet.absoluteFillObject,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
 });
 

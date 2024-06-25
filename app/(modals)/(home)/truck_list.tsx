@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Modal,
@@ -10,12 +10,13 @@ import {
     TextInput,
     SafeAreaView,
     ScrollView,
+    ActivityIndicator,
 } from "react-native";
 import { BlurView } from 'expo-blur';
 import { Colors } from "@/constants/Colors";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import { trucks } from "@/constants/dummy";
 import { router } from "expo-router";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 interface BlurOverlayProps {
     visible: boolean;
@@ -35,10 +36,54 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
     </Modal>
 );
 
+interface Vehicle {
+    _id: string;
+    number: string;
+    seatingCapacity: number;
+    model: string;
+    bodyType: string;
+    chassisBrand: string;
+    location: string;
+    contactNumber: string;
+    photos: string[];
+    isAC: boolean;
+    isForRent: boolean;
+    isForSell: boolean;
+    type: string;
+    noOfTyres: number;
+    vehicleWeightInKGS: number;
+    chassisNumber: string;
+    forRentOrSell: string;
+}
+
 const TruckListScreen: React.FC = () => {
-    const [showDeleteModal, setShowDeleteModal] = React.useState(false);
-    const [selectedTruckImage, setSelectedTruckImage] = React.useState<Array<string> | null>(null);
-    const [showPhotoModal, setShowPhotoModal] = React.useState(false);
+    const [trucks, setTrucks] = useState<Vehicle[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedTruckImage, setSelectedTruckImage] = useState<string[] | null>(null);
+    const [showPhotoModal, setShowPhotoModal] = useState(false);
+    const { apiCaller, token } = useGlobalContext();
+
+    const filterByType = (data: Vehicle[], type: string): Vehicle[] => {
+        return data.filter(vehicle => vehicle.type === type);
+    };
+
+    useEffect(() => {
+        const fetchVehicles = async () => {
+            try {
+                setLoading(true);
+                const response = await apiCaller.get('/api/vehicle');
+                const filteredData = filterByType(response.data.data, 'TRUCK');
+                setTrucks(filteredData);
+            } catch (err) {
+                console.log(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchVehicles();
+    }, []);
 
     const handleDelete = () => {
         // Implement delete logic here
@@ -46,7 +91,7 @@ const TruckListScreen: React.FC = () => {
         setShowDeleteModal(false);
     };
 
-    const handleViewPhoto = (imageUrl: Array<string>) => {
+    const handleViewPhoto = (imageUrl: string[]) => {
         setSelectedTruckImage(imageUrl);
         setShowPhotoModal(true);
     };
@@ -66,48 +111,51 @@ const TruckListScreen: React.FC = () => {
                 <Text style={styles.addButtonText}>Add Truck</Text>
             </TouchableOpacity>
 
-            <ScrollView style={styles.trucksList}>
-                {trucks.map((truck, index) => (
-                    <View key={index} style={styles.card}>
-                        <View style={styles.cardHeader}>
-                            <TouchableOpacity style={styles.editButton}>
-                                <Text style={styles.editButtonText}>Edit form</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
-                                <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
+            {loading ? (
+                <ActivityIndicator size="large" color={Colors.darkBlue} />
+            ) : (
+                <ScrollView style={styles.trucksList}>
+                    {trucks.map((truck) => (
+                        <View key={truck._id} style={styles.card}>
+                            <View style={styles.cardHeader}>
+                                <TouchableOpacity style={styles.editButton}>
+                                    <Text style={styles.editButtonText}>Edit form</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
+                                    <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
+                                </TouchableOpacity>
+                            </View>
+                            <Text style={styles.cardText}>
+                                Vehicle Number: <Text style={{ color: "black" }}>{truck.number}</Text>
+                            </Text>
+                            <Text style={styles.cardText}>
+                                Number of Tyres: <Text style={{ color: "black" }}>{truck.noOfTyres}</Text>
+                            </Text>
+                            <Text style={styles.cardText}>
+                                Vehicle Weight: <Text style={{ color: "black" }}>{truck.vehicleWeightInKGS}</Text>
+                            </Text>
+                            <Text style={styles.cardText}>
+                                Model: <Text style={{ color: "black" }}>{truck.model}</Text>
+                            </Text>
+                            <Text style={styles.cardText}>
+                                Body Type: <Text style={{ color: "black" }}>{truck.bodyType}</Text>
+                            </Text>
+                            <Text style={styles.cardText}>
+                                Location: <Text style={{ color: "black" }}>{truck.location}</Text>
+                            </Text>
+                            <Text style={styles.cardText}>
+                                Chassis Number: <Text style={{ color: "black" }}>{truck.chassisBrand}</Text>
+                            </Text>
+                            <Text style={styles.cardText}>{truck.isForRent&&" Rent /"} {truck.isForSell&&" Sell"}</Text>
+
+
+                            <TouchableOpacity style={styles.viewPhotoButton} onPress={() => handleViewPhoto(truck.photos)}>
+                                <Text style={styles.viewPhotoButtonText}>View Photos</Text>
                             </TouchableOpacity>
                         </View>
-                        <Text style={styles.cardText}>
-                            Vehicle Number: <Text style={{ color: "black" }}>{truck.vehicleNumber}</Text>
-                        </Text>
-                        <Text style={styles.cardText}>
-                            Number of Tyres: <Text style={{ color: "black" }}>{truck.numberOfTyres}</Text>
-                        </Text>
-                        <Text style={styles.cardText}>
-                            Vehicle Weight: <Text style={{ color: "black" }}>{truck.vehicleWeight}</Text>
-                        </Text>
-                        <Text style={styles.cardText}>
-                            Model: <Text style={{ color: "black" }}>{truck.model}</Text>
-                        </Text>
-                        <Text style={styles.cardText}>
-                            Body Type: <Text style={{ color: "black" }}>{truck.bodyType}</Text>
-                        </Text>
-                        <Text style={styles.cardText}>
-                            Location: <Text style={{ color: "black" }}>{truck.location}</Text>
-                        </Text>
-                        <Text style={styles.cardText}>
-                            Chassis Number: <Text style={{ color: "black" }}>{truck.chassisNumber}</Text>
-                        </Text>
-                        <Text style={styles.cardText}>
-                            For Rent/Sell: <Text style={{ color: "black" }}>{truck.forRentOrSell}</Text>
-                        </Text>
-
-                        <TouchableOpacity style={styles.viewPhotoButton} onPress={() => handleViewPhoto(truck.imageUrl)}>
-                            <Text style={styles.viewPhotoButtonText}>View Photos</Text>
-                        </TouchableOpacity>
-                    </View>
-                ))}
-            </ScrollView>
+                    ))}
+                </ScrollView>
+            )}
 
             {/* Delete Confirmation Modal */}
             <Modal
@@ -293,10 +341,10 @@ const styles = StyleSheet.create({
     },
     photoModalContent: {
         width: '80%',
-        height: '80%',
         backgroundColor: '#fff',
         borderRadius: 10,
         padding: 10,
+        marginVertical:100
     },
     photoModalContentContainer: {
         alignItems: 'center',

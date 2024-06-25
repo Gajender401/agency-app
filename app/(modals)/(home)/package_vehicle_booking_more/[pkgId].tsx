@@ -1,38 +1,79 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import { Colors } from '@/constants/Colors'; // Ensure to import your color constants
+import { useLocalSearchParams } from 'expo-router';
+import { useGlobalContext } from '@/context/GlobalProvider';
+
+interface PackageDetails {
+  _id: string;
+  vehicle: string;
+  otherVehicle: string;
+  customerName: string;
+  mobileNumber: string;
+  alternateNumber: string;
+  kmStarting: string;
+  perKmRateInINR: number;
+  advanceAmountInINR: number;
+  remainingAmountInINR: number;
+  advancePlace: string;
+  departurePlace: string;
+  destinationPlace: string;
+  departureTime: string;
+  returnTime: string;
+  tollInINR: number;
+  otherStateTaxInINR: number;
+  note: string;
+  instructions: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth() + 1;
+  const day = date.getUTCDate();
+  return `${month}/${day}/${year}`;
+}
 
 const VehicleDetailsScreen: React.FC = () => {
-  const vehicleDetails = {
-    vehicleNumber: 'ABC123',
-    otherVehicleNumber: 'XYZ456',
-    customerName: 'John Doe',
-    mobileNumber: '1234567890',
-    alternateNumber: '9876543210',
-    kmStarting: '1000',
-    perKmRate: '10',
-    advancedAmount: '5000',
-    remainingAmount: '2000',
-    departurePlace: 'City A',
-    destinationPlace: 'City B',
-    departureTime: '10:00 AM',
-    returnTime: '5:00 PM',
-    toll: '200',
-    otherStateTax: '100',
-    instructions: 'Handle with care',
-    addNote: 'Please note additional instructions',
-    entryParking: 'Paid parking available'
-  };
+  const { pkgId } = useLocalSearchParams();
+  const [vehicleDetails, setVehicleDetails] = useState<PackageDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { apiCaller } = useGlobalContext();
+
+  useEffect(() => {
+    const fetchPackageDetails = async () => {
+      try {
+        const response = await apiCaller.get(`/api/packageBooking/${pkgId}`);
+        setVehicleDetails(response.data.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPackageDetails();
+  }, [pkgId]);
+
+  if (loading) {
+    return <ActivityIndicator size="large" color={Colors.darkBlue} />;
+  }
+
+  if (!vehicleDetails) {
+    return <Text style={styles.errorText}>Failed to load vehicle details.</Text>;
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.section}>
         <Text style={styles.label}>Vehicle Number:</Text>
-        <Text style={styles.value}>{vehicleDetails.vehicleNumber}</Text>
+        <Text style={styles.value}>{vehicleDetails.vehicle}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Other Vehicle Number:</Text>
-        <Text style={styles.value}>{vehicleDetails.otherVehicleNumber}</Text>
+        <Text style={styles.value}>{vehicleDetails.otherVehicle}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Customer Name:</Text>
@@ -52,15 +93,15 @@ const VehicleDetailsScreen: React.FC = () => {
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Per Km Rate:</Text>
-        <Text style={styles.value}>{vehicleDetails.perKmRate}</Text>
+        <Text style={styles.value}>{vehicleDetails.perKmRateInINR}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Advanced Amount:</Text>
-        <Text style={styles.value}>{vehicleDetails.advancedAmount}</Text>
+        <Text style={styles.value}>{vehicleDetails.advanceAmountInINR}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Remaining Amount:</Text>
-        <Text style={styles.value}>{vehicleDetails.remainingAmount}</Text>
+        <Text style={styles.value}>{vehicleDetails.remainingAmountInINR}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Departure Place:</Text>
@@ -72,19 +113,19 @@ const VehicleDetailsScreen: React.FC = () => {
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Departure Time:</Text>
-        <Text style={styles.value}>{vehicleDetails.departureTime}</Text>
+        <Text style={styles.value}>{formatDate(vehicleDetails.departureTime)}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Return Time:</Text>
-        <Text style={styles.value}>{vehicleDetails.returnTime}</Text>
+        <Text style={styles.value}>{formatDate(vehicleDetails.returnTime)}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Toll:</Text>
-        <Text style={styles.value}>{vehicleDetails.toll}</Text>
+        <Text style={styles.value}>{vehicleDetails.tollInINR}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Other State Tax:</Text>
-        <Text style={styles.value}>{vehicleDetails.otherStateTax}</Text>
+        <Text style={styles.value}>{vehicleDetails.otherStateTaxInINR}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Instructions:</Text>
@@ -92,11 +133,7 @@ const VehicleDetailsScreen: React.FC = () => {
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Add Note:</Text>
-        <Text style={styles.value}>{vehicleDetails.addNote}</Text>
-      </View>
-      <View style={styles.section}>
-        <Text style={styles.label}>Entry/Parking:</Text>
-        <Text style={styles.value}>{vehicleDetails.entryParking}</Text>
+        <Text style={styles.value}>{vehicleDetails.note}</Text>
       </View>
     </ScrollView>
   );
@@ -113,11 +150,16 @@ const styles = StyleSheet.create({
   label: {
     color: Colors.secondary,
     fontWeight: 'semibold',
-    fontSize: 13,
+    fontSize: 16,
   },
   value: {
-    fontSize: 13,
+    fontSize: 14,
     marginBottom: 4,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 

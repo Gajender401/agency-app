@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Modal,
@@ -10,12 +10,13 @@ import {
     TextInput,
     SafeAreaView,
     ScrollView,
+    ActivityIndicator,
 } from "react-native";
 import { BlurView } from 'expo-blur';
 import { Colors } from "@/constants/Colors";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import { buses } from "@/constants/dummy";
 import { router } from "expo-router";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 interface BlurOverlayProps {
     visible: boolean;
@@ -35,10 +36,67 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
     </Modal>
 );
 
+interface Bus {
+    _id: string;
+    number: string;
+    seatingCapacity: number;
+    model: string;
+    bodyType: string;
+    chassisBrand: string;
+    location: string;
+    contactNumber: string;
+    photos: string[];
+    isAC: boolean;
+    isForRent: boolean;
+    isForSell: boolean;
+    type: string;
+}
+
+interface Vehicle {
+    _id: string;
+    number: string;
+    seatingCapacity: number;
+    model: string;
+    bodyType: string;
+    chassisBrand: string;
+    location: string;
+    contactNumber: string;
+    photos: string[];
+    isAC: boolean;
+    isForRent: boolean;
+    isForSell: boolean;
+    type: string;
+}
+
 const BusListScreen: React.FC = () => {
+    const [buses, setBuses] = useState<Bus[]>([]);
+    const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
-    const [selectedBusImage, setSelectedBusImage] = React.useState<Array<string> | null>(null);
+    const [selectedBusImage, setSelectedBusImage] = React.useState<string[] | null>(null);
     const [showPhotoModal, setShowPhotoModal] = React.useState(false);
+    const { apiCaller, token } = useGlobalContext();
+
+    const filterByType = (data: Vehicle[], type: string): Vehicle[] => {
+        return data.filter(vehicle => vehicle.type === type);
+      };
+
+
+    useEffect(() => {
+        const fetchBuses = async () => {
+            try {
+                setLoading(true);
+                const response = await apiCaller.get('/api/vehicle');
+                const filteredData = filterByType(response.data.data, 'BUS')
+                setBuses(filteredData);
+            } catch (err) {
+                console.log(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchBuses();
+    }, []);
 
     const handleDelete = () => {
         // Implement delete logic here
@@ -46,7 +104,7 @@ const BusListScreen: React.FC = () => {
         setShowDeleteModal(false);
     };
 
-    const handleViewPhoto = (imageUrl: Array<string>) => {
+    const handleViewPhoto = (imageUrl: string[]) => {
         setSelectedBusImage(imageUrl);
         setShowPhotoModal(true);
     };
@@ -66,31 +124,35 @@ const BusListScreen: React.FC = () => {
                 <Text style={styles.addButtonText}>Add Bus</Text>
             </TouchableOpacity>
 
-            <ScrollView style={styles.busesList}>
-                {buses.map((bus, index) => (
-                    <View key={index} style={styles.card}>
-                        <View style={styles.cardHeader}>
-                            <TouchableOpacity style={styles.editButton}>
-                                <Text style={styles.editButtonText}>Edit form</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
-                                <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
+            {loading ? (
+                <ActivityIndicator size="large" color={Colors.darkBlue} />
+            ) : (
+                <ScrollView style={styles.busesList}>
+                    {buses.map((bus) => (
+                        <View key={bus._id} style={styles.card}>
+                            <View style={styles.cardHeader}>
+                                <TouchableOpacity style={styles.editButton}>
+                                    <Text style={styles.editButtonText}>Edit form</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
+                                    <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
+                                </TouchableOpacity>
+                            </View>
+                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{bus.number}</Text></Text>
+                            <Text style={styles.cardText}>Seating Capacity: <Text style={{ color: "black" }}>{bus.seatingCapacity}</Text></Text>
+                            <Text style={styles.cardText}>Vehicle Model: <Text style={{ color: "black" }}>{bus.model}</Text></Text>
+                            <Text style={styles.cardText}>Body Type: <Text style={{ color: "black" }}>{bus.bodyType}</Text></Text>
+                            <Text style={styles.cardText}>Chassis Brand: <Text style={{ color: "black" }}>{bus.chassisBrand}</Text></Text>
+                            <Text style={styles.cardText}>Location: <Text style={{ color: "black" }}>{bus.location}</Text></Text>
+                            <Text style={styles.cardText}>Contact Number: <Text style={{ color: "black" }}>{bus.contactNumber}</Text></Text>
+                            <Text style={styles.cardText}>{bus.isAC ? "AC /" : "NON AC /"} {bus.isForRent && " Rent /"} {bus.isForSell && " Sell"}</Text>
+                            <TouchableOpacity style={styles.viewPhotoButton} onPress={() => handleViewPhoto(bus.photos)}>
+                                <Text style={styles.viewPhotoButtonText}>View Photos</Text>
                             </TouchableOpacity>
                         </View>
-                        <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{bus.vehicleNumber}</Text></Text>
-                        <Text style={styles.cardText}>Seating Capacity: <Text style={{ color: "black" }}>{bus.seatingCapacity}</Text></Text>
-                        <Text style={styles.cardText}>Vehicle Model: <Text style={{ color: "black" }}>{bus.vehicleModel}</Text></Text>
-                        <Text style={styles.cardText}>Body Type: <Text style={{ color: "black" }}>{bus.bodyType}</Text></Text>
-                        <Text style={styles.cardText}>Location: <Text style={{ color: "black" }}>{bus.location}</Text></Text>
-                        <Text style={styles.cardText}>Chassis Number: <Text style={{ color: "black" }}>{bus.chassisNumber}</Text></Text>
-                        <Text style={styles.cardText}>Ac/ Non Ac / Rent/ Sell: <Text style={{ color: "black" }}>{bus.forRentOrSell}</Text></Text>
-
-                        <TouchableOpacity style={styles.viewPhotoButton} onPress={() => handleViewPhoto(bus.imageUrl)}>
-                            <Text style={styles.viewPhotoButtonText}>View Photos</Text>
-                        </TouchableOpacity>
-                    </View>
-                ))}
-            </ScrollView>
+                    ))}
+                </ScrollView>
+            )}
 
             {/* Delete Confirmation Modal */}
             <Modal
@@ -230,74 +292,77 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
     },
-    // Modal Styles
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+    },
     modalContainer: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        marginHorizontal: 5,
+        marginTop: 22,
     },
     modalContent: {
-        backgroundColor: "#fff",
-        padding: 20,
-        borderRadius: 10,
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
         alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
         elevation: 5,
-        minWidth: 300,
     },
     modalText: {
-        marginBottom: 20,
-        fontSize: 18,
+        marginBottom: 15,
         textAlign: "center",
     },
     modalButtons: {
         flexDirection: "row",
-        justifyContent: "center",
+        justifyContent: "space-between",
+        width: "100%",
     },
     modalButton: {
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 5,
-        marginHorizontal: 10,
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2,
+        width: "48%",
+        alignItems: "center",
     },
     modalButtonText: {
-        fontSize: 16,
         fontWeight: "bold",
-    },
-    overlay: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     photoModalContainer: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: "center",
+        alignItems: "center",
     },
     photoModalOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        position: "absolute",
+        width: "100%",
+        height: "100%",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
     },
     photoModalContent: {
-        width: '80%',
-        height: '80%',
-        backgroundColor: '#fff',
+        width: "80%",
+        height: "80%",
+        backgroundColor: "#fff",
         borderRadius: 10,
-        padding: 10,
+        padding: 20,
+        elevation: 10,
+        marginVertical:100
     },
     photoModalContentContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
     },
     fullImage: {
-        width: '100%',
-        height: 200,
-        borderRadius: 10,
-        marginBottom: 10,
+        width: 250,
+        height: 250,
+        marginBottom: 20,
+        resizeMode: "contain",
     },
 });
 

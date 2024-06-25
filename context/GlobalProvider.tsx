@@ -66,10 +66,10 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const apiCaller = axios.create({
     baseURL,
     onUploadProgress: (progressEvent) => {},
-    withCredentials: true,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    // withCredentials: true,
+    // headers: {
+    //   Authorization: `Bearer ${token}`,
+    // },
   });
 
   apiCaller.interceptors.response.use(
