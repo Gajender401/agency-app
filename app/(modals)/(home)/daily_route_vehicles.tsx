@@ -59,27 +59,27 @@ const DailyRouteVehicles: React.FC = () => {
   const [cleanerName, setCleanerName] = useState("");
   const { apiCaller, token } = useGlobalContext();
 
-  useEffect(() => {
-    const fetchDailyRoutes = async () => {
-      try {
-        setLoading(true);
-        const response = await apiCaller.get('/api/dailyRoute');
-        setDailyRoutes(response.data.data);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchDailyRoutes = async () => {
+    try {
+      setLoading(true);
+      const response = await apiCaller.get('/api/dailyRoute');
+      setDailyRoutes(response.data.data);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchDailyRoutes();
   }, []);
 
   const handleDelete = async () => {
     if (selectedRoute) {
       try {
-        await apiCaller.delete(`/api/dailyRoute/${selectedRoute._id}`);
-        setDailyRoutes(dailyRoutes.filter(route => route._id !== selectedRoute._id));
+        await apiCaller.delete(`/api/dailyRoute?dailyRouteId=${selectedRoute._id}`);
+        fetchDailyRoutes()
         setShowDeleteModal(false);
       } catch (err) {
         console.error(err);
@@ -276,8 +276,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 8,
     marginBottom: 16,
-    borderColor:Colors.secondary,
-    borderWidth:1
+    borderColor: Colors.secondary,
+    borderWidth: 1
   },
   searchInput: {
     flex: 1,
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     marginBottom: 16,
-    width:120
+    width: 120
   },
   addButtonText: {
     color: "#fff",
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     alignItems: "center",
     marginBottom: 8,
-    gap:10
+    gap: 10
   },
   editButton: {
     backgroundColor: Colors.darkBlue,
@@ -323,9 +323,9 @@ const styles = StyleSheet.create({
   },
   cardText: {
     marginBottom: 4,
-    color:Colors.secondary,
-    fontSize:14,
-    fontWeight:"500"
+    color: Colors.secondary,
+    fontSize: 14,
+    fontWeight: "500"
   },
   modalOverlay: {
     flex: 1,
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   },
   inputGroup: {
     marginBottom: 16,
-    width:"100%"
+    width: "100%"
   },
   label: {
     fontWeight: "bold",

@@ -55,28 +55,29 @@ const TechnicianSupport: React.FC = () => {
     const [technicians, setTechnicians] = useState<Technician[]>([]);
     const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<null|string>(null)
     const { apiCaller, token } = useGlobalContext();
 
-    useEffect(() => {
-        const fetchTechnicians = async () => {
-            try {
-                setLoading(true);
-                const response = await apiCaller.get('/api/technician');
-                setTechnicians(response.data.data);
-            } catch (err) {
-                console.log(err);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchTechnicians = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/technician');
+            setTechnicians(response.data.data);
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchTechnicians();
     }, []);
 
-    const handleDelete = () => {
-        // Implement delete logic here
-        console.log("Deleting technician...");
+    const handleDelete = async() => {
+        await apiCaller.delete(`/api/technician?technicianId=${idToDelete}`);
         setShowDeleteModal(false);
+        fetchTechnicians();
     };
 
     const dialNumber = (number: string) => {
@@ -108,7 +109,7 @@ const TechnicianSupport: React.FC = () => {
                                 <TouchableOpacity style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
+                                <TouchableOpacity onPress={() => {setShowDeleteModal(true); setIdToDelete(technician._id)}}> 
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>

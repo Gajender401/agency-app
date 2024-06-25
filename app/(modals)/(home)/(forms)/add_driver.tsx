@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
     View,
     StyleSheet,
@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 const AddDriverScreen: React.FC = () => {
     const [name, setName] = useState("");
@@ -22,42 +23,48 @@ const AddDriverScreen: React.FC = () => {
     const [city, setCity] = useState("");
     const [state, setState] = useState("");
     const [type, setType] = useState("");
+    const [vehicleType, setVehicleType] = useState("");
     const [driverImage, setDriverImage] = useState<string | null>(null);
     const [aadharImage, setAadharImage] = useState<string | null>(null);
     const [licenseImage, setLicenseImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const { apiCaller } = useGlobalContext();
 
-    const handleAddDriver = () => {
-        if (!name || !mobile || !password || !city || !state || !type || !driverImage || !aadharImage || !licenseImage) {
+    const handleAddDriver = async () => {
+        if (!name || !mobile || !password || !city || !state || !type || !vehicleType || !driverImage || !aadharImage || !licenseImage) {
             Alert.alert("Please fill all fields and provide images.");
             return;
         }
 
         const newDriver = {
             name,
-            mobile,
+            mobileNumber:mobile,
             password,
             city,
             state,
-            type,
-            driverImage,
-            aadharImage,
-            licenseImage,
+            vehicleType,
+            photo:driverImage,
+            aadharCard:aadharImage,
+            license:licenseImage,
         };
 
-        console.log("New Driver Data:", newDriver);
+        
 
-        // Simulate loading state (you can replace this with actual API call)
         setLoading(true);
-        setTimeout(() => {
+        try {
+            await apiCaller.post('/api/driver', newDriver,{headers:{'Content-Type': 'multipart/form-data'}});
             setLoading(false);
             resetForm();
             Alert.alert("Success", "Driver added successfully!");
-        }, 1500);
+        } catch (error) {
+            console.log(error);
+            
+            setLoading(false);
+            Alert.alert("Error", "Failed to add driver. Please try again.");
+        }
     };
 
     const handleImagePicker = async (type: "driver" | "aadhar" | "license") => {
-
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: false,
@@ -83,6 +90,7 @@ const AddDriverScreen: React.FC = () => {
         setCity("");
         setState("");
         setType("");
+        setVehicleType("");
         setDriverImage(null);
         setAadharImage(null);
         setLicenseImage(null);
@@ -140,6 +148,14 @@ const AddDriverScreen: React.FC = () => {
                             style={styles.input}
                             value={type}
                             onChangeText={(text) => setType(text)}
+                        />
+                    </View>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Vehicle Type</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={vehicleType}
+                            onChangeText={(text) => setVehicleType(text)}
                         />
                     </View>
 

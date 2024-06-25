@@ -61,27 +61,26 @@ const PackageVehicleListScreen: React.FC = () => {
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const { apiCaller, token } = useGlobalContext();
 
+  const fetchPackages = async () => {
+    try {
+      setLoading(true);
+      const response = await apiCaller.get('/api/packageBooking');
+      setPackages(response.data.data);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    const fetchPackages = async () => {
-      try {
-        setLoading(true);
-        const response = await apiCaller.get('/api/packageBooking');
-        setPackages(response.data.data);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPackages();
   }, []);
 
   const handleDelete = async () => {
     if (selectedPackage) {
       try {
-        await apiCaller.delete(`/api/packageBooking/${selectedPackage._id}`);
-        setPackages(packages.filter(pkg => pkg._id !== selectedPackage._id));
+        await apiCaller.delete(`/api/packageBooking?bookingId=${selectedPackage._id}`);
+        fetchPackages();
         setShowDeleteModal(false);
       } catch (err) {
         console.error(err);

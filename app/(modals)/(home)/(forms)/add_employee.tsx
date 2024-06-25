@@ -14,43 +14,56 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors"; // Replace with your colors constant
+import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have this hook or context
 
 const AddEmployeeScreen: React.FC = () => {
     const [name, setName] = useState("");
-    const [role, setRole] = useState("");
-    const [department, setDepartment] = useState("");
-    const [email, setEmail] = useState("");
-    const [phone, setPhone] = useState("");
-    const [employeeImage, setEmployeeImage] = useState<string | null>(null);
+    const [mobile, setMobile] = useState("");
+    const [password, setPassword] = useState("");
+    const [city, setCity] = useState("");
+    const [state, setState] = useState("");
+    const [employerType, setEmployerType] = useState("");
+    const [selfie, setSelfie] = useState<string | null>(null);
+    const [aadharImage, setAadharImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const { apiCaller } = useGlobalContext(); // Ensure your global context provides an apiCaller
 
-    const handleAddEmployee = () => {
-        if (!name || !role || !department || !email || !phone || !employeeImage) {
-            Alert.alert("Please fill all fields and provide an image.");
+    const handleAddEmployee = async () => {
+        if (!name || !mobile || !password || !city || !state || !employerType || !selfie || !aadharImage) {
+            Alert.alert("Please fill all fields and provide both images.");
+            return;
+        }
+
+        if (mobile.length !== 10) {
+            Alert.alert("Please enter a valid 10-digit phone number.");
             return;
         }
 
         const newEmployee = {
             name,
-            role,
-            department,
-            email,
-            phone,
-            employeeImage,
+            mobileNumber:mobile,
+            password,
+            city,
+            state,
+            employeeType:employerType,
+            photo:selfie,
+            aadharCard:aadharImage,
         };
 
-        console.log("New Employee Data:", newEmployee);
-
-        // Simulate loading state (you can replace this with actual API call)
         setLoading(true);
-        setTimeout(() => {
+        try {
+            await apiCaller.post('/api/employee', newEmployee, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
             resetForm();
             Alert.alert("Success", "Employee added successfully!");
-        }, 1500);
+        } catch (error) {
+            console.log(error);
+            setLoading(false);
+            Alert.alert("Error", "Failed to add employee. Please try again.");
+        }
     };
 
-    const handleImagePicker = async () => {
+    const handleImagePicker = async (type: "selfie" | "aadhar") => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: false,
@@ -59,17 +72,23 @@ const AddEmployeeScreen: React.FC = () => {
         });
 
         if (!result.canceled) {
-            setEmployeeImage(result.assets[0].uri);
+            if (type === "selfie") {
+                setSelfie(result.assets[0].uri);
+            } else {
+                setAadharImage(result.assets[0].uri);
+            }
         }
     };
 
     const resetForm = () => {
         setName("");
-        setRole("");
-        setDepartment("");
-        setEmail("");
-        setPhone("");
-        setEmployeeImage(null);
+        setMobile("");
+        setPassword("");
+        setCity("");
+        setState("");
+        setEmployerType("");
+        setSelfie(null);
+        setAadharImage(null);
     };
 
     return (
@@ -77,7 +96,7 @@ const AddEmployeeScreen: React.FC = () => {
             <ScrollView style={styles.scrollView}>
                 <View style={styles.content}>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Name</Text>
+                        <Text style={styles.label}>Employee Name</Text>
                         <TextInput
                             style={styles.input}
                             value={name}
@@ -85,49 +104,59 @@ const AddEmployeeScreen: React.FC = () => {
                         />
                     </View>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Role</Text>
+                        <Text style={styles.label}>Mobile No.</Text>
                         <TextInput
                             style={styles.input}
-                            value={role}
-                            onChangeText={(text) => setRole(text)}
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Department</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={department}
-                            onChangeText={(text) => setDepartment(text)}
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Email</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={email}
-                            onChangeText={(text) => setEmail(text)}
-                            keyboardType="email-address"
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Phone</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={phone}
-                            onChangeText={(text) => setPhone(text)}
+                            value={mobile}
+                            onChangeText={(text) => setMobile(text)}
                             keyboardType="phone-pad"
                         />
                     </View>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Password</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={password}
+                            onChangeText={(text) => setPassword(text)}
+                            secureTextEntry
+                        />
+                    </View>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>City</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={city}
+                            onChangeText={(text) => setCity(text)}
+                        />
+                    </View>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>State</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={state}
+                            onChangeText={(text) => setState(text)}
+                        />
+                    </View>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Employee Type</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={employerType}
+                            onChangeText={(text) => setEmployerType(text)}
+                        />
+                    </View>
 
-                    <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
-                        <Text style={styles.imagePickerText}>Select Employee Image</Text>
+                    <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("selfie")}>
+                        <Text style={styles.imagePickerText}>Select Selfie</Text>
                     </TouchableOpacity>
-                    {employeeImage && <Image source={{ uri: employeeImage }} style={styles.previewImage} />}
+                    {selfie && <Image source={{ uri: selfie }} style={styles.previewImage} />}
+
+                    <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("aadhar")}>
+                        <Text style={styles.imagePickerText}>Select Aadhar Card Image</Text>
+                    </TouchableOpacity>
+                    {aadharImage && <Image source={{ uri: aadharImage }} style={styles.previewImage} />}
 
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity style={[styles.button, { backgroundColor: "#ccc" }]}>
-                            <Text style={styles.buttonText}>Cancel</Text>
-                        </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.button, { backgroundColor: Colors.darkBlue }]}
                             onPress={handleAddEmployee}

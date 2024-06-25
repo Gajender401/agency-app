@@ -11,7 +11,8 @@ import {
     Alert,
     ActivityIndicator
 } from "react-native";
-import { Colors } from "@/constants/Colors";
+import { Colors } from "@/constants/Colors"; // Replace with your colors constant
+import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have this hook or context
 
 const AddRouteScreen: React.FC = () => {
     const [vehicleNumber, setVehicleNumber] = useState("");
@@ -19,29 +20,32 @@ const AddRouteScreen: React.FC = () => {
     const [destinationPlace, setDestinationPlace] = useState("");
     const [departureTime, setDepartureTime] = useState("");
     const [loading, setLoading] = useState(false);
+    const { apiCaller } = useGlobalContext(); // Ensure your global context provides an apiCaller
 
-    const handleAddRoute = () => {
+    const handleAddRoute = async () => {
         if (!vehicleNumber || !departurePlace || !destinationPlace || !departureTime) {
             Alert.alert("Please fill all fields.");
             return;
         }
 
         const newRoute = {
-            vehicleNumber,
+            vehicleId:vehicleNumber,
             departurePlace,
             destinationPlace,
             departureTime,
         };
 
-        console.log("New Route Data:", newRoute);
-
-        // Simulate loading state (you can replace this with actual API call)
         setLoading(true);
-        setTimeout(() => {
+        try {
+            await apiCaller.post('/api/dailyRoute', newRoute, { headers: { 'Content-Type': 'application/json' } });
             setLoading(false);
             resetForm();
             Alert.alert("Success", "Route added successfully!");
-        }, 1500);
+        } catch (error) {
+            console.log(error);
+            setLoading(false);
+            Alert.alert("Error", "Failed to add route. Please try again.");
+        }
     };
 
     const resetForm = () => {
@@ -130,7 +134,7 @@ const styles = StyleSheet.create({
         marginBottom: 5,
         fontSize: 13,
         color: Colors.secondary,
-        fontWeight:"500"
+        fontWeight: "500"
     },
     input: {
         borderColor: Colors.secondary,

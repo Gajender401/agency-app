@@ -42,7 +42,7 @@ interface Driver {
     mobileNumber: string;
     city: string;
     state: string;
-    driverType: string;
+    vehicleType: string;
     photo: string;
     aadharCard: string;
     license: string;
@@ -54,28 +54,29 @@ const DriverListScreen: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [idToDelete, setIdToDelete] = useState<null|string>(null)
     const { apiCaller, token } = useGlobalContext();
 
-    useEffect(() => {
-        const fetchDrivers = async () => {
-            try {
-                setLoading(true);
-                const response = await apiCaller.get('/api/driver');
-                setDrivers(response.data.data);
-            } catch (err) {
-                console.log(err);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchDrivers = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/driver');
+            setDrivers(response.data.data);
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchDrivers();
     }, []);
 
-    const handleDelete = () => {
-        // Implement delete logic here
-        console.log("Deleting driver...");
+    const handleDelete = async() => {
+        await apiCaller.delete(`/api/driver?driverId=${idToDelete}`);
         setShowDeleteModal(false);
+        fetchDrivers();
     };
 
     const handleViewImage = (imageUri: string) => {
@@ -112,7 +113,7 @@ const DriverListScreen: React.FC = () => {
                                 <TouchableOpacity style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
+                                <TouchableOpacity onPress={() => {setShowDeleteModal(true); setIdToDelete(driver._id)}}>
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>
@@ -129,7 +130,7 @@ const DriverListScreen: React.FC = () => {
                                 State: <Text style={{ color: "black" }}>{driver.state}</Text>
                             </Text>
                             <Text style={styles.cardText}>
-                                Type: <Text style={{ color: "black" }}>{driver.driverType}</Text>
+                                Vehicle Type: <Text style={{ color: "black" }}>{driver.vehicleType}</Text>
                             </Text>
                             <View style={styles.aadharContainer}>
                                 <Text style={styles.cardText}>Aadhar card</Text>

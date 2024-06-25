@@ -11,7 +11,8 @@ import {
     TouchableOpacity,
     ActivityIndicator
 } from "react-native";
-import { Colors } from "@/constants/Colors";
+import { Colors } from "@/constants/Colors"; // Replace with your colors constant
+import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have this hook or context
 
 const PackageBookingForm: React.FC = () => {
     const [vehicleNumber, setVehicleNumber] = useState("");
@@ -33,43 +34,46 @@ const PackageBookingForm: React.FC = () => {
     const [addNote, setAddNote] = useState("");
     const [entryParking, setEntryParking] = useState("");
     const [loading, setLoading] = useState(false);
+    const { apiCaller } = useGlobalContext(); // Ensure your global context provides an apiCaller
 
-    const handleBooking = () => {
+    const handleBooking = async () => {
         if (!vehicleNumber || !otherVehicleNumber || !customerName || !mobileNumber || !alternateNumber || !kmStarting || !perKmRate || !advancedAmount || !remainingAmount || !departurePlace || !destinationPlace || !departureTime || !returnTime || !toll || !otherStateTax || !instructions || !addNote || !entryParking) {
             Alert.alert("Please fill all fields.");
             return;
         }
 
         const newBooking = {
-            vehicleNumber,
-            otherVehicleNumber,
+            vehicleId:vehicleNumber,
+            otherVehicleId:otherVehicleNumber,
             customerName,
             mobileNumber,
             alternateNumber,
             kmStarting,
-            perKmRate,
-            advancedAmount,
-            remainingAmount,
+            perKmRateInINR:perKmRate,
+            advanceAmountInINR:advancedAmount,
+            remainingAmountInINR:remainingAmount,
             departurePlace,
             destinationPlace,
             departureTime,
             returnTime,
-            toll,
-            otherStateTax,
+            tollInINR:toll,
+            otherStateTaxInINR:otherStateTax,
             instructions,
-            addNote,
-            entryParking
+            note:addNote,
+            advancePlace:entryParking,
         };
 
-        console.log("New Booking Data:", newBooking);
-
-        // Simulate loading state (you can replace this with actual API call)
         setLoading(true);
-        setTimeout(() => {
+        try {
+            await apiCaller.post('/api/packageBooking', newBooking);
             setLoading(false);
             resetForm();
             Alert.alert("Success", "Booking added successfully!");
-        }, 1500);
+        } catch (error) {
+            console.log(error);
+            setLoading(false);
+            Alert.alert("Error", "Failed to add booking. Please try again.");
+        }
     };
 
     const resetForm = () => {
@@ -283,6 +287,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         borderRadius: 10,
         elevation: 5,
+        padding: 20,
     },
     inputGroup: {
         marginBottom: 15,

@@ -12,6 +12,7 @@ import {
     ActivityIndicator
 } from "react-native";
 import { Colors } from "@/constants/Colors"; // Replace with your colors constant
+import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have this hook or context
 
 const AddTechnicianScreen: React.FC = () => {
     const [name, setName] = useState("");
@@ -20,8 +21,9 @@ const AddTechnicianScreen: React.FC = () => {
     const [technicianType, setTechnicianType] = useState("");
     const [vehicleType, setVehicleType] = useState("");
     const [loading, setLoading] = useState(false);
+    const { apiCaller } = useGlobalContext(); // Ensure your global context provides an apiCaller
 
-    const handleAddTechnician = () => {
+    const handleAddTechnician = async () => {
         if (!name || !mobile || !alternateNumber || !technicianType || !vehicleType) {
             Alert.alert("Please fill all fields.");
             return;
@@ -29,21 +31,23 @@ const AddTechnicianScreen: React.FC = () => {
 
         const newTechnician = {
             name,
-            mobile,
+            mobileNumber:mobile,
             alternateNumber,
             technicianType,
             vehicleType,
         };
 
-        console.log("New Technician Data:", newTechnician);
-
-        // Simulate loading state (you can replace this with actual API call)
         setLoading(true);
-        setTimeout(() => {
+        try {
+            await apiCaller.post('/api/technician', newTechnician, { headers: { 'Content-Type': 'application/json' } });
             setLoading(false);
             resetForm();
             Alert.alert("Success", "Technician added successfully!");
-        }, 1500);
+        } catch (error) {
+            console.log(error);
+            setLoading(false);
+            Alert.alert("Error", "Failed to add technician. Please try again.");
+        }
     };
 
     const resetForm = () => {

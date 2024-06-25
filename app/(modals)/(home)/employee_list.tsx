@@ -55,28 +55,29 @@ const EmployeeListScreen: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [showImageModal, setShowImageModal] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<null|string>(null)
     const { apiCaller, token } = useGlobalContext();
 
-    useEffect(() => {
-        const fetchEmployees = async () => {
-            try {
-                setLoading(true);
-                const response = await apiCaller.get('/api/employee');
-                setEmployees(response.data.data);
-            } catch (err) {
-                console.log(err);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchEmployees = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/employee');
+            setEmployees(response.data.data);
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchEmployees();
     }, []);
 
-    const handleDelete = () => {
-        // Implement delete logic here
-        console.log("Deleting employee...");
+    const handleDelete = async() => {
+        await apiCaller.delete(`/api/employee?employeeId=${idToDelete}`);
         setShowDeleteModal(false);
+        fetchEmployees();
     };
 
     const handleViewImage = (imageUri: string) => {
@@ -113,7 +114,7 @@ const EmployeeListScreen: React.FC = () => {
                                 <TouchableOpacity style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
+                                <TouchableOpacity onPress={() => {setShowDeleteModal(true); setIdToDelete(employee._id)}}>
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>
