@@ -74,34 +74,34 @@ const BusListScreen: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
     const [selectedBusImage, setSelectedBusImage] = React.useState<string[] | null>(null);
     const [showPhotoModal, setShowPhotoModal] = React.useState(false);
+    const [idToDelete, setIdToDelete] = useState<null|string>(null)
     const { apiCaller, token } = useGlobalContext();
 
     const filterByType = (data: Vehicle[], type: string): Vehicle[] => {
         return data.filter(vehicle => vehicle.type === type);
-      };
+    };
 
+    const fetchBuses = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/vehicle');
+            const filteredData = filterByType(response.data.data, 'BUS')
+            setBuses(filteredData);
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchBuses = async () => {
-            try {
-                setLoading(true);
-                const response = await apiCaller.get('/api/vehicle');
-                const filteredData = filterByType(response.data.data, 'BUS')
-                setBuses(filteredData);
-            } catch (err) {
-                console.log(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchBuses();
     }, []);
 
-    const handleDelete = () => {
-        // Implement delete logic here
-        console.log("Deleting bus...");
+    const handleDelete = async() => {
+        await apiCaller.delete(`/api/vehicle?vehicleId=${idToDelete}`);
         setShowDeleteModal(false);
+        fetchBuses()
     };
 
     const handleViewPhoto = (imageUrl: string[]) => {
@@ -134,7 +134,7 @@ const BusListScreen: React.FC = () => {
                                 <TouchableOpacity style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
+                                <TouchableOpacity onPress={() => {setShowDeleteModal(true); setIdToDelete(bus._id)}}>
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>
@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 20,
         elevation: 10,
-        marginVertical:100
+        marginVertical: 100
     },
     photoModalContentContainer: {
         alignItems: "center",

@@ -62,33 +62,34 @@ const TruckListScreen: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedTruckImage, setSelectedTruckImage] = useState<string[] | null>(null);
     const [showPhotoModal, setShowPhotoModal] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<null|string>(null)
     const { apiCaller, token } = useGlobalContext();
 
     const filterByType = (data: Vehicle[], type: string): Vehicle[] => {
         return data.filter(vehicle => vehicle.type === type);
     };
 
-    useEffect(() => {
-        const fetchVehicles = async () => {
-            try {
-                setLoading(true);
-                const response = await apiCaller.get('/api/vehicle');
-                const filteredData = filterByType(response.data.data, 'TRUCK');
-                setTrucks(filteredData);
-            } catch (err) {
-                console.log(err);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchVehicles = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/vehicle');
+            const filteredData = filterByType(response.data.data, 'TRUCK');
+            setTrucks(filteredData);
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchVehicles();
     }, []);
 
-    const handleDelete = () => {
-        // Implement delete logic here
-        console.log("Deleting truck...");
+    const handleDelete = async() => {
+        await apiCaller.delete(`/api/vehicle?vehicleId=${idToDelete}`);
         setShowDeleteModal(false);
+        fetchVehicles()
     };
 
     const handleViewPhoto = (imageUrl: string[]) => {
@@ -121,7 +122,7 @@ const TruckListScreen: React.FC = () => {
                                 <TouchableOpacity style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
+                                <TouchableOpacity onPress={() => {setShowDeleteModal(true); setIdToDelete(truck._id)}}>
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>

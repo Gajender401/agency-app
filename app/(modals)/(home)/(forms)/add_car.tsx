@@ -16,6 +16,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 //@ts-ignore
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 const AddCarScreen: React.FC = () => {
     const [vehicleNo, setVehicleNo] = useState("");
@@ -24,36 +25,48 @@ const AddCarScreen: React.FC = () => {
     const [location, setLocation] = useState("");
     const [carName, setCarName] = useState("");
     const [contactNo, setContactNo] = useState("");
-    const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
+    const [bodyType, setBodyType] = useState("");
+    const [chassisBrand, setChassisBrand] = useState("");
+    const [selectedAC, setSelectedAC] = useState<string | null>(null); // State for AC/Non-AC selection
+    const [selectedForRent, setSelectedForRent] = useState<boolean>(false); // State for For Rent selection
+    const [selectedForSell, setSelectedForSell] = useState<boolean>(false); // State for For Sell selection
     const [carImages, setCarImages] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
+    const { apiCaller } = useGlobalContext();
 
-    const handleAddCar = () => {
+    const handleAddCar = async () => {
         if (!vehicleNo || !seatingCapacity || !vehicleModel || !location || !carName || !contactNo || carImages.length === 0) {
             Alert.alert("Please fill all fields and upload car images.");
             return;
         }
 
         const newCar = {
-            vehicleNo,
+            number: vehicleNo,
             seatingCapacity,
-            vehicleModel,
+            model: vehicleModel,
             location,
-            carName,
-            contactNo,
-            features: selectedFeature,
-            carImages,
+            bodyType,
+            chassisBrand,
+            contactNumber: contactNo,
+            isAC: selectedAC === "AC",
+            isForRent: selectedForRent,
+            isForSell: selectedForSell,
+            photos: carImages,
+            type: "CAR",
+            name:carName
         };
 
-        console.log("New Car Data:", newCar);
-
-        // Simulate loading state (you can replace this with actual API call)
         setLoading(true);
-        setTimeout(() => {
+        try {
+            await apiCaller.post('/api/vehicle', newCar, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
             resetForm();
             Alert.alert("Success", "Car added successfully!");
-        }, 1500);
+        } catch (error) {
+            console.log(error);
+            setLoading(false);
+            Alert.alert("Error", "Failed to add car. Please try again.");
+        }
     };
 
     const handleImagePicker = async () => {
@@ -75,7 +88,11 @@ const AddCarScreen: React.FC = () => {
         setLocation("");
         setCarName("");
         setContactNo("");
-        setSelectedFeature(null);
+        setBodyType("");
+        setChassisBrand("");
+        setSelectedAC(null);
+        setSelectedForRent(false);
+        setSelectedForSell(false);
         setCarImages([]);
     };
 
@@ -90,7 +107,7 @@ const AddCarScreen: React.FC = () => {
                             value={vehicleNo}
                             onChangeText={(text) => setVehicleNo(text)}
                         />
-                        <Text style={styles.vehiceNumberLabel} >“If your vehicle is to be sold to other vehicle owners or is to be given on rent, then you will have to fill the option given below.”</Text>
+                        <Text style={styles.vehicleNumberLabel}>“If your vehicle is to be sold to other vehicle owners or is to be given on rent, then you will have to fill the option given below.”</Text>
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Seating Capacity</Text>
@@ -134,19 +151,50 @@ const AddCarScreen: React.FC = () => {
                             keyboardType="phone-pad"
                         />
                     </View>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Body Type</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={bodyType}
+                            onChangeText={(text) => setBodyType(text)}
+                        />
+                    </View>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Chassis Brand</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={chassisBrand}
+                            onChangeText={(text) => setChassisBrand(text)}
+                        />
+                    </View>
 
+                    {/* AC/Non-AC RadioButtonGroup */}
                     <View style={styles.featuresContainer}>
                         <RadioButtonGroup
                             containerStyle={styles.radioButtonGroup}
-                            selected={selectedFeature}
-                            onSelected={(value: string) => setSelectedFeature(value)}
+                            selected={selectedAC}
+                            onSelected={(value: string) => setSelectedAC(value)}
                             radioBackground={Colors.darkBlue}
                         >
-                            <RadioButtonItem value="AC" label={<Text style={{color:Colors.primary, fontWeight:"500"}} >AC</Text>} style={styles.radioButtonItem} />
-                            <RadioButtonItem value="NonAC" label={<Text style={{color:Colors.primary, fontWeight:"500"}} >Non-AC</Text>} style={styles.radioButtonItem} />
-                            <RadioButtonItem value="ForRent" label={<Text style={{color:Colors.primary, fontWeight:"500"}} >For Rent</Text>} style={styles.radioButtonItem} />
-                            <RadioButtonItem value="ForSell" label={<Text style={{color:Colors.primary, fontWeight:"500"}} >For Sell</Text>} style={styles.radioButtonItem} />
+                            <RadioButtonItem value="AC" label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>AC</Text>} style={styles.radioButtonItem} />
+                            <RadioButtonItem value="NonAC" label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>Non-AC</Text>} style={styles.radioButtonItem} />
                         </RadioButtonGroup>
+                    </View>
+
+                    {/* For Rent/For Sell Checkboxes */}
+                    <View style={styles.featuresContainer}>
+                        <TouchableOpacity
+                            style={[styles.checkboxContainer, { backgroundColor: selectedForRent ? Colors.darkBlue : Colors.secondary }]}
+                            onPress={() => setSelectedForRent(!selectedForRent)}
+                        >
+                            <Text style={styles.checkboxText}>For Rent</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.checkboxContainer, { backgroundColor: selectedForSell ? Colors.darkBlue : Colors.secondary }]}
+                            onPress={() => setSelectedForSell(!selectedForSell)}
+                        >
+                            <Text style={styles.checkboxText}>For Sell</Text>
+                        </TouchableOpacity>
                     </View>
 
                     <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
@@ -192,12 +240,6 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         elevation: 5,
     },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: "bold",
-        marginBottom: 20,
-        textAlign: "center",
-    },
     inputGroup: {
         marginBottom: 15,
     },
@@ -216,7 +258,6 @@ const styles = StyleSheet.create({
     },
     featuresContainer: {
         flexDirection: "row",
-        flexWrap: "wrap",
         justifyContent: "space-between",
         backgroundColor: Colors.secondary,
         padding: 10,
@@ -226,13 +267,25 @@ const styles = StyleSheet.create({
     radioButtonGroup: {
         flexDirection: "row",
         flexWrap: "wrap",
-        justifyContent: "space-between",
-        gap:10
+        justifyContent:"space-around",
+        width:"100%"
     },
     radioButtonItem: {
-        borderColor:Colors.secondary,
-        backgroundColor:"white",
-        color:Colors.darkBlue
+        borderColor: Colors.secondary,
+        backgroundColor: "white",
+        color: Colors.darkBlue,
+    },
+    checkboxContainer: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 10,
+        borderRadius: 5,
+        marginHorizontal: 5,
+    },
+    checkboxText: {
+        color: Colors.primary,
+        fontWeight: "500",
     },
     imagePicker: {
         backgroundColor: Colors.darkBlue,
@@ -271,12 +324,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
     },
-    vehiceNumberLabel: {
-        fontSize: 9,
-        fontWeight: "500",
-        paddingHorizontal: 15,
-        marginTop: 5
-    }
+    vehicleNumberLabel: {
+        fontSize: 12,
+        color: Colors.primary,
+        marginTop: 5,
+    },
 });
 
 export default AddCarScreen;

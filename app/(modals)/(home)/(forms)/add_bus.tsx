@@ -16,6 +16,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 //@ts-ignore
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
+import { useGlobalContext } from "@/context/GlobalProvider"; // Importing useGlobalContext
 
 const AddBusScreen: React.FC = () => {
   const [vehicleNo, setVehicleNo] = useState("");
@@ -25,36 +26,45 @@ const AddBusScreen: React.FC = () => {
   const [chassisBrand, setChassisBrand] = useState("");
   const [location, setLocation] = useState("");
   const [contactNo, setContactNo] = useState("");
-  const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
+  const [selectedAC, setSelectedAC] = useState<string | null>(null);
+  const [selectedForRent, setSelectedForRent] = useState<boolean>(false);
+  const [selectedForSell, setSelectedForSell] = useState<boolean>(false);
   const [busImages, setBusImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const { apiCaller } = useGlobalContext(); // Destructuring apiCaller from context
 
-  const handleAddBus = () => {
+  const handleAddBus = async () => {
     if (!vehicleNo || !seatingCapacity || !vehicleModel || !bodyType || !chassisBrand || !location || !contactNo || busImages.length === 0) {
       Alert.alert("Please fill all fields and upload bus images.");
       return;
     }
 
     const newBus = {
-      vehicleNo,
+      number: vehicleNo,
       seatingCapacity,
-      vehicleModel,
+      model: vehicleModel,
+      location,
       bodyType,
       chassisBrand,
-      location,
-      contactNo,
-      features: selectedFeature,
-      busImages,
+      contactNumber: contactNo,
+      isAC: selectedAC === "AC",
+      isForRent: selectedForRent,
+      isForSell: selectedForSell,
+      photos: busImages,
+      type: "BUS"
     };
 
-    console.log("New Bus Data:", newBus);
-
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await apiCaller.post('/api/vehicle', newBus, { headers: { 'Content-Type': 'multipart/form-data' } });
       setLoading(false);
       resetForm();
       Alert.alert("Success", "Bus added successfully!");
-    }, 1500);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      Alert.alert("Error", "Failed to add bus. Please try again.");
+    }
   };
 
   const handleImagePicker = async () => {
@@ -77,7 +87,9 @@ const AddBusScreen: React.FC = () => {
     setChassisBrand("");
     setLocation("");
     setContactNo("");
-    setSelectedFeature(null);
+    setSelectedAC(null);
+    setSelectedForRent(false);
+    setSelectedForSell(false);
     setBusImages([]);
   };
 
@@ -93,7 +105,7 @@ const AddBusScreen: React.FC = () => {
               onChangeText={(text) => setVehicleNo(text)}
             />
           </View>
-          <Text style={styles.vehiceNumberLabel} >“If your vehicle is to be sold to other vehicle owners or is to be given on rent, then you will have to fill the option given below.”</Text>
+          <Text style={styles.vehicleNumberLabel}>“If your vehicle is to be sold to other vehicle owners or is to be given on rent, then you will have to fill the option given below.”</Text>
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Seating Capacity</Text>
             <TextInput
@@ -148,15 +160,22 @@ const AddBusScreen: React.FC = () => {
           <View style={styles.featuresContainer}>
             <RadioButtonGroup
               containerStyle={styles.radioButtonGroup}
-              selected={selectedFeature}
-              onSelected={(value: string) => setSelectedFeature(value)}
+              selected={selectedAC}
+              onSelected={(value: string) => setSelectedAC(value)}
               radioBackground={Colors.darkBlue}
             >
               <RadioButtonItem value="AC" label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>AC</Text>} style={styles.radioButtonItem} />
               <RadioButtonItem value="NonAC" label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>Non-AC</Text>} style={styles.radioButtonItem} />
-              <RadioButtonItem value="ForRent" label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>For Rent</Text>} style={styles.radioButtonItem} />
-              <RadioButtonItem value="ForSell" label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>For Sell</Text>} style={styles.radioButtonItem} />
             </RadioButtonGroup>
+          </View>
+
+          <View style={styles.featuresContainer}>
+            <TouchableOpacity style={styles.checkboxContainer} onPress={() => setSelectedForRent(!selectedForRent)}>
+              <Text style={styles.checkboxLabel}>{selectedForRent ? "✔ " : ""}For Rent</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.checkboxContainer} onPress={() => setSelectedForSell(!selectedForSell)}>
+              <Text style={styles.checkboxLabel}>{selectedForSell ? "✔ " : ""}For Sell</Text>
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
@@ -202,12 +221,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 5,
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-  },
   inputGroup: {
     marginBottom: 15,
   },
@@ -220,7 +233,7 @@ const styles = StyleSheet.create({
   input: {
     borderColor: Colors.secondary,
     borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 10,
     paddingHorizontal: 10,
     height: 40,
   },
@@ -236,57 +249,67 @@ const styles = StyleSheet.create({
   radioButtonGroup: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: 10,
+    justifyContent: "space-around",
+    width: "100%",
   },
   radioButtonItem: {
     borderColor: Colors.secondary,
     backgroundColor: "white",
     color: Colors.darkBlue,
   },
-  imagePicker: {
-    backgroundColor: Colors.darkBlue,
-    padding: 15,
-    borderRadius: 5,
+  checkboxContainer: {
+    flexDirection: "row",
     alignItems: "center",
-    marginBottom: 15,
+    padding: 10,
+  },
+  checkboxLabel: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: Colors.primary,
+  },
+  imagePicker: {
+    padding: 15,
+    backgroundColor: Colors.secondary,
+    borderRadius: 10,
+    alignItems: "center",
+    marginVertical: 15,
   },
   imagePickerText: {
-    color: "#fff",
-    fontWeight: "bold",
+    fontSize: 14,
+    fontWeight: "500",
+    color: Colors.primary,
   },
   imagePreviewContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
+    marginBottom: 15,
   },
   previewImage: {
-    width: "48%",
-    height: 100,
+    width: 70,
+    height: 70,
     borderRadius: 10,
     marginBottom: 10,
   },
   modalButtons: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 20,
+    paddingVertical: 10,
   },
   modalButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
     borderRadius: 5,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     marginHorizontal: 10,
   },
   modalButtonText: {
-    fontSize: 16,
     fontWeight: "bold",
+    textAlign: "center",
   },
-  vehiceNumberLabel: {
-    fontSize: 9,
-    fontWeight: "500",
-    paddingHorizontal: 15,
-    marginTop: 5
-  }
+  vehicleNumberLabel: {
+    fontSize: 12,
+    marginTop: 5,
+  },
 });
 
 export default AddBusScreen;

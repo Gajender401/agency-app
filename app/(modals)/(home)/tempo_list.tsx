@@ -58,33 +58,35 @@ const TempoListScreen: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
     const [selectedTempoImage, setSelectedTempoImage] = React.useState<string[] | null>(null);
     const [showPhotoModal, setShowPhotoModal] = React.useState(false);
+    const [idToDelete, setIdToDelete] = useState<null | string>(null)
     const { apiCaller, token } = useGlobalContext();
 
     const filterByType = (data: Vehicle[], type: string): Vehicle[] => {
         return data.filter(vehicle => vehicle.type === type);
     };
 
+    const fetchVehicles = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/vehicle');
+            const filteredData = filterByType(response.data.data, 'TAMPO');
+            setTempos(filteredData);
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchVehicles = async () => {
-            try {
-                setLoading(true);
-                const response = await apiCaller.get('/api/vehicle');
-                const filteredData = filterByType(response.data.data, 'TEMPO');
-                setTempos(filteredData);
-            } catch (err) {
-                console.log(err);
-            } finally {
-                setLoading(false);
-            }
-        };
 
         fetchVehicles();
     }, []);
 
-    const handleDelete = () => {
-        // Implement delete logic here
-        console.log("Deleting tempo...");
+    const handleDelete = async () => {
+        await apiCaller.delete(`/api/vehicle?vehicleId=${idToDelete}`);
         setShowDeleteModal(false);
+        fetchVehicles()
     };
 
     const handleViewPhoto = (imageUrl: string[]) => {
@@ -117,7 +119,7 @@ const TempoListScreen: React.FC = () => {
                                 <TouchableOpacity style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
+                                <TouchableOpacity onPress={() => { setShowDeleteModal(true); setIdToDelete(tempo._id) }}>
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>
@@ -126,7 +128,7 @@ const TempoListScreen: React.FC = () => {
                             <Text style={styles.cardText}>Vehicle Model: <Text style={{ color: "black" }}>{tempo.model}</Text></Text>
                             <Text style={styles.cardText}>Location: <Text style={{ color: "black" }}>{tempo.location}</Text></Text>
                             <Text style={styles.cardText}>Contact Number: <Text style={{ color: "black" }}>{tempo.contactNumber}</Text></Text>
-                            <Text style={styles.cardText}>{tempo.isForRent&&" Rent /"} {tempo.isForSell&&" Sell"}</Text>
+                            <Text style={styles.cardText}>{tempo.isForRent && " Rent /"} {tempo.isForSell && " Sell"}</Text>
                             <TouchableOpacity style={styles.viewPhotoButton} onPress={() => handleViewPhoto(tempo.photos)}>
                                 <Text style={styles.viewPhotoButtonText}>View Photos</Text>
                             </TouchableOpacity>
@@ -316,7 +318,7 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
         overflow: "hidden",
-        marginVertical:100
+        marginVertical: 100
     },
     photoModalContentContainer: {
         alignItems: "center",
