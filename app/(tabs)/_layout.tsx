@@ -33,9 +33,9 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="rent_vehicle"
+          name="vehicle_trasaction"
           options={{
-            title: 'Rent Vehicle',
+            title: 'Vehicle Trasaction',
             tabBarIcon: ({ color, focused }) => (
               <Ionicons name={focused ? 'car-sharp' : 'car'} size={30} color={color} />
             ),

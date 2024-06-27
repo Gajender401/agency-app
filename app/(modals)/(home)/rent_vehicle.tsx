@@ -8,15 +8,12 @@ import {
     ScrollView,
     Image,
     Dimensions,
-    TouchableOpacity,
-    StatusBar,
 } from "react-native";
 import PagerView from "react-native-pager-view";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { sell_cars } from "@/constants/dummy";
 import { useState } from "react";
-import { router } from "expo-router";
 
 const { width: viewportWidth } = Dimensions.get("window");
 
@@ -42,10 +39,6 @@ const SellVehicleScreen: React.FC = () => {
                         placeholderTextColor={Colors.secondary}
                     />
                 </View>
-
-                <TouchableOpacity onPress={() => router.push("add_sell_vehicle")} style={styles.addButton}>
-                    <Text style={styles.addButtonText}>Add sale</Text>
-                </TouchableOpacity>
 
                 {sell_cars.map((car, index) => (
                     <View key={index} style={styles.card}>
@@ -84,7 +77,6 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         backgroundColor: "#ffffff",
-        marginTop: StatusBar.currentHeight,
     },
     searchContainer: {
         flexDirection: "row",

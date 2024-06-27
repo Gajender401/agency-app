@@ -57,8 +57,8 @@ export default function RootLayout() {
         <Stack.Screen name="(modals)/(home)/vehicle_documents" options={{ headerShadowVisible:false, headerTitle:"Vehicle Documents", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/vehicle_servicing_history" options={{ headerShadowVisible:false, headerTitle:"Vehicle Servicing history", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/sell_vehicle" options={{ headerShadowVisible:false, headerTitle:" Sell Vehicle", headerTitleAlign:"center" }} />
+        <Stack.Screen name="(modals)/(home)/rent_vehicle" options={{ headerShadowVisible:false, headerTitle:" Rent Vehicle", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/all_photos" options={{ headerShadowVisible:false, headerTitle:"Gallery", headerTitleAlign:"center" }} />
-
 
         <Stack.Screen name="(modals)/(home)/(forms)/add_cleaner" options={{ headerShadowVisible:false, headerTitle:"Add Cleaner", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/(forms)/add_driver" options={{ headerShadowVisible:false, headerTitle:"Add Driver", headerTitleAlign:"center" }} />
@@ -72,7 +72,6 @@ export default function RootLayout() {
         <Stack.Screen name="(modals)/(home)/(forms)/add_technician" options={{ headerShadowVisible:false, headerTitle:"Add Technician", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/(forms)/add_vehicle_documents" options={{ headerShadowVisible:false, headerTitle:"Vehicle Documents", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/(forms)/add_vehicle_inspection" options={{ headerShadowVisible:false, headerTitle:"Vehicle Documents", headerTitleAlign:"center" }} />
-        <Stack.Screen name="(modals)/(home)/(forms)/add_sell_vehicle" options={{ headerShadowVisible:false, headerTitle:"Sell Vehicle", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/plans" options={{ headerShadowVisible:false, headerTitle:"Premium", headerTitleAlign:"center" }} />
 
         <Stack.Screen name="+not-found" />

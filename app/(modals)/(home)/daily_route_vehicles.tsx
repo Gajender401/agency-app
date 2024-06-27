@@ -18,14 +18,28 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useGlobalContext } from "@/context/GlobalProvider";
 
+interface Driver {
+  _id: string;
+  name: string;
+  mobileNumber: string;
+  photo: string;
+}
+
+interface Cleaner {
+  _id: string;
+  name: string;
+  mobileNumber: string;
+  photo: string;
+}
+
 interface DailyRoute {
   _id: string;
   vehicleNumber: string;
   departurePlace: string;
   destinationPlace: string;
-  primaryDriver: string;
-  secondaryDriver: string;
-  cleaner: string;
+  primaryDriver: Driver | null;
+  secondaryDriver: Driver | null;
+  cleaner: Cleaner | null;
   departureTime: string;
   instructions: string;
 }
@@ -166,13 +180,13 @@ const DailyRouteVehicles: React.FC = () => {
                 Departure Time: <Text style={{ color: "black" }}>{route.departureTime}</Text>
               </Text>
               <Text style={styles.cardText}>
-                Cleaner Name: <Text style={{ color: "black" }}>{route.cleaner}</Text>
+                Cleaner Name: <Text style={{ color: "black" }}>{route.cleaner ? route.cleaner.name : "N/A"}</Text>
               </Text>
               <Text style={styles.cardText}>
-                Primary Driver : <Text style={{ color: "black" }}>{route.primaryDriver}</Text>
+                Primary Driver : <Text style={{ color: "black" }}>{route.primaryDriver ? route.primaryDriver.name : "N/A"}</Text>
               </Text>
               <Text style={styles.cardText}>
-                Secondary Driver: <Text style={{ color: "black" }}>{route.secondaryDriver}</Text>
+                Secondary Driver: <Text style={{ color: "black" }}>{route.secondaryDriver ? route.secondaryDriver.name : "N/A"}</Text>
               </Text>
 
             </View>
@@ -189,23 +203,19 @@ const DailyRouteVehicles: React.FC = () => {
       >
         <BlurOverlay visible={showDeleteModal} onRequestClose={() => setShowDeleteModal(false)} />
 
-        <TouchableWithoutFeedback onPress={() => setShowDeleteModal(false)}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalText}>Are you sure you want to delete this route?</Text>
-                <View style={styles.modalButtons}>
-                  <TouchableOpacity style={[styles.modalButton, { backgroundColor: "#ccc" }]} onPress={() => setShowDeleteModal(false)}>
-                    <Text style={styles.modalButtonText}>Cancel</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]} onPress={handleDelete}>
-                    <Text style={[styles.modalButtonText, { color: "#fff" }]}>Delete</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>Are you sure you want to delete this car?</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={[styles.modalButton, { backgroundColor: "#ccc" }]} onPress={() => setShowDeleteModal(false)}>
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]} onPress={handleDelete}>
+                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Delete</Text>
+              </TouchableOpacity>
             </View>
           </View>
-        </TouchableWithoutFeedback>
+        </View>
       </Modal>
 
       {/* Add Driver Modal */}
@@ -218,16 +228,15 @@ const DailyRouteVehicles: React.FC = () => {
         <BlurOverlay visible={showAddDriverModal} onRequestClose={() => setShowAddDriverModal(false)} />
 
         <TouchableWithoutFeedback onPress={() => setShowAddDriverModal(false)}>
-          <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
-              <ScrollView style={styles.modalScroll}>
                 <View style={styles.modalContent}>
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Driver Name</Text>
                     <TextInput
                       style={styles.input}
                       value={driverName}
-                      onChangeText={(text) => setDriverName(text)}
+                      onChangeText={setDriverName}
+                      placeholder="Driver Name"
                     />
                   </View>
                   <View style={styles.inputGroup}>
@@ -235,7 +244,8 @@ const DailyRouteVehicles: React.FC = () => {
                     <TextInput
                       style={styles.input}
                       value={driverName2}
-                      onChangeText={(text) => setDriverName2(text)}
+                      onChangeText={setDriverName2}
+                      placeholder="Driver Name 2"
                     />
                   </View>
                   <View style={styles.inputGroup}>
@@ -243,7 +253,8 @@ const DailyRouteVehicles: React.FC = () => {
                     <TextInput
                       style={styles.input}
                       value={cleanerName}
-                      onChangeText={(text) => setCleanerName(text)}
+                      onChangeText={setCleanerName}
+                      placeholder="Cleaner Name"
                     />
                   </View>
                   <View style={styles.modalButtons}>
@@ -255,9 +266,7 @@ const DailyRouteVehicles: React.FC = () => {
                     </TouchableOpacity>
                   </View>
                 </View>
-              </ScrollView>
             </View>
-          </View>
         </TouchableWithoutFeedback>
       </Modal>
     </SafeAreaView>
@@ -267,32 +276,35 @@ const DailyRouteVehicles: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 10,
     backgroundColor: "#fff",
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
     borderRadius: 8,
-    padding: 8,
-    marginBottom: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    marginBottom: 10,
     borderColor: Colors.secondary,
     borderWidth: 1
   },
   searchInput: {
     flex: 1,
-    marginLeft: 8,
+    marginLeft: 10,
+    color: Colors.secondary,
   },
   addButton: {
     backgroundColor: Colors.darkBlue,
-    padding: 10,
     borderRadius: 8,
+    padding: 8,
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 10,
     width: 120
   },
   addButtonText: {
     color: "#fff",
+    fontSize: 16,
     fontWeight: "bold",
   },
   routesList: {
@@ -300,50 +312,60 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 16,
-    elevation: 4,
+    padding: 20,
+    borderRadius: 5,
+    marginBottom: 20,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
   },
   cardHeader: {
     flexDirection: "row",
     justifyContent: "flex-end",
+    marginBottom: 10,
     alignItems: "center",
-    marginBottom: 8,
-    gap: 10
+    gap: 5,
   },
   editButton: {
     backgroundColor: Colors.darkBlue,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 4,
+    borderRadius: 5,
+    padding: 5,
   },
   editButtonText: {
     color: "#fff",
+    fontSize: 12,
   },
   cardText: {
-    marginBottom: 4,
+    marginBottom: 6,
     color: Colors.secondary,
-    fontSize: 14,
-    fontWeight: "500"
+    fontWeight: "500",
   },
-  modalOverlay: {
+  // Modal Styles
+  modalContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  modalContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    padding: 16,
-    width: "80%",
-    elevation: 4,
+    marginTop: 22,
   },
   modalContent: {
+    width: 300,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   modalText: {
-    marginBottom: 16,
+    marginBottom: 15,
     textAlign: "center",
   },
   modalButtons: {
@@ -352,35 +374,73 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   modalButton: {
-    padding: 12,
-    borderRadius: 8,
-    flex: 1,
-    marginHorizontal: 8,
+    borderRadius: 10,
+    padding: 10,
+    elevation: 2,
+    marginHorizontal: 5,
+    width: 100,
     alignItems: "center",
   },
   modalButtonText: {
+    color: "white",
     fontWeight: "bold",
+  },
+  overlay: {
+    flex: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalScroll: {
     width: "100%",
   },
+  // Photo Modal Styles
+  photoModalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  photoModalOverlay: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  photoModalContent: {
+    width: "80%",
+    height: "80%",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    elevation: 10,
+    marginVertical: 100
+  },
+  photoModalContentContainer: {
+    alignItems: "center",
+  },
+  fullImage: {
+    width: 250,
+    height: 250,
+    marginBottom: 20,
+    resizeMode: "contain",
+  },
+
   inputGroup: {
-    marginBottom: 16,
-    width: "100%"
+    marginBottom: 15,
+    width:"100%"
   },
   label: {
-    fontWeight: "bold",
-    marginBottom: 4,
+    fontSize: 16,
+    marginBottom: 5,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 8,
-    width: "100%",
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    fontSize: 16,
   },
 });
 
