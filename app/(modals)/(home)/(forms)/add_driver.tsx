@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     StyleSheet,
@@ -15,6 +15,14 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { Picker } from '@react-native-picker/picker';
+import { State, City } from 'country-state-city';
+
+type CityType = {
+    countryCode: string;
+    name: string;
+    stateCode: string;
+};
 
 const AddDriverScreen: React.FC = () => {
     const [name, setName] = useState("");
@@ -22,43 +30,49 @@ const AddDriverScreen: React.FC = () => {
     const [password, setPassword] = useState("");
     const [city, setCity] = useState("");
     const [state, setState] = useState("");
-    const [type, setType] = useState("");
     const [vehicleType, setVehicleType] = useState("");
     const [driverImage, setDriverImage] = useState<string | null>(null);
     const [aadharImage, setAadharImage] = useState<string | null>(null);
     const [licenseImage, setLicenseImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [cityList, setCityList] = useState<CityType[]>([]);
     const { apiCaller } = useGlobalContext();
 
+    useEffect(() => {
+        if (state) {
+            const stateData = State.getStatesOfCountry("IN").find(s => s.isoCode === state);
+            if (stateData) {
+                setCityList(City.getCitiesOfState("IN", stateData.isoCode));
+            }
+        }
+    }, [state]);
+
     const handleAddDriver = async () => {
-        if (!name || !mobile || !password || !city || !state || !type || !vehicleType || !driverImage || !aadharImage || !licenseImage) {
+        if (!name || !mobile || !password || !city || !state || !vehicleType || !driverImage || !aadharImage || !licenseImage) {
             Alert.alert("Please fill all fields and provide images.");
             return;
         }
 
         const newDriver = {
             name,
-            mobileNumber:mobile,
+            mobileNumber: mobile,
             password,
             city,
             state,
             vehicleType,
-            photo:driverImage,
-            aadharCard:aadharImage,
-            license:licenseImage,
+            photo: driverImage,
+            aadharCard: aadharImage,
+            license: licenseImage,
         };
-
-        
 
         setLoading(true);
         try {
-            await apiCaller.post('/api/driver', newDriver,{headers:{'Content-Type': 'multipart/form-data'}});
+            await apiCaller.post('/api/driver', newDriver, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
             resetForm();
             Alert.alert("Success", "Driver added successfully!");
         } catch (error) {
             console.log(error);
-            
             setLoading(false);
             Alert.alert("Error", "Failed to add driver. Please try again.");
         }
@@ -89,7 +103,6 @@ const AddDriverScreen: React.FC = () => {
         setPassword("");
         setCity("");
         setState("");
-        setType("");
         setVehicleType("");
         setDriverImage(null);
         setAadharImage(null);
@@ -98,8 +111,8 @@ const AddDriverScreen: React.FC = () => {
 
     return (
         <SafeAreaView style={styles.container}>
-            <ScrollView style={styles.modalContainer}>
-                <View style={styles.modalContent}>
+            <ScrollView style={styles.scrollView}>
+                <View style={styles.content}>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Name</Text>
                         <TextInput
@@ -127,36 +140,51 @@ const AddDriverScreen: React.FC = () => {
                         />
                     </View>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>City</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={city}
-                            onChangeText={(text) => setCity(text)}
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
                         <Text style={styles.label}>State</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={state}
-                            onChangeText={(text) => setState(text)}
-                        />
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={state}
+                                onValueChange={(itemValue) => setState(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item style={{ color: Colors.secondary }} label="Select State" value="" />
+                                {State.getStatesOfCountry("IN").map((s) => (
+                                    <Picker.Item key={s.isoCode} label={s.name} value={s.isoCode} />
+                                ))}
+                            </Picker>
+                        </View>
                     </View>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Employee Type</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={type}
-                            onChangeText={(text) => setType(text)}
-                        />
+                        <Text style={styles.label}>City</Text>
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={city}
+                                onValueChange={(itemValue) => setCity(itemValue)}
+                                style={styles.picker}
+                                enabled={!!state}
+                            >
+                                <Picker.Item style={{ color: Colors.secondary }} label="Select City" value="" />
+                                {cityList.map((c) => (
+                                    <Picker.Item key={c.name} label={c.name} value={c.name} />
+                                ))}
+                            </Picker>
+                        </View>
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Vehicle Type</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={vehicleType}
-                            onChangeText={(text) => setVehicleType(text)}
-                        />
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={vehicleType}
+                                onValueChange={(itemValue) => setVehicleType(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item style={{ color: Colors.secondary }} label="Select Vehicle Type" value="" />
+                                <Picker.Item label="CAR" value="CAR" />
+                                <Picker.Item label="TRUCK" value="TRUCK" />
+                                <Picker.Item label="BUS" value="BUS" />
+                                <Picker.Item label="TAMPO" value="TAMPO" />
+                            </Picker>
+                        </View>
                     </View>
 
                     <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("driver")}>
@@ -174,15 +202,15 @@ const AddDriverScreen: React.FC = () => {
                     </TouchableOpacity>
                     {licenseImage && <Image source={{ uri: licenseImage }} style={styles.previewImage} />}
 
-                    <View style={styles.modalButtons}>
+                    <View style={styles.buttonContainer}>
                         <TouchableOpacity
-                            style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
+                            style={[styles.button, { backgroundColor: Colors.darkBlue }]}
                             onPress={handleAddDriver}
                         >
                             {loading ? (
                                 <ActivityIndicator color="#fff" />
                             ) : (
-                                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Submit</Text>
+                                <Text style={[styles.buttonText, { color: "#fff" }]}>Submit</Text>
                             )}
                         </TouchableOpacity>
                     </View>
@@ -195,24 +223,18 @@ const AddDriverScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
         backgroundColor: "#ffffff",
     },
-    modalContainer: {
+    scrollView: {
         flex: 1,
         paddingTop: Platform.OS === 'android' ? 20 : 0,
         paddingHorizontal: 20,
     },
-    modalContent: {
+    content: {
         backgroundColor: "#fff",
         borderRadius: 10,
         elevation: 5,
-    },
-    modalTitle: {
-        fontSize: 20,
-        fontWeight: "bold",
-        marginBottom: 20,
-        textAlign: "center",
+        padding: 20,
     },
     inputGroup: {
         marginBottom: 15,
@@ -221,7 +243,7 @@ const styles = StyleSheet.create({
         marginBottom: 5,
         fontSize: 13,
         color: Colors.secondary,
-        fontWeight: "500"
+        fontWeight: "500",
     },
     input: {
         borderColor: Colors.secondary,
@@ -229,6 +251,15 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingHorizontal: 10,
         height: 40,
+    },
+    pickerContainer: {
+        borderColor: Colors.secondary,
+        borderWidth: 1,
+        borderRadius: 10,
+    },
+    picker: {
+        width: "100%",
+        marginVertical: -6,
     },
     imagePicker: {
         backgroundColor: Colors.darkBlue,
@@ -239,28 +270,27 @@ const styles = StyleSheet.create({
     },
     imagePickerText: {
         color: "#fff",
-        fontWeight: "bold",
+        fontSize: 16,
     },
     previewImage: {
-        width: "100%",
-        height: 200,
+        width: 100,
+        height: 100,
+        marginVertical: 10,
+        alignSelf: "center",
         borderRadius: 10,
-        marginBottom: 15,
     },
-    modalButtons: {
+    buttonContainer: {
         flexDirection: "row",
         justifyContent: "center",
-        marginTop: 20,
     },
-    modalButton: {
+    button: {
+        borderRadius: 10,
         paddingVertical: 10,
         paddingHorizontal: 20,
-        borderRadius: 5,
-        marginHorizontal: 10,
+        alignItems: "center",
     },
-    modalButtonText: {
+    buttonText: {
         fontSize: 16,
-        fontWeight: "bold",
     },
 });
 

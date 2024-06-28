@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     StyleSheet,
@@ -13,8 +13,17 @@ import {
     ActivityIndicator
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { Colors } from "@/constants/Colors"; // Replace with your colors constant
-import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have this hook or context
+import { Colors } from "@/constants/Colors";
+import { useGlobalContext } from "@/context/GlobalProvider";
+import { Picker } from '@react-native-picker/picker';
+import { State, City } from 'country-state-city';
+
+
+type CityType = {
+    countryCode: string;
+    name: string;
+    stateCode: string;
+};
 
 const AddEmployeeScreen: React.FC = () => {
     const [name, setName] = useState("");
@@ -26,7 +35,17 @@ const AddEmployeeScreen: React.FC = () => {
     const [selfie, setSelfie] = useState<string | null>(null);
     const [aadharImage, setAadharImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [cityList, setCityList] = useState<CityType[]>([]);
     const { apiCaller } = useGlobalContext(); // Ensure your global context provides an apiCaller
+
+    useEffect(() => {
+        if (state) {
+            const stateData = State.getStatesOfCountry("IN").find(s => s.isoCode === state);
+            if (stateData) {
+                setCityList(City.getCitiesOfState("IN", stateData.isoCode));
+            }
+        }
+    }, [state]);
 
     const handleAddEmployee = async () => {
         if (!name || !mobile || !password || !city || !state || !employerType || !selfie || !aadharImage) {
@@ -41,13 +60,13 @@ const AddEmployeeScreen: React.FC = () => {
 
         const newEmployee = {
             name,
-            mobileNumber:mobile,
+            mobileNumber: mobile,
             password,
             city,
             state,
-            employeeType:employerType,
-            photo:selfie,
-            aadharCard:aadharImage,
+            employeeType: employerType,
+            photo: selfie,
+            aadharCard: aadharImage,
         };
 
         setLoading(true);
@@ -122,28 +141,52 @@ const AddEmployeeScreen: React.FC = () => {
                         />
                     </View>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>City</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={city}
-                            onChangeText={(text) => setCity(text)}
-                        />
+                        <Text style={styles.label}>State</Text>
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={state}
+                                onValueChange={(itemValue) => setState(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item style={{ color: Colors.secondary }} label="Select State" value="" />
+                                {State.getStatesOfCountry("IN").map((s) => (
+                                    <Picker.Item key={s.isoCode} label={s.name} value={s.isoCode} />
+                                ))}
+                            </Picker>
+                        </View>
                     </View>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>State</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={state}
-                            onChangeText={(text) => setState(text)}
-                        />
+                        <Text style={styles.label}>City</Text>
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={city}
+                                onValueChange={(itemValue) => setCity(itemValue)}
+                                style={styles.picker}
+                                enabled={!!state}
+                            >
+                                <Picker.Item style={{ color: Colors.secondary }} label="Select City" value="" />
+                                {cityList.map((c) => (
+                                    <Picker.Item key={c.name} label={c.name} value={c.name} />
+                                ))}
+                            </Picker>
+                        </View>
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Employee Type</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={employerType}
-                            onChangeText={(text) => setEmployerType(text)}
-                        />
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={employerType}
+                                onValueChange={(itemValue) => setEmployerType(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item style={{ color: Colors.secondary }} label="Select Employee Type" value="" />
+                                <Picker.Item label="MANAGER" value="MANAGER" />
+                                <Picker.Item label="CLEANER" value="CLEANER" />
+                                <Picker.Item label="OFFICE-BOY" value="OFFICE-BOY" />
+                                <Picker.Item label="ACCOUNTANT" value="ACCOUNTANT" />
+                                <Picker.Item label="TELECALLER" value="TELECALLER" />
+                            </Picker>
+                        </View>
                     </View>
 
                     <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("selfie")}>
@@ -205,6 +248,15 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingHorizontal: 10,
         height: 40,
+    },
+    pickerContainer: {
+        borderColor: Colors.secondary,
+        borderWidth: 1,
+        borderRadius: 10,
+    },
+    picker: {
+        width: "100%",
+        marginVertical: -6,
     },
     imagePicker: {
         backgroundColor: Colors.darkBlue,

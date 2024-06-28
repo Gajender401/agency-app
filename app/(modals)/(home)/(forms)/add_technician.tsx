@@ -11,6 +11,7 @@ import {
     Alert,
     ActivityIndicator
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { Colors } from "@/constants/Colors"; // Replace with your colors constant
 import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have this hook or context
 
@@ -31,7 +32,7 @@ const AddTechnicianScreen: React.FC = () => {
 
         const newTechnician = {
             name,
-            mobileNumber:mobile,
+            mobileNumber: mobile,
             alternateNumber,
             technicianType,
             vehicleType,
@@ -90,19 +91,37 @@ const AddTechnicianScreen: React.FC = () => {
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Technician Type</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={technicianType}
-                            onChangeText={(text) => setTechnicianType(text)}
-                        />
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={technicianType}
+                                onValueChange={(itemValue) => setTechnicianType(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item style={{ color: Colors.secondary }} label="Select Technician Type" value="" />
+                                <Picker.Item label="MECHANIC" value="MECHANIC" />
+                                <Picker.Item label="ELECTRICIAN" value="ELECTRICIAN" />
+                                <Picker.Item label="SPARE PART SHOP" value="SPAREPARTSHOP" />
+                                <Picker.Item label="SPRING WORK" value="SPRINGWORK" />
+                                <Picker.Item label="BATTERY SERVICES" value="BATTERYSERVICES" />
+                                <Picker.Item label="VEHICLE BODY REPAIR" value="VEHICLEBODYREPAIR" />
+                            </Picker>
+                        </View>
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Vehicle Type</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={vehicleType}
-                            onChangeText={(text) => setVehicleType(text)}
-                        />
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={vehicleType}
+                                onValueChange={(itemValue) => setVehicleType(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item style={{ color: Colors.secondary }} label="Select Vehicle Type" value="" />
+                                <Picker.Item label="CAR" value="CAR" />
+                                <Picker.Item label="TRUCK" value="TRUCK" />
+                                <Picker.Item label="BUS" value="BUS" />
+                                <Picker.Item label="TAMPO" value="TAMPO" />
+                            </Picker>
+                        </View>
                     </View>
 
                     <View style={styles.buttonContainer}>
@@ -155,6 +174,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         height: 40,
     },
+    pickerContainer: {
+        borderColor: Colors.secondary,
+        borderWidth: 1,
+        borderRadius: 10,
+        overflow: "hidden",
+    },
     buttonContainer: {
         flexDirection: "row",
         justifyContent: "center",
@@ -169,6 +194,10 @@ const styles = StyleSheet.create({
     buttonText: {
         fontSize: 16,
         fontWeight: "bold",
+    },
+    picker: {
+        width: "100%",
+        marginVertical: -6,
     },
 });
 

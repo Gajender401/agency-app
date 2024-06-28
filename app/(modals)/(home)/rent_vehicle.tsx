@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Text,
@@ -8,17 +8,36 @@ import {
     ScrollView,
     Image,
     Dimensions,
+    ActivityIndicator,
 } from "react-native";
 import PagerView from "react-native-pager-view";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { Colors } from "@/constants/Colors";
-import { sell_cars } from "@/constants/dummy";
-import { useState } from "react";
+import { Colors } from "@/constants/Colors"; // Make sure to import your Colors from the correct path
+import { useGlobalContext } from "@/context/GlobalProvider"; // Adjust path as per your project structure
 
 const { width: viewportWidth } = Dimensions.get("window");
 
+interface Vehicle {
+    _id: string;
+    number: string;
+    seatingCapacity: number;
+    model: string;
+    bodyType: string;
+    chassisBrand: string;
+    location: string;
+    contactNumber: string;
+    photos: string[];
+    isAC: boolean;
+    isForRent: boolean;
+    isForSell: boolean;
+    type: string;
+}
+
 const SellVehicleScreen: React.FC = () => {
     const [activeSlide, setActiveSlide] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const { apiCaller, token } = useGlobalContext(); // Ensure useGlobalContext is correctly imported and used
+    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
     const renderPagerItem = (item: string, index: number) => {
         return (
@@ -27,6 +46,27 @@ const SellVehicleScreen: React.FC = () => {
             </View>
         );
     };
+
+    const filterByType = (data: Vehicle[]): Vehicle[] => {
+        return data.filter(vehicle => vehicle.isForRent === true);
+      };
+
+    const fetchVehicles = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/vehicle/purpose/RENT/');
+            const filteredData = filterByType(response.data.data)
+            setVehicles(filteredData);
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchVehicles();
+    }, []);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -40,33 +80,37 @@ const SellVehicleScreen: React.FC = () => {
                     />
                 </View>
 
-                {sell_cars.map((car, index) => (
-                    <View key={index} style={styles.card}>
-                        <PagerView
-                            style={styles.pagerView}
-                            initialPage={0}
-                            onPageSelected={(e) => setActiveSlide(e.nativeEvent.position)}
-                            useNext={true}
-                        >
-                            {car.imageUrl.map((image, imageIndex) => renderPagerItem(image, imageIndex))}
-                        </PagerView>
-                        <View style={styles.paginationContainer}>
-                            {car.imageUrl.map((_, imageIndex) => (
-                                <View
-                                    key={imageIndex}
-                                    style={[
-                                        styles.dotStyle,
-                                        { opacity: imageIndex === activeSlide ? 1 : 0.4 },
-                                    ]}
-                                />
-                            ))}
+                {loading ? (
+                    <ActivityIndicator size="large" color={Colors.darkBlue} style={{ marginTop: 20 }} />
+                ) : (
+                    vehicles.map((vehicle, index) => (
+                        <View key={index} style={styles.card}>
+                            <PagerView
+                                style={styles.pagerView}
+                                initialPage={0}
+                                onPageSelected={(e) => setActiveSlide(e.nativeEvent.position)}
+                                useNext={true}
+                            >
+                                {vehicle.photos.map((photo, photoIndex) => renderPagerItem(photo, photoIndex))}
+                            </PagerView>
+                            <View style={styles.paginationContainer}>
+                                {vehicle.photos.map((_, photoIndex) => (
+                                    <View
+                                        key={photoIndex}
+                                        style={[
+                                            styles.dotStyle,
+                                            { opacity: photoIndex === activeSlide ? 1 : 0.4 },
+                                        ]}
+                                    />
+                                ))}
+                            </View>
+                            <Text style={styles.cardText}>Vehicle No: <Text style={{ color: "black" }}>{vehicle.number}</Text></Text>
+                            <Text style={styles.cardText}>Model: <Text style={{ color: "black" }}>{vehicle.model}</Text></Text>
+                            <Text style={styles.cardText}>Contact No: <Text style={{ color: "black" }}>{vehicle.contactNumber}</Text></Text>
+                            <Text style={styles.cardText}>Location: <Text style={{ color: "black" }}>{vehicle.location}</Text></Text>
                         </View>
-                        <Text style={styles.cardText}>Vehicle No: <Text style={{ color: "black" }}>{car.vehicleNumber}</Text></Text>
-                        <Text style={styles.cardText}>Model: <Text style={{ color: "black" }}>{car.vehicleModel}</Text></Text>
-                        <Text style={styles.cardText}>Contact No: <Text style={{ color: "black" }}>{car.contactNumber}</Text></Text>
-                        <Text style={styles.cardText}>Location: <Text style={{ color: "black" }}>{car.location}</Text></Text>
-                    </View>
-                ))}
+                    ))
+                )}
             </ScrollView>
         </SafeAreaView>
     );
@@ -135,18 +179,6 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         backgroundColor: Colors.darkBlue,
         marginHorizontal: 4,
-    },
-    addButtonText: {
-        color: "#fff",
-        fontWeight: "bold",
-    },
-    addButton: {
-        backgroundColor: Colors.darkBlue,
-        paddingVertical: 10,
-        borderRadius: 5,
-        alignItems: "center",
-        marginBottom: 20,
-        width: 140,
     },
 });
 

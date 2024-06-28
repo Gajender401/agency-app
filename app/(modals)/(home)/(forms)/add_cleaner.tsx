@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     StyleSheet,
@@ -15,6 +15,20 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider"; // Import the global context
+import { Picker } from '@react-native-picker/picker';
+import { Country, State, City } from 'country-state-city';
+
+type CityType = {
+    countryCode: string;
+    name: string;
+    stateCode: string;
+};
+
+type StateType = {
+    countryCode: string;
+    isoCode: string;
+    name: string;
+};
 
 const AddCleanerScreen: React.FC = () => {
     const [name, setName] = useState("");
@@ -25,7 +39,17 @@ const AddCleanerScreen: React.FC = () => {
     const [cleanerImage, setCleanerImage] = useState<string | null>(null);
     const [aadharImage, setAadharImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [cityList, setCityList] = useState<CityType[]>([]);
     const { apiCaller } = useGlobalContext(); // Use the global context
+
+    useEffect(() => {
+        if (state) {
+            const stateData = State.getStatesOfCountry("IN").find(s => s.isoCode === state);
+            if (stateData) {
+                setCityList(City.getCitiesOfState("IN", stateData.isoCode) as CityType[]);
+            }
+        }
+    }, [state]);
 
     const handleAddCleaner = async () => {
         if (!name || !mobile || !city || !state || !password || !cleanerImage || !aadharImage) {
@@ -35,12 +59,12 @@ const AddCleanerScreen: React.FC = () => {
 
         const newCleaner = {
             name,
-            mobileNumber:mobile,
+            mobileNumber: mobile,
             city,
             state,
             password,
-            photo:cleanerImage,
-            aadharCard:aadharImage,
+            photo: cleanerImage,
+            aadharCard: aadharImage,
         };
 
         setLoading(true);
@@ -114,22 +138,36 @@ const AddCleanerScreen: React.FC = () => {
                         />
                     </View>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>City</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={city}
-                            onChangeText={(text) => setCity(text)}
-                        />
+                        <Text style={styles.label}>State</Text>
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={state}
+                                onValueChange={(itemValue) => setState(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item style={{ color: Colors.secondary }} label="Select State" value="" />
+                                {State.getStatesOfCountry("IN").map((s) => (
+                                    <Picker.Item key={s.isoCode} label={s.name} value={s.isoCode} />
+                                ))}
+                            </Picker>
+                        </View>
                     </View>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>State</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={state}
-                            onChangeText={(text) => setState(text)}
-                        />
+                        <Text style={styles.label}>City</Text>
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={city}
+                                onValueChange={(itemValue) => setCity(itemValue)}
+                                style={styles.picker}
+                                enabled={!!state}
+                            >
+                                <Picker.Item style={{ color: Colors.secondary }} label="Select City" value="" />
+                                {cityList.map((c) => (
+                                    <Picker.Item key={c.name} label={c.name} value={c.name} />
+                                ))}
+                            </Picker>
+                        </View>
                     </View>
-
                     <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("cleaner")}>
                         <Text style={styles.imagePickerText}>Select Cleaner Image</Text>
                     </TouchableOpacity>
@@ -187,7 +225,7 @@ const styles = StyleSheet.create({
         marginBottom: 5,
         fontSize: 13,
         color: Colors.secondary,
-        fontWeight:"500"
+        fontWeight: "500"
     },
     input: {
         borderColor: Colors.secondary,
@@ -195,6 +233,15 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingHorizontal: 10,
         height: 40,
+    },
+    pickerContainer: {
+        borderColor: Colors.secondary,
+        borderWidth: 1,
+        borderRadius: 10,
+    },
+    picker: {
+        color: Colors.secondary,
+        marginVertical:-6
     },
     imagePicker: {
         backgroundColor: Colors.darkBlue,
