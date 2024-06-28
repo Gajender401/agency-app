@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { StyleSheet, StatusBar, View, Text, Image, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
+import { Video } from 'expo-av';
 import Carousel from 'react-native-reanimated-carousel';
 import { useGlobalContext } from '@/context/GlobalProvider';
 import { Redirect, router } from 'expo-router';
@@ -7,6 +8,7 @@ import Loader from '@/components/loader';
 import { Colors } from '@/constants/Colors';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AntDesign } from '@expo/vector-icons';
+import * as Linking from 'expo-linking';
 
 const carouselImages = [
   require('@/assets/images/carousel1.png'),
@@ -21,6 +23,28 @@ const { width: deviceWidth } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const { isLogged, loading } = useGlobalContext();
+  const videoRef = useRef<Video>(null);
+  const whatsNewVideoRef = useRef<Video>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isWhatsNewPlaying, setIsWhatsNewPlaying] = useState(false);
+
+  const handlePlayPause = () => {
+    if (isPlaying) {
+      videoRef.current?.pauseAsync();
+    } else {
+      videoRef.current?.playAsync();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleWhatsNewPlayPause = () => {
+    if (isWhatsNewPlaying) {
+      whatsNewVideoRef.current?.pauseAsync();
+    } else {
+      whatsNewVideoRef.current?.playAsync();
+    }
+    setIsWhatsNewPlaying(!isWhatsNewPlaying);
+  };
 
   if (!loading && isLogged) return <Redirect href="/(modals)/onbording" />;
 
@@ -35,7 +59,7 @@ export default function HomeScreen() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={{ padding: 20 }}>
-        <Text style={{ fontSize:15, fontWeight:"500"}}>Hi, Riya</Text>
+        <Text style={{ fontSize: 15, fontWeight: '500' }}>Hi, Riya</Text>
       </View>
       <ScrollView>
         <View style={styles.carouselContainer}>
@@ -101,32 +125,69 @@ export default function HomeScreen() {
           </View>
         </View>
 
+        <Text style={styles.whatsNewHeading}>How to use</Text>
+
+
         <View style={styles.card}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/300x200.png?text=Random+Image' }}
-            style={styles.cardImage}
+          <Video
+            ref={videoRef}
+            source={require('@/assets/videos/video1.mp4')}
+            rate={1.0}
+            volume={1.0}
+            isMuted={false}
+            //@ts-ignore
+            resizeMode="cover"
+            shouldPlay={isPlaying}
+            isLooping
+            style={styles.cardVideo}
           />
+          <TouchableOpacity style={styles.playPauseButton} onPress={handlePlayPause}>
+            <AntDesign name={isPlaying ? 'pausecircle' : 'playcircleo'} size={40} color={Colors.primary} />
+          </TouchableOpacity>
           <Text style={styles.cardText}>This is a card</Text>
         </View>
 
-        <Text style={styles.whatsNewHeading}>What's New</Text>
-        <Image
-          source={{ uri: 'https://via.placeholder.com/300x200.png?text=Random+Image' }}
-          style={styles.whatsNewImage}
-        />
+        <Text style={styles.whatsNewHeading}>Why choose us</Text>
+        <View style={styles.whatsNewVideoContainer}>
+          <Video
+            ref={whatsNewVideoRef}
+            source={require('@/assets/videos/video2.mp4')}
+            rate={1.0}
+            volume={1.0}
+            isMuted={false}
+            //@ts-ignore
+            resizeMode="cover"
+            shouldPlay={isWhatsNewPlaying}
+            isLooping
+            style={styles.whatsNewVideo}
+          />
+          <TouchableOpacity style={styles.playPauseButtonWhatsNew} onPress={handleWhatsNewPlayPause}>
+            <AntDesign name={isWhatsNewPlaying ? 'pausecircle' : 'playcircleo'} size={40} color={Colors.primary} />
+          </TouchableOpacity>
+        </View>
+        
         <View style={styles.socialMediaContainer}>
-          <View style={styles.socialMediaIcon}>
+          <TouchableOpacity
+            style={styles.socialMediaIcon}
+            onPress={() => Linking.openURL('https://www.instagram.com/touristjunctionpvtltd?igsh=MWlkZWY1aGtsc3U5Ng==')}
+          >
             <AntDesign name="instagram" size={24} color={Colors.primary} />
             <Text style={styles.socialText}>Instagram</Text>
-          </View>
-          <View style={styles.socialMediaIcon}>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.socialMediaIcon}
+            onPress={() => Linking.openURL('https://www.facebook.com/profile.php?id=100077968170241&mibextid=kFxxJD')}
+          >
             <AntDesign name="facebook-square" size={24} color={Colors.primary} />
             <Text style={styles.socialText}>Facebook</Text>
-          </View>
-          <View style={styles.socialMediaIcon}>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.socialMediaIcon}
+            onPress={() => Linking.openURL('https://youtube.com/@touristjunction4999?si=R80i9A17olOBrdzX')}
+          >
             <AntDesign name="youtube" size={24} color={Colors.primary} />
             <Text style={styles.socialText}>YouTube</Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </GestureHandlerRootView>
@@ -145,7 +206,7 @@ const styles = StyleSheet.create({
   carouselImage: {
     height: deviceWidth * 0.5,
     borderRadius: 10,
-    width: deviceWidth * 0.9
+    width: deviceWidth * 0.9,
   },
   dividerContainer: {
     marginHorizontal: 20,
@@ -164,7 +225,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     paddingHorizontal: 5,
     top: -10,
-    color: Colors.secondary
+    color: Colors.secondary,
   },
   grid: {
     flexDirection: 'row',
@@ -218,10 +279,16 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 5 },
   },
-  cardImage: {
-    width: "100%",
+  cardVideo: {
+    width: '100%',
     height: 200,
     borderRadius: 15,
+  },
+  playPauseButton: {
+    position: 'absolute',
+    top: '40%',
+    left: '45%',
+    zIndex: 1,
   },
   cardText: {
     marginTop: 10,
@@ -230,7 +297,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 12,
     paddingVertical: 2,
-    fontWeight: "600"
+    fontWeight: '600',
   },
   whatsNewHeading: {
     fontSize: 24,
@@ -239,18 +306,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: 20,
   },
-  whatsNewImage: {
+  whatsNewVideoContainer: {
+    position: 'relative',
+    alignSelf: 'center',
+  },
+  whatsNewVideo: {
     width: deviceWidth * 0.9,
     height: deviceWidth * 0.5,
     borderRadius: 15,
-    alignSelf: 'center',
-    marginBottom: 20,
+  },
+  playPauseButtonWhatsNew: {
+    position: 'absolute',
+    top: '40%',
+    left: '45%',
+    zIndex: 1,
   },
   socialMediaContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     marginVertical: 20,
+    marginBottom:60
   },
   socialMediaIcon: {
     alignItems: 'center',
