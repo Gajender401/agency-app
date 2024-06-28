@@ -117,6 +117,9 @@ const TechnicianSupport: React.FC = () => {
                                 <TouchableOpacity onPress={() => dialNumber(technician.mobileNumber)}>
                                     <MaterialIcons name="phone-in-talk" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
+                                <TouchableOpacity onPress={() => dialNumber(technician.alternateNumber)}>
+                                    <MaterialIcons name="phone-in-talk" size={24} color={Colors.secondary} />
+                                </TouchableOpacity>
                             </View>
                             <Text style={styles.cardText}>Technician Name: <Text style={{ color: "black" }}> {technician.name}</Text></Text>
                             <Text style={styles.cardText}>Alternate Number: <Text style={{ color: "black" }}> {technician.alternateNumber}</Text></Text>

@@ -150,7 +150,7 @@ const AddTruckScreen: React.FC = () => {
             />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Chassis Brand</Text>
+            <Text style={styles.label}>Chassis Number</Text>
             <TextInput
               style={styles.input}
               value={chassisBrand}
