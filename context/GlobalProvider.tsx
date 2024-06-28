@@ -17,8 +17,9 @@ interface GlobalContextProps {
   loading: boolean;
   userData: UserData | undefined;
   userEmail: string | null;
-
+  setEditData: React.Dispatch<React.SetStateAction<any>>;
   setUserEmail: React.Dispatch<React.SetStateAction<string | null>>;
+  editData: any
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -41,6 +42,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [userData, setUserData] = useState<UserData>();
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [editData, setEditData] = useState<any>()
 
   const baseURL = process.env.EXPO_PUBLIC_URL as string;
 
@@ -106,6 +108,8 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         userData,
         userEmail,
         setUserEmail,
+        setEditData,
+        editData
       }}
     >
       {children}

@@ -59,7 +59,7 @@ const TempoListScreen: React.FC = () => {
     const [selectedTempoImage, setSelectedTempoImage] = React.useState<string[] | null>(null);
     const [showPhotoModal, setShowPhotoModal] = React.useState(false);
     const [idToDelete, setIdToDelete] = useState<null | string>(null)
-    const { apiCaller, token } = useGlobalContext();
+    const { apiCaller, setEditData } = useGlobalContext();
 
     const filterByType = (data: Vehicle[], type: string): Vehicle[] => {
         return data.filter(vehicle => vehicle.type === type);
@@ -116,7 +116,7 @@ const TempoListScreen: React.FC = () => {
                     {tempos.map((tempo) => (
                         <View key={tempo._id} style={styles.card}>
                             <View style={styles.cardHeader}>
-                                <TouchableOpacity style={styles.editButton}>
+                                <TouchableOpacity onPress={()=> {setEditData(tempo);router.push("edit_tempo")}} style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => { setShowDeleteModal(true); setIdToDelete(tempo._id) }}>

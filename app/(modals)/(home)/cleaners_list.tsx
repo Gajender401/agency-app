@@ -54,7 +54,7 @@ const CleanerListScreen: React.FC = () => {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [showImageModal, setShowImageModal] = useState(false);
     const [idToDelete, setIdToDelete] = useState<null|string>(null)
-    const { apiCaller, token } = useGlobalContext();
+    const { apiCaller, setEditData } = useGlobalContext();
 
     const fetchCleaners = async () => {
         try {
@@ -109,7 +109,7 @@ const CleanerListScreen: React.FC = () => {
                                 style={styles.cleanerImage}
                             />
                             <View style={styles.cardHeader}>
-                                <TouchableOpacity style={styles.editButton}>
+                                <TouchableOpacity onPress={()=> {setEditData(cleaner); router.push("edit_cleaner")}} style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => {setShowDeleteModal(true); setIdToDelete(cleaner._id)}}>

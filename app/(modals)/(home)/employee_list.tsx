@@ -56,7 +56,7 @@ const EmployeeListScreen: React.FC = () => {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [showImageModal, setShowImageModal] = useState(false);
     const [idToDelete, setIdToDelete] = useState<null|string>(null)
-    const { apiCaller, token } = useGlobalContext();
+    const { apiCaller, setEditData } = useGlobalContext();
 
     const fetchEmployees = async () => {
         try {
@@ -111,7 +111,7 @@ const EmployeeListScreen: React.FC = () => {
                                 style={styles.employeeImage}
                             />
                             <View style={styles.cardHeader}>
-                                <TouchableOpacity style={styles.editButton}>
+                                <TouchableOpacity onPress={()=> {setEditData(employee); router.push("edit_employee")}} style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => {setShowDeleteModal(true); setIdToDelete(employee._id)}}>

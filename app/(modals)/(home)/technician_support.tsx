@@ -56,7 +56,7 @@ const TechnicianSupport: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [idToDelete, setIdToDelete] = useState<null|string>(null)
-    const { apiCaller, token } = useGlobalContext();
+    const { apiCaller, setEditData } = useGlobalContext();
 
     const fetchTechnicians = async () => {
         try {
@@ -106,7 +106,7 @@ const TechnicianSupport: React.FC = () => {
                     {technicians.map((technician) => (
                         <View key={technician._id} style={styles.card}>
                             <View style={styles.cardHeader}>
-                                <TouchableOpacity style={styles.editButton}>
+                                <TouchableOpacity onPress={()=>{setEditData(technician);router.push("edit_technician")}} style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => {setShowDeleteModal(true); setIdToDelete(technician._id)}}> 

@@ -59,7 +59,7 @@ const CarListScreen: React.FC = () => {
     const [selectedCarImage, setSelectedCarImage] = React.useState<string[] | null>(null);
     const [showPhotoModal, setShowPhotoModal] = React.useState(false);
     const [idToDelete, setIdToDelete] = useState<null|string>(null)
-    const { apiCaller, token } = useGlobalContext();
+    const { apiCaller, setEditData } = useGlobalContext();
 
     const filterByType = (data: Vehicle[], type: string): Vehicle[] => {
         return data.filter(vehicle => vehicle.type === type);
@@ -115,7 +115,7 @@ const CarListScreen: React.FC = () => {
                     {cars.map((car) => (
                         <View key={car._id} style={styles.card}>
                             <View style={styles.cardHeader}>
-                                <TouchableOpacity style={styles.editButton}>
+                                <TouchableOpacity onPress={()=> {setEditData(car);router.push("edit_car")}} style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => {setShowDeleteModal(true); setIdToDelete(car._id)}}>

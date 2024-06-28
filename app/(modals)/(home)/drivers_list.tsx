@@ -55,7 +55,7 @@ const DriverListScreen: React.FC = () => {
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [idToDelete, setIdToDelete] = useState<null|string>(null)
-    const { apiCaller, token } = useGlobalContext();
+    const { apiCaller, setEditData } = useGlobalContext();
 
     const fetchDrivers = async () => {
         try {
@@ -110,7 +110,7 @@ const DriverListScreen: React.FC = () => {
                                 style={styles.driverImage}
                             />
                             <View style={styles.cardHeader}>
-                                <TouchableOpacity style={styles.editButton}>
+                                <TouchableOpacity onPress={()=> {setEditData(driver); router.push("edit_driver")}} style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => {setShowDeleteModal(true); setIdToDelete(driver._id)}}>

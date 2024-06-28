@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -14,60 +14,67 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
-//@ts-ignore
-import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
-import { useGlobalContext } from "@/context/GlobalProvider"; // Importing useGlobalContext
-
-const AddBusScreen: React.FC = () => {
+import { useGlobalContext } from "@/context/GlobalProvider";
+const AddTempoScreen: React.FC = () => {
   const [vehicleNo, setVehicleNo] = useState("");
   const [seatingCapacity, setSeatingCapacity] = useState("");
   const [vehicleModel, setVehicleModel] = useState("");
   const [bodyType, setBodyType] = useState("");
-  const [chassisBrand, setChassisBrand] = useState("");
   const [location, setLocation] = useState("");
   const [contactNo, setContactNo] = useState("");
-  const [noOfTyres, setNoOfTyres] = useState("");
-  const [vehicleWeightInKGS, setVehicleWeightInKGS] = useState("");
-  const [selectedAC, setSelectedAC] = useState<string | null>(null);
+  const [chassisBrand, setChassisBrand] = useState(""); 
   const [selectedForRent, setSelectedForRent] = useState<boolean>(false);
   const [selectedForSell, setSelectedForSell] = useState<boolean>(false);
-  const [busImages, setBusImages] = useState<string[]>([]);
+  const [tempoImages, setTempoImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const { apiCaller } = useGlobalContext(); // Destructuring apiCaller from context
+  const { apiCaller, editData } = useGlobalContext();
 
-  const handleAddBus = async () => {
-    if (!vehicleNo || !seatingCapacity || !vehicleModel || !bodyType || !chassisBrand || !location || !contactNo || !noOfTyres || !vehicleWeightInKGS || busImages.length === 0) {
-      Alert.alert("Please fill all fields and upload bus images.");
+  useEffect(() => {
+      if (editData) {
+          setVehicleNo(editData.number);
+          setSeatingCapacity(editData.seatingCapacity);
+          setVehicleModel(editData.model);
+          setLocation(editData.location);
+          setContactNo(editData.contactNumber);
+          setBodyType(editData.bodyType);
+          setChassisBrand(editData.chassisBrand);
+          setSelectedForRent(editData.isForRent);
+          setSelectedForSell(editData.isForSell);
+          setTempoImages(editData.photos);
+      }
+  }, [editData])
+
+  const handleAddTempo = async () => {
+    if (!vehicleNo || !seatingCapacity || !vehicleModel || !bodyType || !location || !contactNo || !chassisBrand || tempoImages.length === 0) {
+      Alert.alert("Please fill all fields and upload tempo images.");
       return;
     }
 
-    const newBus = {
+    const newTempo = {
       number: vehicleNo,
       seatingCapacity,
       model: vehicleModel,
       location,
       bodyType,
-      chassisBrand,
       contactNumber: contactNo,
-      noOfTyres,
-      vehicleWeightInKGS,
-      isAC: selectedAC === "AC",
+      chassisBrand, // Include new field in the payload
+      isAC: false,
       isForRent: selectedForRent,
       isForSell: selectedForSell,
-      photos: busImages,
-      type: "BUS"
+      photos: tempoImages,
+      type: "TAMPO"
     };
 
     setLoading(true);
     try {
-      await apiCaller.post('/api/vehicle', newBus, { headers: { 'Content-Type': 'multipart/form-data' } });
+        await apiCaller.patch(`/api/vehicle?vehicleId=${editData._id}`, newTempo, { headers: { 'Content-Type': 'multipart/form-data' } });
       setLoading(false);
       resetForm();
-      Alert.alert("Success", "Bus added successfully!");
+      Alert.alert("Success", "Tempo added successfully!");
     } catch (error) {
       console.log(error);
       setLoading(false);
-      Alert.alert("Error", "Failed to add bus. Please try again.");
+      Alert.alert("Error", "Failed to add tempo. Please try again.");
     }
   };
 
@@ -79,7 +86,7 @@ const AddBusScreen: React.FC = () => {
     });
 
     if (!result.canceled) {
-      setBusImages(result.assets.map(asset => asset.uri));
+      setTempoImages(result.assets.map(asset => asset.uri));
     }
   };
 
@@ -88,15 +95,12 @@ const AddBusScreen: React.FC = () => {
     setSeatingCapacity("");
     setVehicleModel("");
     setBodyType("");
-    setChassisBrand("");
     setLocation("");
     setContactNo("");
-    setNoOfTyres("");
-    setVehicleWeightInKGS("");
-    setSelectedAC(null);
+    setChassisBrand(""); // Reset the new field
     setSelectedForRent(false);
     setSelectedForSell(false);
-    setBusImages([]);
+    setTempoImages([]);
   };
 
   return (
@@ -112,6 +116,7 @@ const AddBusScreen: React.FC = () => {
             />
           </View>
           <Text style={styles.vehicleNumberLabel}>“If your vehicle is to be sold to other vehicle owners or is to be given on rent, then you will have to fill the option given below.”</Text>
+
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Seating Capacity</Text>
             <TextInput
@@ -138,14 +143,6 @@ const AddBusScreen: React.FC = () => {
             />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Chassis Number</Text>
-            <TextInput
-              style={styles.input}
-              value={chassisBrand}
-              onChangeText={(text) => setChassisBrand(text)}
-            />
-          </View>
-          <View style={styles.inputGroup}>
             <Text style={styles.label}>Location</Text>
             <TextInput
               style={styles.input}
@@ -163,34 +160,12 @@ const AddBusScreen: React.FC = () => {
             />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Number of Tyres</Text>
+            <Text style={styles.label}>Chassis Number</Text>
             <TextInput
               style={styles.input}
-              value={noOfTyres}
-              onChangeText={(text) => setNoOfTyres(text)}
-              keyboardType="numeric"
+              value={chassisBrand}
+              onChangeText={(text) => setChassisBrand(text)}
             />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Vehicle Weight (in KGS)</Text>
-            <TextInput
-              style={styles.input}
-              value={vehicleWeightInKGS}
-              onChangeText={(text) => setVehicleWeightInKGS(text)}
-              keyboardType="numeric"
-            />
-          </View>
-
-          <View style={styles.featuresContainer}>
-            <RadioButtonGroup
-              containerStyle={styles.radioButtonGroup}
-              selected={selectedAC}
-              onSelected={(value: string) => setSelectedAC(value)}
-              radioBackground={Colors.darkBlue}
-            >
-              <RadioButtonItem value="AC" label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>AC</Text>} style={styles.radioButtonItem} />
-              <RadioButtonItem value="NonAC" label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>Non-AC</Text>} style={styles.radioButtonItem} />
-            </RadioButtonGroup>
           </View>
 
           <View style={styles.featuresContainer}>
@@ -203,10 +178,10 @@ const AddBusScreen: React.FC = () => {
           </View>
 
           <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
-            <Text style={styles.imagePickerText}>Upload Bus Images (Max 5)</Text>
+            <Text style={styles.imagePickerText}>Upload Tempo Images (Max 5)</Text>
           </TouchableOpacity>
           <View style={styles.imagePreviewContainer}>
-            {busImages.map((uri, index) => (
+            {tempoImages.map((uri, index) => (
               <Image key={index} source={{ uri }} style={styles.previewImage} />
             ))}
           </View>
@@ -214,7 +189,7 @@ const AddBusScreen: React.FC = () => {
           <View style={styles.modalButtons}>
             <TouchableOpacity
               style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
-              onPress={handleAddBus}
+              onPress={handleAddTempo}
             >
               {loading ? (
                 <ActivityIndicator color="#fff" />
@@ -270,17 +245,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 15,
   },
-  radioButtonGroup: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-around",
-    width: "100%",
-  },
-  radioButtonItem: {
-    borderColor: Colors.secondary,
-    backgroundColor: "white",
-    color: Colors.darkBlue,
-  },
   checkboxContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -327,13 +291,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   modalButtonText: {
+    fontSize: 14,
     fontWeight: "bold",
     textAlign: "center",
   },
   vehicleNumberLabel: {
     fontSize: 12,
-    marginTop: 5,
+    marginVertical: 5,
   },
 });
 
-export default AddBusScreen;
+export default AddTempoScreen;
