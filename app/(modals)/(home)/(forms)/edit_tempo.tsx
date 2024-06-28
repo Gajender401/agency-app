@@ -70,11 +70,11 @@ const AddTempoScreen: React.FC = () => {
         await apiCaller.patch(`/api/vehicle?vehicleId=${editData._id}`, newTempo, { headers: { 'Content-Type': 'multipart/form-data' } });
       setLoading(false);
       resetForm();
-      Alert.alert("Success", "Tempo added successfully!");
+      Alert.alert("Success", "Tempo updated successfully!");
     } catch (error) {
       console.log(error);
       setLoading(false);
-      Alert.alert("Error", "Failed to add tempo. Please try again.");
+      Alert.alert("Error", "Failed to update tempo. Please try again.");
     }
   };
 
@@ -194,7 +194,7 @@ const AddTempoScreen: React.FC = () => {
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Submit</Text>
+                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Update</Text>
               )}
             </TouchableOpacity>
           </View>

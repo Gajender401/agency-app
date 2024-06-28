@@ -71,7 +71,7 @@ const DailyRouteVehicles: React.FC = () => {
   const [driverName, setDriverName] = useState("");
   const [driverName2, setDriverName2] = useState("");
   const [cleanerName, setCleanerName] = useState("");
-  const { apiCaller, token } = useGlobalContext();
+  const { apiCaller, setEditData } = useGlobalContext();
 
   const fetchDailyRoutes = async () => {
     try {
@@ -155,7 +155,7 @@ const DailyRouteVehicles: React.FC = () => {
                 <TouchableOpacity style={styles.editButton} onPress={() => setShowAddDriverModal(true)}>
                   <Text style={styles.editButtonText}>Add Driver</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.editButton}>
+                <TouchableOpacity onPress={()=> {setEditData(route); router.push("edit_daily_route_vehicles")}} style={styles.editButton}>
                   <Text style={styles.editButtonText}>Edit Route</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => { setShowDeleteModal(true); setSelectedRoute(route); }}>

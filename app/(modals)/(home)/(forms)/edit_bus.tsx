@@ -92,11 +92,11 @@ const EditBusScreen: React.FC = () => {
       });
       setLoading(false);
       resetForm();
-      Alert.alert("Success", "Car updated successfully!");
+      Alert.alert("Success", "Bus updated successfully!");
     } catch (error) {
       console.log(error);
       setLoading(false);
-      Alert.alert("Error", "Failed to update car. Please try again.");
+      Alert.alert("Error", "Failed to update bus. Please try again.");
     }
   };
 

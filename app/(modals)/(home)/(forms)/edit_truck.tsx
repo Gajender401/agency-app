@@ -75,11 +75,11 @@ const AddTruckScreen: React.FC = () => {
       await apiCaller.patch(`/api/vehicle?vehicleId=${editData._id}`, newTruck, { headers: { 'Content-Type': 'multipart/form-data' } });
       setLoading(false);
       resetForm();
-      Alert.alert("Success", "Truck added successfully!");
+      Alert.alert("Success", "Truck updated successfully!");
     } catch (error) {
       console.log(error);
       setLoading(false);
-      Alert.alert("Error", "Failed to add truck. Please try again.");
+      Alert.alert("Error", "Failed to update truck. Please try again.");
     }
   };
 
@@ -224,7 +224,7 @@ const AddTruckScreen: React.FC = () => {
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Submit</Text>
+                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Update</Text>
               )}
             </TouchableOpacity>
           </View>

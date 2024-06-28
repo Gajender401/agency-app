@@ -43,11 +43,11 @@ const EditTechnicianScreen: React.FC = () => {
             await apiCaller.patch(`/api/technician?technicianId=${editData._id}`, newTechnician);
             setLoading(false);
             resetForm();
-            Alert.alert("Success", "Technician added successfully!");
+            Alert.alert("Success", "Technician updated successfully!");
         } catch (error) {
             console.log(error);
             setLoading(false);
-            Alert.alert("Error", "Failed to add technician. Please try again.");
+            Alert.alert("Error", "Failed to update technician. Please try again.");
         }
     };
 

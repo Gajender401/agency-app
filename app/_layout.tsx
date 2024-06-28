@@ -75,6 +75,8 @@ export default function RootLayout() {
         <Stack.Screen name="(modals)/(home)/(forms)/edit_truck" options={{ headerShadowVisible:false, headerTitle:"Edit Truck", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/(forms)/add_package_vehicle_booking" options={{ headerShadowVisible:false, headerTitle:"Package Vehicle Booking Form", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/(forms)/add_daily_route_vehicles" options={{ headerShadowVisible:false, headerTitle:"Daily Route Vehicles", headerTitleAlign:"center" }} />
+        <Stack.Screen name="(modals)/(home)/(forms)/edit_package_vehicle_booking" options={{ headerShadowVisible:false, headerTitle:"Package Vehicle Booking Form", headerTitleAlign:"center" }} />
+        <Stack.Screen name="(modals)/(home)/(forms)/edit_daily_route_vehicles" options={{ headerShadowVisible:false, headerTitle:"Daily Route Vehicles", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/(forms)/add_technician" options={{ headerShadowVisible:false, headerTitle:"Add Technician", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/(forms)/edit_technician" options={{ headerShadowVisible:false, headerTitle:"Edit Technician", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/(forms)/add_vehicle_documents" options={{ headerShadowVisible:false, headerTitle:"Vehicle Documents", headerTitleAlign:"center" }} />

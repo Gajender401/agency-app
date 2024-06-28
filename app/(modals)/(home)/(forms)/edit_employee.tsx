@@ -88,11 +88,11 @@ const AddEmployeeScreen: React.FC = () => {
             await apiCaller.patch(`/api/employee?technicianId=${editData._id}`, newEmployee, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
             resetForm();
-            Alert.alert("Success", "Employee added successfully!");
+            Alert.alert("Success", "Employee updated successfully!");
         } catch (error) {
             console.log(error);
             setLoading(false);
-            Alert.alert("Error", "Failed to add employee. Please try again.");
+            Alert.alert("Error", "Failed to update employee. Please try again.");
         }
     };
 
@@ -221,7 +221,7 @@ const AddEmployeeScreen: React.FC = () => {
                             {loading ? (
                                 <ActivityIndicator color="#fff" />
                             ) : (
-                                <Text style={[styles.buttonText, { color: "#fff" }]}>Submit</Text>
+                                <Text style={[styles.buttonText, { color: "#fff" }]}>Update</Text>
                             )}
                         </TouchableOpacity>
                     </View>
