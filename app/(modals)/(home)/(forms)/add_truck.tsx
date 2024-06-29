@@ -303,6 +303,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 40
   },
   modalButtonText: {
     fontWeight: "bold",

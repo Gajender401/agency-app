@@ -289,6 +289,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     marginHorizontal: 10,
+    marginBottom: 40
   },
   modalButtonText: {
     fontSize: 14,

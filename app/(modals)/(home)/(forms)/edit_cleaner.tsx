@@ -35,7 +35,7 @@ const AddCleanerScreen: React.FC = () => {
     const [aadharImage, setAadharImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [cityList, setCityList] = useState<CityType[]>([]);
-    const { apiCaller, editData } = useGlobalContext(); 
+    const { apiCaller, editData } = useGlobalContext();
 
     useEffect(() => {
         if (state) {
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     },
     picker: {
         color: Colors.secondary,
-        marginVertical:-6
+        marginVertical: -6
     },
     imagePicker: {
         backgroundColor: Colors.darkBlue,
@@ -278,6 +278,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         borderRadius: 5,
         marginHorizontal: 10,
+        marginBottom: 40
     },
     modalButtonText: {
         fontSize: 16,

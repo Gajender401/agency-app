@@ -282,6 +282,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     textAlign: "center",
+    marginBottom: 40
   },
   vehicleNumberLabel: {
     fontSize: 12,

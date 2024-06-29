@@ -1,14 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { StyleSheet, StatusBar, View, Text, Image, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
+import { StyleSheet, StatusBar, View, Text, Image, TouchableOpacity, Dimensions, ScrollView, Modal } from 'react-native';
 import { Video } from 'expo-av';
 import Carousel from 'react-native-reanimated-carousel';
 import { useGlobalContext } from '@/context/GlobalProvider';
 import { Redirect, router } from 'expo-router';
 import Loader from '@/components/loader';
 import { Colors } from '@/constants/Colors';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GestureHandlerRootView, TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { AntDesign } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
+import { BlurView } from 'expo-blur';
 
 const carouselImages = [
   require('@/assets/images/carousel1.png'),
@@ -21,12 +22,32 @@ const carouselImages = [
 
 const { width: deviceWidth } = Dimensions.get('window');
 
+interface BlurOverlayProps {
+  visible: boolean;
+  onRequestClose: () => void;
+}
+
+const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) => (
+  <Modal
+    animationType="fade"
+    transparent={true}
+    visible={visible}
+    onRequestClose={onRequestClose}
+  >
+    <TouchableWithoutFeedback onPress={onRequestClose}>
+      <BlurView intensity={90} tint="light" style={styles.overlay} />
+    </TouchableWithoutFeedback>
+  </Modal>
+);
+
 export default function HomeScreen() {
   const { isLogged, loading } = useGlobalContext();
   const videoRef = useRef<Video>(null);
   const whatsNewVideoRef = useRef<Video>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isWhatsNewPlaying, setIsWhatsNewPlaying] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
 
   const handlePlayPause = () => {
     if (isPlaying) {
@@ -44,6 +65,11 @@ export default function HomeScreen() {
       whatsNewVideoRef.current?.playAsync();
     }
     setIsWhatsNewPlaying(!isWhatsNewPlaying);
+  };
+
+  const handleViewVideo = (isVideo1: boolean) => {
+    setSelectedVideo(isVideo1);
+    setShowVideoModal(true);
   };
 
   if (!loading && isLogged) return <Redirect href="/(modals)/onbording" />;
@@ -127,7 +153,6 @@ export default function HomeScreen() {
 
         <Text style={styles.whatsNewHeading}>How to use</Text>
 
-
         <View style={styles.card}>
           <Video
             ref={videoRef}
@@ -137,18 +162,17 @@ export default function HomeScreen() {
             isMuted={false}
             //@ts-ignore
             resizeMode="cover"
-            shouldPlay={isPlaying}
+            shouldPlay={false}
             isLooping
-            style={styles.cardVideo}
+            style={[styles.cardVideo,{height:200}]}
           />
-          <TouchableOpacity style={styles.playPauseButton} onPress={handlePlayPause}>
-            <AntDesign name={isPlaying ? 'pausecircle' : 'playcircleo'} size={40} color={Colors.primary} />
+          <TouchableOpacity style={styles.playPauseButton} onPress={() => handleViewVideo(true)}>
+            <AntDesign name={'playcircleo'} size={40} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.cardText}>This is a card</Text>
         </View>
 
         <Text style={styles.whatsNewHeading}>Why choose us</Text>
-        <View style={styles.whatsNewVideoContainer}>
+        <View style={styles.card}>
           <Video
             ref={whatsNewVideoRef}
             source={require('@/assets/videos/video2.mp4')}
@@ -157,15 +181,15 @@ export default function HomeScreen() {
             isMuted={false}
             //@ts-ignore
             resizeMode="cover"
-            shouldPlay={isWhatsNewPlaying}
+            shouldPlay={false}
             isLooping
             style={styles.whatsNewVideo}
           />
-          <TouchableOpacity style={styles.playPauseButtonWhatsNew} onPress={handleWhatsNewPlayPause}>
-            <AntDesign name={isWhatsNewPlaying ? 'pausecircle' : 'playcircleo'} size={40} color={Colors.primary} />
+          <TouchableOpacity style={styles.playPauseButton} onPress={() => handleViewVideo(false)}>
+            <AntDesign name={'playcircleo'} size={40} color="#fff" />
           </TouchableOpacity>
         </View>
-        
+
         <View style={styles.socialMediaContainer}>
           <TouchableOpacity
             style={styles.socialMediaIcon}
@@ -190,6 +214,38 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showVideoModal}
+        onRequestClose={() => setShowVideoModal(false)}
+      >
+        <BlurOverlay visible={showVideoModal} onRequestClose={() => setShowVideoModal(false)} />
+
+        <View style={styles.modalContainer}>
+            <View style={!selectedVideo?styles.modalContentOverdide:styles.modalContent}>
+              <Video
+                ref={videoRef}
+                source={!selectedVideo?require('@/assets/videos/video2.mp4'):require('@/assets/videos/video1.mp4')}
+                rate={1.0}
+                volume={1.0}
+                isMuted={false}
+                shouldPlay={isPlaying}
+                //@ts-ignore
+                resizeMode="cover"
+                isLooping
+                style={[styles.cardVideo,!selectedVideo&&{height:200}]}
+              />
+              <TouchableOpacity style={styles.playPauseButton} onPress={handlePlayPause}>
+                <AntDesign style={isPlaying&&{opacity:0.1}} name={isPlaying ? 'pausecircle' : 'playcircleo'} size={40} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.closeButton} onPress={() => setShowVideoModal(false)}>
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+        </View>
+      </Modal>
     </GestureHandlerRootView>
   );
 }
@@ -281,7 +337,7 @@ const styles = StyleSheet.create({
   },
   cardVideo: {
     width: '100%',
-    height: 200,
+    height: "90%",
     borderRadius: 15,
   },
   playPauseButton: {
@@ -326,7 +382,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     marginVertical: 20,
-    marginBottom:60
+    marginBottom: 60
   },
   socialMediaIcon: {
     alignItems: 'center',
@@ -340,5 +396,61 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Colors.primary,
     textAlign: 'center',
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 5,
+    width: "90%",
+    alignItems: "center",
+    marginVertical:20
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: 20,
+    alignItems: "center",
+  },
+  modalImage: {
+    width: 200,
+    height: 200,
+    resizeMode: "contain",
+    marginBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: Colors.darkBlue,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    marginTop:20
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  modalContentOverdide: {
+    backgroundColor: "#fff",
+    borderRadius: 5,
+    width: "90%",
+    alignItems: "center",
+    marginVertical:20,
+    height:"70%",
+    justifyContent:"center",
+    paddingTop:50,
+    gap:100
   },
 });

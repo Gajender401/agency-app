@@ -329,6 +329,7 @@ const styles = StyleSheet.create({
   modalButtonText: {
     fontWeight: "bold",
     textAlign: "center",
+    marginBottom: 40
   },
   vehicleNumberLabel: {
     fontSize: 12,

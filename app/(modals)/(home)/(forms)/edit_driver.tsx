@@ -302,6 +302,8 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 20,
         alignItems: "center",
+        marginBottom: 40
+
     },
     buttonText: {
         fontSize: 16,
