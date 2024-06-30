@@ -80,7 +80,8 @@ export default function RootLayout() {
         <Stack.Screen name="(modals)/(home)/(forms)/add_technician" options={{ headerShadowVisible:false, headerTitle:"Add Technician", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/(forms)/edit_technician" options={{ headerShadowVisible:false, headerTitle:"Edit Technician", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/(forms)/add_vehicle_documents" options={{ headerShadowVisible:false, headerTitle:"Vehicle Documents", headerTitleAlign:"center" }} />
-        <Stack.Screen name="(modals)/(home)/(forms)/add_vehicle_inspection" options={{ headerShadowVisible:false, headerTitle:"Vehicle Documents", headerTitleAlign:"center" }} />
+        <Stack.Screen name="(modals)/(home)/(forms)/add_vehicle_servicing_history" options={{ headerShadowVisible:false, headerTitle:"Vehicle Documents", headerTitleAlign:"center" }} />
+        <Stack.Screen name="(modals)/(home)/(forms)/edit_vehicle_servicing_history" options={{ headerShadowVisible:false, headerTitle:"Vehicle Documents", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/plans" options={{ headerShadowVisible:false, headerTitle:"Premium", headerTitleAlign:"center" }} />
 
         <Stack.Screen name="+not-found" />

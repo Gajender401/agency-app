@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Modal,
@@ -10,13 +10,14 @@ import {
     TextInput,
     SafeAreaView,
     ScrollView,
+    ActivityIndicator,
     StatusBar,
 } from "react-native";
-import { BlurView } from 'expo-blur'; // Import BlurView from expo-blur
+import { BlurView } from 'expo-blur';
 import { Colors } from "@/constants/Colors";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import { vehicleDocuments } from "@/constants/dummy"; // Replace drivers with vehicles
 import { router } from "expo-router";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 interface BlurOverlayProps {
     visible: boolean;
@@ -36,13 +37,46 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
     </Modal>
 );
 
-const VehicleListScreen: React.FC = () => {
-    const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+interface VehicleDocuments {
+    _id: string;
+    number: string;
+    RC: string;
+    insurance: string;
+    permit: string;
+    fitness: string;
+    tax: string;
+    PUC: string;
+}
 
-    const handleDelete = () => {
-        // Implement delete logic here
-        console.log("Deleting vehicle...");
-        setShowDeleteModal(false);
+const VehicleListScreen: React.FC = () => {
+    const [vehicles, setVehicles] = useState<VehicleDocuments[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+    const { apiCaller } = useGlobalContext();
+
+    const fetchVehicles = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/vehicle');
+            setVehicles(response.data.data);
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchVehicles();
+    }, []);
+
+    const handleDelete = async () => {
+        if (selectedVehicleId) {
+            await apiCaller.delete(`/api/vehicle?vehicleId=${selectedVehicleId}`);
+            setShowDeleteModal(false);
+            fetchVehicles();
+        }
     };
 
     return (
@@ -60,41 +94,45 @@ const VehicleListScreen: React.FC = () => {
                 <Text style={styles.addButtonText}>Add Vehicle</Text>
             </TouchableOpacity>
 
-            <ScrollView style={styles.vehiclesList}>
-                {vehicleDocuments.map((vehicle, index) => (
-                    <View key={index} style={styles.card}>
-                        <View style={styles.cardHeader}>
-                            <TouchableOpacity style={styles.editButton}>
-                                <Text style={styles.editButtonText}>Edit form</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setShowDeleteModal(true)}>
-                                <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
-                            </TouchableOpacity>
+            {loading ? (
+                <ActivityIndicator size="large" color={Colors.darkBlue} />
+            ) : (
+                <ScrollView style={styles.vehiclesList}>
+                    {vehicles.map((vehicle) => (
+                        <View key={vehicle._id} style={styles.card}>
+                            <View style={styles.cardHeader}>
+                                <TouchableOpacity style={styles.editButton}>
+                                    <Text style={styles.editButtonText}>Edit form</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={() => { setShowDeleteModal(true); setSelectedVehicleId(vehicle._id); }}>
+                                    <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
+                                </TouchableOpacity>
+                            </View>
+                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{vehicle.number}</Text></Text>
+                            <View style={styles.documentContainer}>
+                                <TouchableOpacity style={styles.viewDocumentButton}>
+                                    <Text style={styles.viewDocumentButtonText}>View RC</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.viewDocumentButton}>
+                                    <Text style={styles.viewDocumentButtonText}>View Insurance</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.viewDocumentButton}>
+                                    <Text style={styles.viewDocumentButtonText}>View Permit</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.viewDocumentButton}>
+                                    <Text style={styles.viewDocumentButtonText}>View Fitness</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.viewDocumentButton}>
+                                    <Text style={styles.viewDocumentButtonText}>View Tax</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={styles.viewDocumentButton}>
+                                    <Text style={styles.viewDocumentButtonText}>View PUC</Text>
+                                </TouchableOpacity>
+                            </View>
                         </View>
-                        <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}> {vehicle.number}</Text></Text>
-                        <View style={styles.documentContainer}>
-                            <TouchableOpacity style={styles.viewDocumentButton}>
-                                <Text style={styles.viewDocumentButtonText}>View RC</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.viewDocumentButton}>
-                                <Text style={styles.viewDocumentButtonText}>View Insurance</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.viewDocumentButton}>
-                                <Text style={styles.viewDocumentButtonText}>View Permit</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.viewDocumentButton}>
-                                <Text style={styles.viewDocumentButtonText}>View Fitness</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.viewDocumentButton}>
-                                <Text style={styles.viewDocumentButtonText}>View Tax</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.viewDocumentButton}>
-                                <Text style={styles.viewDocumentButtonText}>View PUC</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                ))}
-            </ScrollView>
+                    ))}
+                </ScrollView>
+            )}
 
             {/* Delete Confirmation Modal */}
             <Modal
@@ -170,14 +208,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 5,
         position: "relative",
-    },
-    vehicleImage: {
-        width: 70,
-        height: 70,
-        borderRadius: 35,
-        position: "absolute",
-        right: 30,
-        top: 70,
     },
     cardHeader: {
         flexDirection: "row",

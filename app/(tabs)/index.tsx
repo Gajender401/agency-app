@@ -45,7 +45,6 @@ export default function HomeScreen() {
   const videoRef = useRef<Video>(null);
   const whatsNewVideoRef = useRef<Video>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isWhatsNewPlaying, setIsWhatsNewPlaying] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
 
@@ -58,21 +57,13 @@ export default function HomeScreen() {
     setIsPlaying(!isPlaying);
   };
 
-  const handleWhatsNewPlayPause = () => {
-    if (isWhatsNewPlaying) {
-      whatsNewVideoRef.current?.pauseAsync();
-    } else {
-      whatsNewVideoRef.current?.playAsync();
-    }
-    setIsWhatsNewPlaying(!isWhatsNewPlaying);
-  };
 
   const handleViewVideo = (isVideo1: boolean) => {
     setSelectedVideo(isVideo1);
     setShowVideoModal(true);
   };
 
-  if (!loading && isLogged) return <Redirect href="/(modals)/onbording" />;
+  if (!loading && !isLogged) return <Redirect href="/(modals)/onbording" />;
 
   if (loading) {
     return (

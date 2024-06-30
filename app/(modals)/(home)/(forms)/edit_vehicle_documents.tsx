@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     StyleSheet,
@@ -17,7 +17,7 @@ import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider"; // Import the global context
 
 
-const AddVehicleDocumentsScreen: React.FC = () => {
+const EditVehicleDocumentsScreen: React.FC = () => {
     const [vehicleNumber, setVehicleNumber] = useState("");
     const [rcImage, setRcImage] = useState<string | null>(null);
     const [insuranceImage, setInsuranceImage] = useState<string | null>(null);
@@ -26,7 +26,19 @@ const AddVehicleDocumentsScreen: React.FC = () => {
     const [taxImage, setTaxImage] = useState<string | null>(null);
     const [pucImage, setPucImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const { apiCaller } = useGlobalContext(); 
+    const { apiCaller, editData } = useGlobalContext();
+
+    useEffect(() => {
+        if (editData) {
+            setVehicleNumber("");
+            setRcImage(null);
+            setInsuranceImage(null);
+            setPermitImage(null);
+            setFitnessImage(null);
+            setTaxImage(null);
+            setPucImage(null);
+        }
+    }, [editData])
 
     const handleAddVehicleDocuments = async () => {
         if (!vehicleNumber || !rcImage || !insuranceImage || !permitImage || !fitnessImage || !taxImage || !pucImage) {
@@ -238,4 +250,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default AddVehicleDocumentsScreen;
+export default EditVehicleDocumentsScreen;

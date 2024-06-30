@@ -36,7 +36,7 @@ interface Vehicle {
 const SellVehicleScreen: React.FC = () => {
     const [activeSlide, setActiveSlide] = useState(0);
     const [loading, setLoading] = useState(true);
-    const { apiCaller, token } = useGlobalContext(); // Ensure useGlobalContext is correctly imported and used
+    const { apiCaller, token } = useGlobalContext();
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
 
     const renderPagerItem = (item: string, index: number) => {
