@@ -1,26 +1,50 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     StyleSheet,
     TouchableOpacity,
     Text,
-    TextInput,
     SafeAreaView,
     ScrollView,
     Platform,
     Alert,
     ActivityIndicator
 } from "react-native";
+import { Picker } from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Colors } from "@/constants/Colors"; // Replace with your colors constant
 import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have this hook or context
+import { GestureHandlerRootView, TextInput } from "react-native-gesture-handler";
 
 const AddRouteScreen: React.FC = () => {
-    const [vehicleNumber, setVehicleNumber] = useState("");
-    const [departurePlace, setDeparturePlace] = useState("");
-    const [destinationPlace, setDestinationPlace] = useState("");
-    const [departureTime, setDepartureTime] = useState("");
-    const [loading, setLoading] = useState(false);
-    const { apiCaller } = useGlobalContext(); // Ensure your global context provides an apiCaller
+    const [vehicleNumber, setVehicleNumber] = useState<string>("");
+    const [departurePlace, setDeparturePlace] = useState<string>("");
+    const [destinationPlace, setDestinationPlace] = useState<string>("");
+    const [departureTime, setDepartureTime] = useState<Date | undefined>(undefined);
+    const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
+    const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const { apiCaller } = useGlobalContext();
+
+    const extractNumbers = (data: Vehicle[]): { id: string, number: string }[] => {
+        return data.map(vehicle => ({ id: vehicle._id, number: vehicle.number }));
+    };
+
+    const fetchVehicles = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/vehicle');
+            setVehicleNumbers(extractNumbers(response.data.data));
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchVehicles();
+    }, []);
 
     const handleAddRoute = async () => {
         if (!vehicleNumber || !departurePlace || !destinationPlace || !departureTime) {
@@ -29,10 +53,10 @@ const AddRouteScreen: React.FC = () => {
         }
 
         const newRoute = {
-            vehicleId:vehicleNumber,
+            vehicleId: vehicleNumber,
             departurePlace,
             destinationPlace,
-            departureTime,
+            departureTime: departureTime.toISOString(),
         };
 
         setLoading(true);
@@ -52,61 +76,86 @@ const AddRouteScreen: React.FC = () => {
         setVehicleNumber("");
         setDeparturePlace("");
         setDestinationPlace("");
-        setDepartureTime("");
+        setDepartureTime(undefined);
+    };
+
+    const onChangeTime = (event: any, selectedTime?: Date) => {
+        setShowTimePicker(false);
+        if (selectedTime) {
+            setDepartureTime(selectedTime);
+        }
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView style={styles.modalContainer}>
-                <View style={styles.modalContent}>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Vehicle Number</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={vehicleNumber}
-                            onChangeText={(text) => setVehicleNumber(text)}
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Departure Place</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={departurePlace}
-                            onChangeText={(text) => setDeparturePlace(text)}
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Destination Place</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={destinationPlace}
-                            onChangeText={(text) => setDestinationPlace(text)}
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Departure Time</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={departureTime}
-                            onChangeText={(text) => setDepartureTime(text)}
-                        />
-                    </View>
-
-                    <View style={styles.modalButtons}>
-                        <TouchableOpacity
-                            style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
-                            onPress={handleAddRoute}
-                        >
-                            {loading ? (
-                                <ActivityIndicator color="#fff" />
-                            ) : (
-                                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Submit</Text>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <SafeAreaView style={styles.container}>
+                <ScrollView style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Vehicle Number</Text>
+                            <View style={styles.pickerContainer}>
+                                <Picker
+                                    selectedValue={vehicleNumber}
+                                    onValueChange={(itemValue) => setVehicleNumber(itemValue)}
+                                    style={styles.picker}
+                                >
+                                    <Picker.Item label="Select Vehicle Number" value="" />
+                                    {vehicleNumbers.map((number, index) => (
+                                        <Picker.Item key={index} label={number.number} value={number.id} />
+                                    ))}
+                                </Picker>
+                            </View>
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Departure Place</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={departurePlace}
+                                onChangeText={(text) => setDeparturePlace(text)}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Destination Place</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={destinationPlace}
+                                onChangeText={(text) => setDestinationPlace(text)}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Departure Time</Text>
+                            <TouchableOpacity
+                                style={styles.input}
+                                onPress={() => setShowTimePicker(true)}
+                            >
+                                <Text>{departureTime ? departureTime.toLocaleTimeString() : "Select Time"}</Text>
+                            </TouchableOpacity>
+                            {showTimePicker && (
+                                <DateTimePicker
+                                    value={departureTime || new Date()}
+                                    mode="time"
+                                    display="default"
+                                    onChange={onChangeTime}
+                                />
                             )}
-                        </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
+                                onPress={handleAddRoute}
+                            >
+                                {loading ? (
+                                    <ActivityIndicator color="#fff" />
+                                ) : (
+                                    <Text style={[styles.modalButtonText, { color: "#fff" }]}>Submit</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+                </ScrollView>
+            </SafeAreaView>
+        </GestureHandlerRootView>
     );
 };
 
@@ -142,6 +191,19 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingHorizontal: 10,
         height: 40,
+        justifyContent: 'center'
+    },
+    pickerContainer: {
+        borderColor: Colors.secondary,
+        borderWidth: 1,
+        borderRadius: 10,
+        overflow: 'hidden',
+    },
+    picker: {
+        height: 40,
+        width: '100%',
+        marginTop: -6,
+        marginBottom: 6
     },
     modalButtons: {
         flexDirection: "row",

@@ -36,26 +36,6 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
     </Modal>
 );
 
-interface Vehicle {
-    _id: string;
-    number: string;
-    seatingCapacity: number;
-    model: string;
-    bodyType: string;
-    chassisBrand: string;
-    location: string;
-    contactNumber: string;
-    photos: string[];
-    isAC: boolean;
-    isForRent: boolean;
-    isForSell: boolean;
-    type: string;
-    noOfTyres: number;
-    vehicleWeightInKGS: number;
-    chassisNumber: string;
-    forRentOrSell: string;
-}
-
 const TruckListScreen: React.FC = () => {
     const [trucks, setTrucks] = useState<Vehicle[]>([]);
     const [loading, setLoading] = useState(true);

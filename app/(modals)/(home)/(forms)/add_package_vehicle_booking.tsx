@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     StyleSheet,
@@ -11,8 +11,10 @@ import {
     TouchableOpacity,
     ActivityIndicator
 } from "react-native";
-import { Colors } from "@/constants/Colors"; // Replace with your colors constant
-import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have this hook or context
+import { Colors } from "@/constants/Colors";
+import { useGlobalContext } from "@/context/GlobalProvider";
+import { Picker } from "@react-native-picker/picker";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const PackageBookingForm: React.FC = () => {
     const [vehicleNumber, setVehicleNumber] = useState("");
@@ -26,15 +28,52 @@ const PackageBookingForm: React.FC = () => {
     const [remainingAmount, setRemainingAmount] = useState("");
     const [departurePlace, setDeparturePlace] = useState("");
     const [destinationPlace, setDestinationPlace] = useState("");
-    const [departureTime, setDepartureTime] = useState("");
-    const [returnTime, setReturnTime] = useState("");
+    const [departureTime, setDepartureTime] = useState<Date | undefined>(undefined);
+    const [returnTime, setReturnTime] = useState<Date | undefined>(undefined);
+    const [showDepartureTimePicker, setShowDepartureTimePicker] = useState<boolean>(false);
+    const [showReturnTimePicker, setShowReturnTimePicker] = useState<boolean>(false);
     const [toll, setToll] = useState("");
     const [otherStateTax, setOtherStateTax] = useState("");
     const [instructions, setInstructions] = useState("");
     const [addNote, setAddNote] = useState("");
     const [entryParking, setEntryParking] = useState("");
     const [loading, setLoading] = useState(false);
-    const { apiCaller } = useGlobalContext(); // Ensure your global context provides an apiCaller
+    const [vehicleNumbers, setVehicleNumbers] = useState<{id: string, number: string}[]>([]);
+    const { apiCaller } = useGlobalContext();
+
+    const extractNumbers = (data: Vehicle[]): {id: string, number: string}[] => {
+        return data.map(vehicle => ({ id: vehicle._id, number: vehicle.number }));
+    };
+    
+    const fetchVehicles = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/vehicle');
+            setVehicleNumbers(extractNumbers(response.data.data));
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchVehicles();
+    }, []);
+
+    const onChangeDepartureTime = (event: any, selectedTime?: Date) => {
+        setShowDepartureTimePicker(false);
+        if (selectedTime) {
+            setDepartureTime(selectedTime);
+        }
+    };
+
+    const onChangeReturnTime = (event: any, selectedTime?: Date) => {
+        setShowReturnTimePicker(false);
+        if (selectedTime) {
+            setReturnTime(selectedTime);
+        }
+    };
 
     const handleBooking = async () => {
         if (!vehicleNumber || !otherVehicleNumber || !customerName || !mobileNumber || !alternateNumber || !kmStarting || !perKmRate || !advancedAmount || !remainingAmount || !departurePlace || !destinationPlace || !departureTime || !returnTime || !toll || !otherStateTax || !instructions || !addNote || !entryParking) {
@@ -43,24 +82,24 @@ const PackageBookingForm: React.FC = () => {
         }
 
         const newBooking = {
-            vehicleId:vehicleNumber,
-            otherVehicleId:otherVehicleNumber,
+            vehicleId: vehicleNumber,
+            otherVehicleId: otherVehicleNumber,
             customerName,
             mobileNumber,
             alternateNumber,
             kmStarting,
-            perKmRateInINR:perKmRate,
-            advanceAmountInINR:advancedAmount,
-            remainingAmountInINR:remainingAmount,
+            perKmRateInINR: perKmRate,
+            advanceAmountInINR: advancedAmount,
+            remainingAmountInINR: remainingAmount,
             departurePlace,
             destinationPlace,
-            departureTime,
-            returnTime,
-            tollInINR:toll,
-            otherStateTaxInINR:otherStateTax,
+            departureTime: departureTime.toISOString(),
+            returnTime: returnTime.toISOString(),
+            tollInINR: toll,
+            otherStateTaxInINR: otherStateTax,
             instructions,
-            note:addNote,
-            advancePlace:entryParking,
+            note: addNote,
+            advancePlace: entryParking,
         };
 
         setLoading(true);
@@ -88,8 +127,8 @@ const PackageBookingForm: React.FC = () => {
         setRemainingAmount("");
         setDeparturePlace("");
         setDestinationPlace("");
-        setDepartureTime("");
-        setReturnTime("");
+        setDepartureTime(undefined);
+        setReturnTime(undefined);
         setToll("");
         setOtherStateTax("");
         setInstructions("");
@@ -103,11 +142,18 @@ const PackageBookingForm: React.FC = () => {
                 <View style={styles.modalContent}>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Vehicle Number</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={vehicleNumber}
-                            onChangeText={(text) => setVehicleNumber(text)}
-                        />
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={vehicleNumber}
+                                onValueChange={(itemValue) => setVehicleNumber(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="Select Vehicle Number" value="" />
+                                {vehicleNumbers.map((number, index) => (
+                                    <Picker.Item key={index} label={number.number} value={number.id} />
+                                ))}
+                            </Picker>
+                        </View>
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Other Vehicle Number</Text>
@@ -197,19 +243,37 @@ const PackageBookingForm: React.FC = () => {
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Departure Time</Text>
-                        <TextInput
+                        <TouchableOpacity
                             style={styles.input}
-                            value={departureTime}
-                            onChangeText={(text) => setDepartureTime(text)}
-                        />
+                            onPress={() => setShowDepartureTimePicker(true)}
+                        >
+                            <Text>{departureTime ? departureTime.toLocaleTimeString() : "Select Time"}</Text>
+                        </TouchableOpacity>
+                        {showDepartureTimePicker && (
+                            <DateTimePicker
+                                value={departureTime || new Date()}
+                                mode="time"
+                                display="default"
+                                onChange={onChangeDepartureTime}
+                            />
+                        )}
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Return Time</Text>
-                        <TextInput
+                        <TouchableOpacity
                             style={styles.input}
-                            value={returnTime}
-                            onChangeText={(text) => setReturnTime(text)}
-                        />
+                            onPress={() => setShowReturnTimePicker(true)}
+                        >
+                            <Text>{returnTime ? returnTime.toLocaleTimeString() : "Select Time"}</Text>
+                        </TouchableOpacity>
+                        {showReturnTimePicker && (
+                            <DateTimePicker
+                                value={returnTime || new Date()}
+                                mode="time"
+                                display="default"
+                                onChange={onChangeReturnTime}
+                            />
+                        )}
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Toll</Text>
@@ -304,6 +368,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingHorizontal: 10,
         height: 40,
+        justifyContent: 'center'
     },
     modalButtons: {
         flexDirection: "row",
@@ -320,6 +385,18 @@ const styles = StyleSheet.create({
     modalButtonText: {
         fontSize: 16,
         fontWeight: "bold",
+    },
+    pickerContainer: {
+        borderColor: Colors.secondary,
+        borderWidth: 1,
+        borderRadius: 10,
+        overflow: 'hidden',
+    },
+    picker: {
+        height: 40,
+        width: '100%',
+        marginTop: -6,
+        marginBottom: 6
     },
 });
 

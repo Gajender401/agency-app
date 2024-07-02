@@ -92,6 +92,8 @@ const DailyRouteVehicles: React.FC = () => {
   const handleDelete = async () => {
     if (selectedRoute) {
       try {
+        console.log(selectedRoute._id);
+        
         await apiCaller.delete(`/api/dailyRoute?dailyRouteId=${selectedRoute._id}`);
         fetchDailyRoutes()
         setShowDeleteModal(false);
@@ -115,7 +117,6 @@ const DailyRouteVehicles: React.FC = () => {
 
     console.log("New Driver Data:", newDriverData);
 
-    // Simulate loading state (you can replace this with actual API call)
     setLoading(true);
     setTimeout(() => {
       setLoading(false);

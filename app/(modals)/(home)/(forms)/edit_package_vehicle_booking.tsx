@@ -11,8 +11,9 @@ import {
     TouchableOpacity,
     ActivityIndicator
 } from "react-native";
-import { Colors } from "@/constants/Colors"; // Replace with your colors constant
-import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have this hook or context
+import { Colors } from "@/constants/Colors";
+import { useGlobalContext } from "@/context/GlobalProvider";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const EditPackageBookingForm: React.FC = () => {
     const [vehicleNumber, setVehicleNumber] = useState("");
@@ -26,8 +27,10 @@ const EditPackageBookingForm: React.FC = () => {
     const [remainingAmount, setRemainingAmount] = useState("");
     const [departurePlace, setDeparturePlace] = useState("");
     const [destinationPlace, setDestinationPlace] = useState("");
-    const [departureTime, setDepartureTime] = useState("");
-    const [returnTime, setReturnTime] = useState("");
+    const [departureTime, setDepartureTime] = useState<Date | undefined>(undefined);
+    const [returnTime, setReturnTime] = useState<Date | undefined>(undefined);
+    const [showDepartureTimePicker, setShowDepartureTimePicker] = useState(false);
+    const [showReturnTimePicker, setShowReturnTimePicker] = useState(false);
     const [toll, setToll] = useState("");
     const [otherStateTax, setOtherStateTax] = useState("");
     const [instructions, setInstructions] = useState("");
@@ -38,8 +41,8 @@ const EditPackageBookingForm: React.FC = () => {
 
     useEffect(() => {
         if (editData) {
-            setVehicleNumber(editData.vehicleId);
-            setOtherVehicleNumber(editData.otherVehicleId);
+            setVehicleNumber(editData.vehicle);
+            setOtherVehicleNumber(editData.otherVehicle);
             setCustomerName(editData.customerName);
             setMobileNumber(editData.mobileNumber);
             setAlternateNumber(editData.alternateNumber);
@@ -49,12 +52,12 @@ const EditPackageBookingForm: React.FC = () => {
             setRemainingAmount(editData.remainingAmountInINR);
             setDeparturePlace(editData.departurePlace);
             setDestinationPlace(editData.destinationPlace);
-            setDepartureTime(editData.departureTime);
-            setReturnTime(editData.returnTime);
+            setDepartureTime(new Date(editData.departureTime));
+            setReturnTime(new Date(editData.returnTime));
             setToll(editData.tollInINR);
             setOtherStateTax(editData.otherStateTaxInINR);
             setInstructions(editData.instructions);
-            setAddNote(editData. note);
+            setAddNote(editData.note);
             setEntryParking(editData.advancePlace);
         }
     }, [editData])
@@ -65,32 +68,31 @@ const EditPackageBookingForm: React.FC = () => {
             return;
         }
 
-        const newBooking = {
-            vehicleId:vehicleNumber,
-            otherVehicleId:otherVehicleNumber,
+        const updatedBooking = {
+            vehicleId: vehicleNumber,
+            otherVehicleId: otherVehicleNumber,
             customerName,
             mobileNumber,
             alternateNumber,
             kmStarting,
-            perKmRateInINR:perKmRate,
-            advanceAmountInINR:advancedAmount,
-            remainingAmountInINR:remainingAmount,
+            perKmRateInINR: perKmRate,
+            advanceAmountInINR: advancedAmount,
+            remainingAmountInINR: remainingAmount,
             departurePlace,
             destinationPlace,
-            departureTime,
-            returnTime,
-            tollInINR:toll,
-            otherStateTaxInINR:otherStateTax,
+            departureTime: departureTime?.toISOString(),
+            returnTime: returnTime?.toISOString(),
+            tollInINR: toll,
+            otherStateTaxInINR: otherStateTax,
             instructions,
-            note:addNote,
-            advancePlace:entryParking,
+            note: addNote,
+            advancePlace: entryParking,
         };
 
         setLoading(true);
         try {
-            await apiCaller.post('/api/packageBooking', newBooking);
+            await apiCaller.put(`/api/packageBooking/${editData._id}`, updatedBooking);
             setLoading(false);
-            resetForm();
             Alert.alert("Success", "Booking updated successfully!");
         } catch (error) {
             console.log(error);
@@ -99,25 +101,18 @@ const EditPackageBookingForm: React.FC = () => {
         }
     };
 
-    const resetForm = () => {
-        setVehicleNumber("");
-        setOtherVehicleNumber("");
-        setCustomerName("");
-        setMobileNumber("");
-        setAlternateNumber("");
-        setKmStarting("");
-        setPerKmRate("");
-        setAdvancedAmount("");
-        setRemainingAmount("");
-        setDeparturePlace("");
-        setDestinationPlace("");
-        setDepartureTime("");
-        setReturnTime("");
-        setToll("");
-        setOtherStateTax("");
-        setInstructions("");
-        setAddNote("");
-        setEntryParking("");
+    const onChangeDepartureTime = (event: any, selectedDate?: Date) => {
+        setShowDepartureTimePicker(false);
+        if (selectedDate) {
+            setDepartureTime(selectedDate);
+        }
+    };
+
+    const onChangeReturnTime = (event: any, selectedDate?: Date) => {
+        setShowReturnTimePicker(false);
+        if (selectedDate) {
+            setReturnTime(selectedDate);
+        }
     };
 
     return (
@@ -127,9 +122,9 @@ const EditPackageBookingForm: React.FC = () => {
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Vehicle Number</Text>
                         <TextInput
-                            style={styles.input}
+                            style={[styles.input]}
                             value={vehicleNumber}
-                            onChangeText={(text) => setVehicleNumber(text)}
+                            editable={false}
                         />
                     </View>
                     <View style={styles.inputGroup}>
@@ -137,7 +132,7 @@ const EditPackageBookingForm: React.FC = () => {
                         <TextInput
                             style={styles.input}
                             value={otherVehicleNumber}
-                            onChangeText={(text) => setOtherVehicleNumber(text)}
+                            editable={false}
                         />
                     </View>
                     <View style={styles.inputGroup}>
@@ -220,19 +215,37 @@ const EditPackageBookingForm: React.FC = () => {
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Departure Time</Text>
-                        <TextInput
+                        <TouchableOpacity
                             style={styles.input}
-                            value={departureTime}
-                            onChangeText={(text) => setDepartureTime(text)}
-                        />
+                            onPress={() => setShowDepartureTimePicker(true)}
+                        >
+                            <Text>{departureTime ? departureTime.toLocaleTimeString() : "Select Time"}</Text>
+                        </TouchableOpacity>
+                        {showDepartureTimePicker && (
+                            <DateTimePicker
+                                value={departureTime || new Date()}
+                                mode="time"
+                                display="default"
+                                onChange={onChangeDepartureTime}
+                            />
+                        )}
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Return Time</Text>
-                        <TextInput
+                        <TouchableOpacity
                             style={styles.input}
-                            value={returnTime}
-                            onChangeText={(text) => setReturnTime(text)}
-                        />
+                            onPress={() => setShowReturnTimePicker(true)}
+                        >
+                            <Text>{returnTime ? returnTime.toLocaleTimeString() : "Select Time"}</Text>
+                        </TouchableOpacity>
+                        {showReturnTimePicker && (
+                            <DateTimePicker
+                                value={returnTime || new Date()}
+                                mode="time"
+                                display="default"
+                                onChange={onChangeReturnTime}
+                            />
+                        )}
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Toll</Text>
@@ -327,6 +340,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingHorizontal: 10,
         height: 40,
+        justifyContent: 'center'
     },
     modalButtons: {
         flexDirection: "row",

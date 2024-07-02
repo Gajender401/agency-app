@@ -36,18 +36,18 @@ const AddCarScreen: React.FC = () => {
 
     useEffect(() => {
         if (editData) {
-                setVehicleNo(editData.number);
-                setSeatingCapacity(editData.seatingCapacity);
-                setVehicleModel(editData.model);
-                setLocation(editData.location);
-                setCarName(editData.name);
-                setContactNo(editData.contactNumber);
-                setBodyType(editData.bodyType);
-                setChassisBrand(editData.chassisBrand);
-                setSelectedAC(editData.isAC?"AC":"NonAC");
-                setSelectedForRent(editData.isForRent);
-                setSelectedForSell(editData.isForSell);
-                setCarImages(editData.photos);
+            setVehicleNo(editData.number);
+            setSeatingCapacity(editData.seatingCapacity);
+            setVehicleModel(editData.model);
+            setLocation(editData.location);
+            setCarName(editData.name);
+            setContactNo(editData.contactNumber);
+            setBodyType(editData.bodyType);
+            setChassisBrand(editData.chassisBrand);
+            setSelectedAC(editData.isAC ? "AC" : "NonAC");
+            setSelectedForRent(editData.isForRent);
+            setSelectedForSell(editData.isForSell);
+            setCarImages(editData.photos);
         }
     }, [editData])
 
@@ -123,6 +123,7 @@ const AddCarScreen: React.FC = () => {
                             style={styles.input}
                             value={vehicleNo}
                             onChangeText={(text) => setVehicleNo(text)}
+                            editable={false}
                         />
                         <Text style={styles.vehicleNumberLabel}>“If your vehicle is to be sold to other vehicle owners or is to be given on rent, then you will have to fill the option given below.”</Text>
                     </View>

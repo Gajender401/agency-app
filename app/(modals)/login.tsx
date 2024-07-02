@@ -32,6 +32,7 @@ const LoginScreen = () => {
                 userName:username,
                 password,
             });
+            
             if (response.status === 200) {
                 setUserName(username)
                 setToken(response.data.data.authToken)
@@ -93,21 +94,6 @@ const LoginScreen = () => {
                 <TouchableOpacity onPress={handleNext} style={styles.button}>
                     <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
                 </TouchableOpacity>
-
-                <View style={styles.dividerContainer}>
-                    <View style={styles.divider} />
-                    <Text style={styles.dividerText}>Or Login With</Text>
-                    <View style={styles.divider} />
-                </View>
-
-                <View style={styles.socialContainer}>
-                    <TouchableOpacity style={styles.socialButton}>
-                        <Text style={styles.socialButtonText}>Google</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.socialButton}>
-                        <Text style={styles.socialButtonText}>Facebook</Text>
-                    </TouchableOpacity>
-                </View>
 
                 <TouchableOpacity style={styles.signUpContainer}>
                     <Text style={styles.signUpText}>Don’t Have an account? </Text>

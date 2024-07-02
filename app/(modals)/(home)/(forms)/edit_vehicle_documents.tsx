@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
-import { useGlobalContext } from "@/context/GlobalProvider"; // Import the global context
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 
 const EditVehicleDocumentsScreen: React.FC = () => {
@@ -30,13 +30,15 @@ const EditVehicleDocumentsScreen: React.FC = () => {
 
     useEffect(() => {
         if (editData) {
-            setVehicleNumber("");
-            setRcImage(null);
-            setInsuranceImage(null);
-            setPermitImage(null);
-            setFitnessImage(null);
-            setTaxImage(null);
-            setPucImage(null);
+            console.log(editData);
+            
+            setVehicleNumber(editData.number);
+            setRcImage(editData.RC);
+            setInsuranceImage(editData.insurance);
+            setPermitImage(editData.permit);
+            setFitnessImage(editData.fitness);
+            setTaxImage(editData.tax);
+            setPucImage(editData.PUC);
         }
     }, [editData])
 
@@ -57,7 +59,7 @@ const EditVehicleDocumentsScreen: React.FC = () => {
 
         setLoading(true);
         try {
-            await apiCaller.patch(`/api/vehicle/addDocuments?vehicleId=${vehicleNumber}`, newVehicleDocuments, {
+            await apiCaller.patch(`/api/vehicle/addDocuments?vehicleId=${editData._id}`, newVehicleDocuments, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             setLoading(false);
@@ -101,7 +103,7 @@ const EditVehicleDocumentsScreen: React.FC = () => {
                         <TextInput
                             style={styles.input}
                             value={vehicleNumber}
-                            onChangeText={(text) => setVehicleNumber(text)}
+                            editable={false}
                         />
                     </View>
 

@@ -11,7 +11,6 @@ import {
     SafeAreaView,
     ScrollView,
     ActivityIndicator,
-    StatusBar,
 } from "react-native";
 import { BlurView } from 'expo-blur';
 import { Colors } from "@/constants/Colors";
@@ -53,7 +52,9 @@ const VehicleListScreen: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
-    const { apiCaller } = useGlobalContext();
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const { apiCaller, setEditData } = useGlobalContext();
 
     const fetchVehicles = async () => {
         try {
@@ -79,6 +80,11 @@ const VehicleListScreen: React.FC = () => {
         }
     };
 
+    const handleViewImage = (imageUri: string) => {
+        setSelectedImage(imageUri);
+        setShowImageModal(true);
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.searchContainer}>
@@ -101,7 +107,7 @@ const VehicleListScreen: React.FC = () => {
                     {vehicles.map((vehicle) => (
                         <View key={vehicle._id} style={styles.card}>
                             <View style={styles.cardHeader}>
-                                <TouchableOpacity style={styles.editButton}>
+                                <TouchableOpacity onPress={()=> {setEditData(vehicle); router.push("edit_vehicle_documents")}} style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => { setShowDeleteModal(true); setSelectedVehicleId(vehicle._id); }}>
@@ -110,22 +116,22 @@ const VehicleListScreen: React.FC = () => {
                             </View>
                             <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{vehicle.number}</Text></Text>
                             <View style={styles.documentContainer}>
-                                <TouchableOpacity style={styles.viewDocumentButton}>
+                                <TouchableOpacity style={styles.viewDocumentButton} onPress={() => handleViewImage(vehicle.RC)}>
                                     <Text style={styles.viewDocumentButtonText}>View RC</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.viewDocumentButton}>
+                                <TouchableOpacity style={styles.viewDocumentButton} onPress={() => handleViewImage(vehicle.insurance)}>
                                     <Text style={styles.viewDocumentButtonText}>View Insurance</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.viewDocumentButton}>
+                                <TouchableOpacity style={styles.viewDocumentButton} onPress={() => handleViewImage(vehicle.permit)}>
                                     <Text style={styles.viewDocumentButtonText}>View Permit</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.viewDocumentButton}>
+                                <TouchableOpacity style={styles.viewDocumentButton} onPress={() => handleViewImage(vehicle.fitness)}>
                                     <Text style={styles.viewDocumentButtonText}>View Fitness</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.viewDocumentButton}>
+                                <TouchableOpacity style={styles.viewDocumentButton} onPress={() => handleViewImage(vehicle.tax)}>
                                     <Text style={styles.viewDocumentButtonText}>View Tax</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.viewDocumentButton}>
+                                <TouchableOpacity style={styles.viewDocumentButton} onPress={() => handleViewImage(vehicle.PUC)}>
                                     <Text style={styles.viewDocumentButtonText}>View PUC</Text>
                                 </TouchableOpacity>
                             </View>
@@ -155,6 +161,27 @@ const VehicleListScreen: React.FC = () => {
                             </TouchableOpacity>
                         </View>
                     </View>
+                </View>
+            </Modal>
+
+            {/* Image View Modal */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={showImageModal}
+                onRequestClose={() => setShowImageModal(false)}
+            >
+                <BlurOverlay visible={showImageModal} onRequestClose={() => setShowImageModal(false)} />
+
+                <View style={styles.modalContainer}>
+                    {selectedImage && 
+                    <View style={styles.modalContent}>
+                        <Image source={{ uri: selectedImage }} style={styles.modalImage} />
+                        <TouchableOpacity style={styles.closeButton} onPress={() => setShowImageModal(false)}>
+                            <Text style={styles.closeButtonText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                    }
                 </View>
             </Modal>
         </SafeAreaView>
@@ -248,7 +275,6 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
     },
-    // Modal Styles
     modalContainer: {
         flex: 1,
         justifyContent: "center",
@@ -286,6 +312,22 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    modalImage: {
+        width: 300,
+        height: 300,
+        resizeMode: "contain",
+        marginBottom: 20,
+    },
+    closeButton: {
+        backgroundColor: Colors.darkBlue,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+    },
+    closeButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
     },
 });
 

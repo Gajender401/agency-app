@@ -59,7 +59,7 @@ const PackageVehicleListScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
-  const { apiCaller, setEditData } = useGlobalContext();
+  const { apiCaller, setEditData, setInvoiceData } = useGlobalContext();
 
   const fetchPackages = async () => {
     try {
@@ -116,7 +116,7 @@ const PackageVehicleListScreen: React.FC = () => {
                 <TouchableOpacity onPress={()=> {setEditData(pkg); router.push("edit_package_vehicle_booking")}} style={styles.editButton}>
                   <Text style={styles.editButtonText}>Edit Booking</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.editButton}>
+                <TouchableOpacity onPress={()=> {setInvoiceData(pkg); router.push("invoice")}} style={styles.editButton}>
                   <Text style={styles.editButtonText}>View Invoice</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.editButton}>

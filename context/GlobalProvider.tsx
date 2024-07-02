@@ -18,6 +18,8 @@ interface GlobalContextProps {
   userName: string | null;
   setEditData: React.Dispatch<React.SetStateAction<any>>;
   setUserName: React.Dispatch<React.SetStateAction<string | null>>;
+  setInvoiceData: React.Dispatch<React.SetStateAction<Invoice | null>>;
+  invoiceData: Invoice | null
   editData: any
 }
 
@@ -41,31 +43,32 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [userName, setUserName] = useState<string | null>(null);
   const [editData, setEditData] = useState<any>()
+  const [invoiceData, setInvoiceData] = useState<Invoice | null>(null)
 
   const baseURL = process.env.EXPO_PUBLIC_URL as string;
 
   useEffect(() => {
-    SecureStore.getItemAsync("access_token")
-      .then((res) => {
-        if (res) {
-          setIsLogged(true);
-          setToken(res);
-        } else {
-          setIsLogged(false);
-          setToken(null);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    // SecureStore.getItemAsync("access_token")
+    //   .then((res) => {
+    //     if (res) {
+    //       setIsLogged(true);
+    //       setToken(res);
+    //     } else {
+    setIsLogged(true);
+    setToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjdmZTYwZjI4NWZjNDdmODc4ZjMzMDgiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3MTk4MjYyNTB9.7ibc5WF_zDMSENrCsrxJDpyANzE-31DO26i3hTDVN_Y");
+    //   }
+    // })
+    // .catch((error) => {
+    //   console.log(error);
+    // })
+    // .finally(() => {
+    //   setLoading(false);
+    // });
   }, []);
 
   const apiCaller = axios.create({
     baseURL,
-    onUploadProgress: (progressEvent) => {},
+    onUploadProgress: (progressEvent) => { },
     withCredentials: true,
     headers: {
       "authtoken": `${token}`,
@@ -90,7 +93,9 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         userName,
         setUserName,
         setEditData,
-        editData
+        editData,
+        invoiceData,
+        setInvoiceData
       }}
     >
       {children}
