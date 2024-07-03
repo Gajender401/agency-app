@@ -9,56 +9,54 @@ import {
   SafeAreaView,
   ScrollView,
   ActivityIndicator,
+  TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
-
-interface Package {
-  _id: string;
-  vehicle: string;
-  otherVehicle: string;
-  customerName: string;
-  mobileNumber: string;
-  alternateNumber: string;
-  kmStarting: string;
-  perKmRateInINR: number;
-  advanceAmountInINR: number;
-  remainingAmountInINR: number;
-  advancePlace: string;
-  departurePlace: string;
-  destinationPlace: string;
-  departureTime: string;
-  returnTime: string;
-  tollInINR: number;
-  otherStateTaxInINR: number;
-  note: string;
-  instructions: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { BlurView } from "expo-blur";
+import { Picker } from '@react-native-picker/picker';
 
 function formatDate(dateString: string): string {
-  // Step 1: Parse the input date string into a Date object
   const date = new Date(dateString);
-
-  // Step 2: Extract year, month, and day from the Date object
   const year = date.getUTCFullYear();
-  const month = date.getUTCMonth() + 1; // Months are zero-indexed, so we add 1
+  const month = date.getUTCMonth() + 1;
   const day = date.getUTCDate();
-
-  // Step 3: Format the date as "MM/DD/YYYY"
-  const formattedDate = `${month}/${day}/${year}`;
-
-  return formattedDate;
+  return `${month}/${day}/${year}`;
 }
+
+interface BlurOverlayProps {
+  visible: boolean;
+  onRequestClose: () => void;
+}
+
+const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) => (
+  <Modal
+    animationType="fade"
+    transparent={true}
+    visible={visible}
+    onRequestClose={onRequestClose}
+  >
+    <TouchableWithoutFeedback onPress={onRequestClose}>
+      <BlurView intensity={90} tint="light" style={styles.overlay} />
+    </TouchableWithoutFeedback>
+  </Modal>
+);
 
 const PackageVehicleListScreen: React.FC = () => {
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
+  const [showAddDriverModal, setShowAddDriverModal] = useState(false);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [cleaners, setCleaners] = useState<Cleaner[]>([]);
+  const [selectedPrimaryDriver, setSelectedPrimaryDriver] = useState<string>("");
+  const [selectedSecondaryDriver, setSelectedSecondaryDriver] = useState<string>("");
+  const [selectedCleaner, setSelectedCleaner] = useState<string>("");
+  const [instruction, setInstruction] = useState("")
   const { apiCaller, setEditData, setInvoiceData } = useGlobalContext();
 
   const fetchPackages = async () => {
@@ -72,14 +70,41 @@ const PackageVehicleListScreen: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const fetchDrivers = async () => {
+    try {
+      setLoading(true);
+      const response = await apiCaller.get('/api/driver');
+      setDrivers(response.data.data);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCleaners = async () => {
+    try {
+      setLoading(true);
+      const response = await apiCaller.get('/api/cleaner');
+      setCleaners(response.data.data);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchPackages();
+    fetchDrivers();
+    fetchCleaners();
   }, []);
 
   const handleDelete = async () => {
     if (selectedPackage) {
       try {
-        await apiCaller.delete(`/api/packageBooking?bookingId=${selectedPackage._id}`);
+        await apiCaller.delete(`/api/packageBooking/finalize?bookingId=${selectedPackage._id}`);
         fetchPackages();
         setShowDeleteModal(false);
       } catch (err) {
@@ -88,9 +113,35 @@ const PackageVehicleListScreen: React.FC = () => {
     }
   };
 
+  const handleAddDriver = async () => {
+    if (!selectedPrimaryDriver || !selectedSecondaryDriver || !selectedCleaner || !instruction) {
+      Alert.alert("Please select all fields.");
+      return;
+    }
+
+    const newDriverData = {
+      primaryDriverId: selectedPrimaryDriver,
+      secondaryDriverId: selectedSecondaryDriver,
+      cleanerId: selectedCleaner,
+      instructions: instruction
+    };
+
+    try {
+      setLoading(true);
+      await apiCaller.patch(`/api/packageBooking/finalize?bookingId=${selectedPackage?._id}`, newDriverData);
+      Alert.alert("Success", "Drivers and cleaner added successfully!");
+      fetchPackages();
+      setShowAddDriverModal(false);
+    } catch (error) {
+      console.error("Error adding drivers and cleaner:", error);
+      Alert.alert("Error", "Failed to add drivers and cleaner. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Search bar */}
       <View style={styles.searchContainer}>
         <FontAwesome5 name="search" size={18} color={Colors.secondary} />
         <TextInput
@@ -100,12 +151,10 @@ const PackageVehicleListScreen: React.FC = () => {
         />
       </View>
 
-      {/* Add Package Button */}
       <TouchableOpacity onPress={() => router.push("add_package_vehicle_booking")} style={styles.addButton}>
         <Text style={styles.addButtonText}>Create Customer Invoice</Text>
       </TouchableOpacity>
 
-      {/* Package List */}
       {loading ? (
         <ActivityIndicator size="large" color={Colors.darkBlue} />
       ) : (
@@ -113,13 +162,16 @@ const PackageVehicleListScreen: React.FC = () => {
           {packages.map((pkg) => (
             <View key={pkg._id} style={styles.card}>
               <View style={styles.cardHeader}>
-                <TouchableOpacity onPress={()=> {setEditData(pkg); router.push("edit_package_vehicle_booking")}} style={styles.editButton}>
+                <TouchableOpacity onPress={() => { setEditData(pkg); router.push("edit_package_vehicle_booking") }} style={styles.editButton}>
                   <Text style={styles.editButtonText}>Edit Booking</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=> {setInvoiceData(pkg); router.push("invoice")}} style={styles.editButton}>
+                <TouchableOpacity onPress={() => { setInvoiceData(pkg); router.push("invoice") }} style={styles.editButton}>
                   <Text style={styles.editButtonText}>View Invoice</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.editButton}>
+                <TouchableOpacity style={styles.editButton} onPress={() => {
+                  setSelectedPackage(pkg);
+                  setShowAddDriverModal(true);
+                }}>
                   <Text style={styles.editButtonText}>Add Driver</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => { setShowDeleteModal(true); setSelectedPackage(pkg); }}>
@@ -137,13 +189,13 @@ const PackageVehicleListScreen: React.FC = () => {
                 <Text style={{ fontWeight: "bold", fontSize: 16 }} >{pkg.destinationPlace}</Text>
               </View>
 
-              {/* Updated cardText section */}
               <Text style={styles.cardText}>Customer Name: <Text style={styles.textValue}>{pkg.customerName}</Text></Text>
               <Text style={styles.cardText}>Journey Duration: <Text style={styles.textValue}>{formatDate(pkg.departureTime)} to {formatDate(pkg.returnTime)}</Text></Text>
-              <Text style={styles.cardText}>Vehicle Number: <Text style={styles.textValue}>{pkg.vehicle}</Text></Text>
+              {pkg.vehicle &&
+                <Text style={styles.cardText}>Vehicle Number: <Text style={styles.textValue}>{pkg.vehicle.number}</Text></Text>
+              }
               <Text style={styles.cardText}>Other Vehicle: <Text style={styles.textValue}>{pkg.otherVehicle}</Text></Text>
 
-              {/* View More Button */}
               <TouchableOpacity
                 style={styles.viewMoreButton}
                 onPress={() => router.push(`/package_vehicle_booking_more/${pkg._id}`)}
@@ -155,7 +207,6 @@ const PackageVehicleListScreen: React.FC = () => {
         </ScrollView>
       )}
 
-      {/* Delete Confirmation Modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -182,10 +233,80 @@ const PackageVehicleListScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showAddDriverModal}
+        onRequestClose={() => setShowAddDriverModal(false)}
+      >
+        <BlurOverlay visible={showAddDriverModal} onRequestClose={() => setShowAddDriverModal(false)} />
+
+        <TouchableWithoutFeedback onPress={() => setShowAddDriverModal(false)}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Primary Driver</Text>
+                <Picker
+                  selectedValue={selectedPrimaryDriver}
+                  onValueChange={(itemValue) => setSelectedPrimaryDriver(itemValue)}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select Primary Driver" value="" />
+                  {drivers.filter(driver => driver._id !== selectedSecondaryDriver).map((driver) => (
+                    <Picker.Item key={driver._id} label={driver.name} value={driver._id} />
+                  ))}
+                </Picker>
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Secondary Driver</Text>
+                <Picker
+                  selectedValue={selectedSecondaryDriver}
+                  onValueChange={(itemValue) => setSelectedSecondaryDriver(itemValue)}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select Secondary Driver" value="" />
+                  {drivers.filter(driver => driver._id !== selectedPrimaryDriver).map((driver) => (
+                    <Picker.Item key={driver._id} label={driver.name} value={driver._id} />
+                  ))}
+                </Picker>
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Cleaner</Text>
+                <Picker
+                  selectedValue={selectedCleaner}
+                  onValueChange={(itemValue) => setSelectedCleaner(itemValue)}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select Cleaner" value="" />
+                  {cleaners.map((cleaner) => (
+                    <Picker.Item key={cleaner._id} label={cleaner.name} value={cleaner._id} />
+                  ))}
+                </Picker>
+              </View>
+              <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Instructions</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={instruction}
+                            onChangeText={(text) => setInstruction(text)}
+                        />
+                    </View>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity style={[styles.modalButton, { backgroundColor: "#ccc" }]} onPress={() => setShowAddDriverModal(false)}>
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]} onPress={handleAddDriver}>
+                  <Text style={[styles.modalButtonText, { color: "#fff" }]}>Add Driver</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -291,22 +412,26 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginHorizontal: 5,
+    marginTop: 22,
   },
   modalContent: {
-    backgroundColor: "#fff",
-    borderRadius: 5,
-    padding: 20,
+    width: 300,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
     elevation: 5,
   },
   modalText: {
-    fontSize: 16,
-    marginBottom: 20,
+    marginBottom: 15,
+    textAlign: "center",
   },
   modalButtons: {
     flexDirection: "row",
@@ -314,15 +439,46 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   modalButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
+    borderRadius: 10,
+    padding: 10,
+    elevation: 2,
+    marginHorizontal: 5,
+    width: 100,
     alignItems: "center",
-    width: "45%",
   },
   modalButtonText: {
-    fontSize: 16,
+    color: "white",
     fontWeight: "bold",
+  },
+  overlay: {
+    flex: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalScroll: {
+    width: "100%",
+  },
+
+  inputGroup: {
+    marginBottom: 15,
+    width: "100%"
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    fontSize: 16,
+  },
+  picker: {
+    width: "100%",
+    height: 50,
+    borderWidth: 1,
+    borderColor: Colors.secondary,
+    borderRadius: 5,
   },
 });
 

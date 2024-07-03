@@ -18,8 +18,8 @@ interface GlobalContextProps {
   userName: string | null;
   setEditData: React.Dispatch<React.SetStateAction<any>>;
   setUserName: React.Dispatch<React.SetStateAction<string | null>>;
-  setInvoiceData: React.Dispatch<React.SetStateAction<Invoice | null>>;
-  invoiceData: Invoice | null
+  setInvoiceData: React.Dispatch<React.SetStateAction<Package | null>>;
+  invoiceData: Package | null
   editData: any
 }
 
@@ -43,7 +43,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [userName, setUserName] = useState<string | null>(null);
   const [editData, setEditData] = useState<any>()
-  const [invoiceData, setInvoiceData] = useState<Invoice | null>(null)
+  const [invoiceData, setInvoiceData] = useState<Package | null>(null)
 
   const baseURL = process.env.EXPO_PUBLIC_URL as string;
 

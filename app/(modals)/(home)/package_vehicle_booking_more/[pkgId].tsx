@@ -4,29 +4,6 @@ import { Colors } from '@/constants/Colors'; // Ensure to import your color cons
 import { useLocalSearchParams } from 'expo-router';
 import { useGlobalContext } from '@/context/GlobalProvider';
 
-interface PackageDetails {
-  _id: string;
-  vehicle: string;
-  otherVehicle: string;
-  customerName: string;
-  mobileNumber: string;
-  alternateNumber: string;
-  kmStarting: string;
-  perKmRateInINR: number;
-  advanceAmountInINR: number;
-  remainingAmountInINR: number;
-  advancePlace: string;
-  departurePlace: string;
-  destinationPlace: string;
-  departureTime: string;
-  returnTime: string;
-  tollInINR: number;
-  otherStateTaxInINR: number;
-  note: string;
-  instructions: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -38,7 +15,7 @@ function formatDate(dateString: string): string {
 
 const VehicleDetailsScreen: React.FC = () => {
   const { pkgId } = useLocalSearchParams();
-  const [vehicleDetails, setVehicleDetails] = useState<PackageDetails | null>(null);
+  const [vehicleDetails, setVehicleDetails] = useState<Package | null>(null);
   const [loading, setLoading] = useState(true);
   const { apiCaller } = useGlobalContext();
 
@@ -69,7 +46,7 @@ const VehicleDetailsScreen: React.FC = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.section}>
         <Text style={styles.label}>Vehicle Number:</Text>
-        <Text style={styles.value}>{vehicleDetails.vehicle}</Text>
+        <Text style={styles.value}>{vehicleDetails.vehicle.number}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Other Vehicle Number:</Text>

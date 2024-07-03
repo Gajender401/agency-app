@@ -36,17 +36,6 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
     </Modal>
 );
 
-interface Driver {
-    _id: string;
-    name: string;
-    mobileNumber: string;
-    city: string;
-    state: string;
-    vehicleType: string;
-    photo: string;
-    aadharCard: string;
-    license: string;
-}
 
 const DriverListScreen: React.FC = () => {
     const [drivers, setDrivers] = useState<Driver[]>([]);

@@ -36,17 +36,6 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
     </Modal>
 );
 
-interface Cleaner {
-    _id: string;
-    name: string;
-    mobileNumber: string;
-    city: string;
-    state: string;
-    cleanerType: string;
-    photo: string;
-    aadharCard: string;
-}
-
 const CleanerListScreen: React.FC = () => {
     const [cleaners, setCleaners] = useState<Cleaner[]>([]);
     const [loading, setLoading] = useState(true);

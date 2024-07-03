@@ -35,7 +35,7 @@ const InvoiceScreen: React.FC = () => {
         <div class="row"><span class="label">Invoice ID:</span><span>${invoiceData._id}</span></div>
         <div class="row"><span class="label">Customer Name:</span><span>${invoiceData.customerName}</span></div>
         <div class="row"><span class="label">Mobile Number:</span><span>${invoiceData.mobileNumber}</span></div>
-        <div class="row"><span class="label">Vehicle Number:</span><span>${invoiceData.vehicle}</span></div>
+        <div class="row"><span class="label">Vehicle Number:</span><span>${invoiceData.vehicle?invoiceData.vehicle.number:""}</span></div>
         <div class="row"><span class="label">Destination Place:</span><span>${invoiceData.destinationPlace}</span></div>
         <div class="row"><span class="label">Rate per KM:</span><span>${invoiceData.perKmRateInINR}</span></div>
         <div class="row"><span class="label">Advance Payment:</span><span>${invoiceData.advanceAmountInINR}</span></div>
@@ -120,10 +120,12 @@ const InvoiceScreen: React.FC = () => {
         <Text style={styles.label}>Mobile Number:</Text>
         <Text style={styles.value}>{invoiceData.mobileNumber}</Text>
       </View>
+      {invoiceData.vehicle && 
       <View style={styles.row}>
         <Text style={styles.label}>Vehicle Number:</Text>
-        <Text style={styles.value}>{invoiceData.vehicle}</Text>
+        <Text style={styles.value}>{invoiceData.vehicle.number}</Text>
       </View>
+      }
       <View style={styles.row}>
         <Text style={styles.label}>Destination Place:</Text>
         <Text style={styles.value}>{invoiceData.destinationPlace}</Text>

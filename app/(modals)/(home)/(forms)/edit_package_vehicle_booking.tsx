@@ -41,7 +41,9 @@ const EditPackageBookingForm: React.FC = () => {
 
     useEffect(() => {
         if (editData) {
-            setVehicleNumber(editData.vehicle);
+            if (editData.vehicle) {
+                setVehicleNumber(editData.vehicle.number);
+            }
             setOtherVehicleNumber(editData.otherVehicle);
             setCustomerName(editData.customerName);
             setMobileNumber(editData.mobileNumber);

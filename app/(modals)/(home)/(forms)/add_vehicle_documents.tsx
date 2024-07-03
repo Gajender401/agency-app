@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     StyleSheet,
@@ -15,6 +15,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider"; // Import the global context
+import { Picker } from "@react-native-picker/picker";
 
 
 const AddVehicleDocumentsScreen: React.FC = () => {
@@ -26,7 +27,28 @@ const AddVehicleDocumentsScreen: React.FC = () => {
     const [taxImage, setTaxImage] = useState<string | null>(null);
     const [pucImage, setPucImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [vehicleNumbers, setVehicleNumbers] = useState<{id: string, number: string}[]>([]);
     const { apiCaller } = useGlobalContext(); 
+
+    const extractNumbers = (data: Vehicle[]): {id: string, number: string}[] => {
+        return data.map(vehicle => ({ id: vehicle._id, number: vehicle.number }));
+    };
+    
+    const fetchVehicles = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/vehicle');
+            setVehicleNumbers(extractNumbers(response.data.data));
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchVehicles();
+    }, []);
 
     const handleAddVehicleDocuments = async () => {
         if (!vehicleNumber || !rcImage || !insuranceImage || !permitImage || !fitnessImage || !taxImage || !pucImage) {
@@ -84,13 +106,20 @@ const AddVehicleDocumentsScreen: React.FC = () => {
         <SafeAreaView style={styles.container}>
             <ScrollView style={styles.modalContainer}>
                 <View style={styles.modalContent}>
-                    <View style={styles.inputGroup}>
+                <View style={styles.inputGroup}>
                         <Text style={styles.label}>Vehicle Number</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={vehicleNumber}
-                            onChangeText={(text) => setVehicleNumber(text)}
-                        />
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={vehicleNumber}
+                                onValueChange={(itemValue) => setVehicleNumber(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="Select Vehicle Number" value="" />
+                                {vehicleNumbers.map((number, index) => (
+                                    <Picker.Item key={index} label={number.number} value={number.id} />
+                                ))}
+                            </Picker>
+                        </View>
                     </View>
 
                     <View style={styles.inputGroup}>
@@ -235,6 +264,18 @@ const styles = StyleSheet.create({
     modalButtonText: {
         fontSize: 16,
         fontWeight: "bold",
+    },
+    pickerContainer: {
+        borderColor: Colors.secondary,
+        borderWidth: 1,
+        borderRadius: 10,
+        overflow: 'hidden',
+    },
+    picker: {
+        height: 40,
+        width: '100%',
+        marginTop: -6,
+        marginBottom: 6
     },
 });
 

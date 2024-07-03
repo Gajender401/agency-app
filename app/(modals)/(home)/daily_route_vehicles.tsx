@@ -17,32 +17,7 @@ import { Colors } from "@/constants/Colors";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useGlobalContext } from "@/context/GlobalProvider";
-
-interface Driver {
-  _id: string;
-  name: string;
-  mobileNumber: string;
-  photo: string;
-}
-
-interface Cleaner {
-  _id: string;
-  name: string;
-  mobileNumber: string;
-  photo: string;
-}
-
-interface DailyRoute {
-  _id: string;
-  vehicleNumber: string;
-  departurePlace: string;
-  destinationPlace: string;
-  primaryDriver: Driver | null;
-  secondaryDriver: Driver | null;
-  cleaner: Cleaner | null;
-  departureTime: string;
-  instructions: string;
-}
+import { Picker } from '@react-native-picker/picker';
 
 interface BlurOverlayProps {
   visible: boolean;
@@ -68,9 +43,12 @@ const DailyRouteVehicles: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAddDriverModal, setShowAddDriverModal] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<DailyRoute | null>(null);
-  const [driverName, setDriverName] = useState("");
-  const [driverName2, setDriverName2] = useState("");
-  const [cleanerName, setCleanerName] = useState("");
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [cleaners, setCleaners] = useState<Cleaner[]>([]);
+  const [selectedPrimaryDriver, setSelectedPrimaryDriver] = useState<string>("");
+  const [selectedSecondaryDriver, setSelectedSecondaryDriver] = useState<string>("");
+  const [selectedCleaner, setSelectedCleaner] = useState<string>("");
+  const [instruction, setInstruction] = useState("")
   const { apiCaller, setEditData } = useGlobalContext();
 
   const fetchDailyRoutes = async () => {
@@ -85,17 +63,41 @@ const DailyRouteVehicles: React.FC = () => {
     }
   };
 
+  const fetchDrivers = async () => {
+    try {
+      setLoading(true);
+      const response = await apiCaller.get('/api/driver');
+      setDrivers(response.data.data);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCleaners = async () => {
+    try {
+      setLoading(true);
+      const response = await apiCaller.get('/api/cleaner');
+      setCleaners(response.data.data);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchDailyRoutes();
+    fetchDrivers();
+    fetchCleaners();
   }, []);
 
   const handleDelete = async () => {
     if (selectedRoute) {
       try {
-        console.log(selectedRoute._id);
-        
         await apiCaller.delete(`/api/dailyRoute?dailyRouteId=${selectedRoute._id}`);
-        fetchDailyRoutes()
+        fetchDailyRoutes();
         setShowDeleteModal(false);
       } catch (err) {
         console.error(err);
@@ -103,33 +105,34 @@ const DailyRouteVehicles: React.FC = () => {
     }
   };
 
-  const handleAddDriver = () => {
-    if (!driverName || !driverName2 || !cleanerName) {
-      Alert.alert("Please fill all fields.");
+  const handleAddDriver = async () => {
+    if (!selectedPrimaryDriver || !selectedSecondaryDriver || !selectedCleaner || !instruction) {
+      Alert.alert("Please select all fields.");
       return;
     }
 
     const newDriverData = {
-      driverName,
-      driverName2,
-      cleanerName,
+      primaryDriverId: selectedPrimaryDriver,
+      secondaryDriverId: selectedSecondaryDriver,
+      cleanerId: selectedCleaner,
+      instructions: instruction
     };
 
-    console.log("New Driver Data:", newDriverData);
-
-    setLoading(true);
-    setTimeout(() => {
+    try {
+      setLoading(true);
+      await apiCaller.patch(`/api/dailyRoute/finalize?routeId=${selectedRoute?._id}`, newDriverData);
+      Alert.alert("Success", "Drivers and cleaner added successfully!");
+      fetchDailyRoutes();
+      setShowAddDriverModal(false);
+    } catch (error) {
+      console.error("Error adding drivers and cleaner:", error);
+      Alert.alert("Error", "Failed to add drivers and cleaner. Please try again.");
+    } finally {
       setLoading(false);
-      resetForm();
-      Alert.alert("Success", "Driver added successfully!");
-    }, 1500);
+    }
   };
 
-  const resetForm = () => {
-    setDriverName("");
-    setDriverName2("");
-    setCleanerName("");
-  };
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -150,13 +153,16 @@ const DailyRouteVehicles: React.FC = () => {
         <ActivityIndicator size="large" color={Colors.darkBlue} />
       ) : (
         <ScrollView style={styles.routesList}>
-          {dailyRoutes.map((route, index) => (
+          {dailyRoutes.map((route) => (
             <View key={route._id} style={styles.card}>
               <View style={styles.cardHeader}>
-                <TouchableOpacity style={styles.editButton} onPress={() => setShowAddDriverModal(true)}>
+                <TouchableOpacity style={styles.editButton} onPress={() => {
+                  setSelectedRoute(route);
+                  setShowAddDriverModal(true);
+                }}>
                   <Text style={styles.editButtonText}>Add Driver</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={()=> {setEditData(route); router.push("edit_daily_route_vehicles")}} style={styles.editButton}>
+                <TouchableOpacity onPress={() => { setEditData(route); router.push("edit_daily_route_vehicles") }} style={styles.editButton}>
                   <Text style={styles.editButtonText}>Edit Route</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => { setShowDeleteModal(true); setSelectedRoute(route); }}>
@@ -189,13 +195,11 @@ const DailyRouteVehicles: React.FC = () => {
               <Text style={styles.cardText}>
                 Secondary Driver: <Text style={{ color: "black" }}>{route.secondaryDriver ? route.secondaryDriver.name : "N/A"}</Text>
               </Text>
-
             </View>
           ))}
         </ScrollView>
       )}
 
-      {/* Delete Confirmation Modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -219,7 +223,6 @@ const DailyRouteVehicles: React.FC = () => {
         </View>
       </Modal>
 
-      {/* Add Driver Modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -229,45 +232,65 @@ const DailyRouteVehicles: React.FC = () => {
         <BlurOverlay visible={showAddDriverModal} onRequestClose={() => setShowAddDriverModal(false)} />
 
         <TouchableWithoutFeedback onPress={() => setShowAddDriverModal(false)}>
-            <View style={styles.modalContainer}>
-                <View style={styles.modalContent}>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Driver Name</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={driverName}
-                      onChangeText={setDriverName}
-                      placeholder="Driver Name"
-                    />
-                  </View>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Driver Name 2</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={driverName2}
-                      onChangeText={setDriverName2}
-                      placeholder="Driver Name 2"
-                    />
-                  </View>
-                  <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Cleaner Name</Text>
-                    <TextInput
-                      style={styles.input}
-                      value={cleanerName}
-                      onChangeText={setCleanerName}
-                      placeholder="Cleaner Name"
-                    />
-                  </View>
-                  <View style={styles.modalButtons}>
-                    <TouchableOpacity style={[styles.modalButton, { backgroundColor: "#ccc" }]} onPress={() => setShowAddDriverModal(false)}>
-                      <Text style={styles.modalButtonText}>Cancel</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]} onPress={handleAddDriver}>
-                      <Text style={[styles.modalButtonText, { color: "#fff" }]}>Add Driver</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Primary Driver</Text>
+                <Picker
+                  selectedValue={selectedPrimaryDriver}
+                  onValueChange={(itemValue) => setSelectedPrimaryDriver(itemValue)}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select Primary Driver" value="" />
+                  {drivers.filter(driver => driver._id !== selectedSecondaryDriver).map((driver) => (
+                    <Picker.Item key={driver._id} label={driver.name} value={driver._id} />
+                  ))}
+                </Picker>
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Secondary Driver</Text>
+                <Picker
+                  selectedValue={selectedSecondaryDriver}
+                  onValueChange={(itemValue) => setSelectedSecondaryDriver(itemValue)}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select Secondary Driver" value="" />
+                  {drivers.filter(driver => driver._id !== selectedPrimaryDriver).map((driver) => (
+                    <Picker.Item key={driver._id} label={driver.name} value={driver._id} />
+                  ))}
+                </Picker>
+              </View>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Cleaner</Text>
+                <Picker
+                  selectedValue={selectedCleaner}
+                  onValueChange={(itemValue) => setSelectedCleaner(itemValue)}
+                  style={styles.picker}
+                >
+                  <Picker.Item label="Select Cleaner" value="" />
+                  {cleaners.map((cleaner) => (
+                    <Picker.Item key={cleaner._id} label={cleaner.name} value={cleaner._id} />
+                  ))}
+                </Picker>
+              </View>
+              <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Instructions</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={instruction}
+                            onChangeText={(text) => setInstruction(text)}
+                        />
+                    </View>
+              <View style={styles.modalButtons}>
+                <TouchableOpacity style={[styles.modalButton, { backgroundColor: "#ccc" }]} onPress={() => setShowAddDriverModal(false)}>
+                  <Text style={styles.modalButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]} onPress={handleAddDriver}>
+                  <Text style={[styles.modalButtonText, { color: "#fff" }]}>Add Driver</Text>
+                </TouchableOpacity>
+              </View>
             </View>
+          </View>
         </TouchableWithoutFeedback>
       </Modal>
     </SafeAreaView>
@@ -343,7 +366,6 @@ const styles = StyleSheet.create({
     color: Colors.secondary,
     fontWeight: "500",
   },
-  // Modal Styles
   modalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -389,60 +411,29 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
   },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalScroll: {
-    width: "100%",
-  },
-  // Photo Modal Styles
-  photoModalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  photoModalOverlay: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  photoModalContent: {
-    width: "80%",
-    height: "80%",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 20,
-    elevation: 10,
-    marginVertical: 100
-  },
-  photoModalContentContainer: {
-    alignItems: "center",
-  },
-  fullImage: {
-    width: 250,
-    height: 250,
-    marginBottom: 20,
-    resizeMode: "contain",
-  },
-
   inputGroup: {
     marginBottom: 15,
-    width:"100%"
+    width: "100%"
   },
   label: {
     fontSize: 16,
     marginBottom: 5,
   },
-  input: {
+  picker: {
+    width: "100%",
+    height: 50,
     borderWidth: 1,
+    borderColor: Colors.secondary,
     borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    fontSize: 16,
   },
+  input: {
+    borderColor: Colors.secondary,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    height: 40,
+    justifyContent: 'center'
+},
 });
 
 export default DailyRouteVehicles;
