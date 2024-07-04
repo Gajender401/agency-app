@@ -11,8 +11,10 @@ import {
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { FontAwesome } from '@expo/vector-icons';
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 const ProfileScreen = () => {
+    const {userData } = useGlobalContext();
 
     const handleEdit = () => {
         router.push('/edit_profile');
@@ -38,9 +40,9 @@ const ProfileScreen = () => {
                         </TouchableOpacity>
                     </View>
                     <View style={styles.detailContent}>
-                        <Text style={styles.detailText}>John Doe</Text>
-                        <Text style={styles.detailText}>123-456-7890</Text>
-                        <Text style={styles.detailText}>john.doe@example.com</Text>
+                        <Text style={styles.detailText}>{userData?.userName}</Text>
+                        <Text style={styles.detailText}>{userData?.mobileNumber}</Text>
+                        <Text style={styles.detailText}>{userData?.email}</Text>
                     </View>
                 </View>
                 <Text style={styles.galleryTitle}>Gallery</Text>

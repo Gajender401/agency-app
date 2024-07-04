@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     StyleSheet,
@@ -16,6 +16,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 const EditProfileScreen: React.FC = () => {
     const [name, setName] = useState("");
@@ -27,6 +28,21 @@ const EditProfileScreen: React.FC = () => {
     const [whatsappNumber, setWhatsappNumber] = useState("");
     const [userImage, setUserImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const { userData } = useGlobalContext();
+    
+    useEffect(() => {
+        if (userData) {
+            setName("");
+            setEmail("");
+            setContactNumber("");
+            setCompanyName("");
+            setState("");
+            setCity("");
+            setWhatsappNumber("");
+            setUserImage(null);
+        }
+    }, [userData])
+    
 
     const handleAddCleaner = () => {
         if (!name || !email || !contactNumber || !companyName || !city || !state || !whatsappNumber || !userImage) {
@@ -158,11 +174,11 @@ const EditProfileScreen: React.FC = () => {
                     {userImage && <Image source={{ uri: userImage }} style={styles.previewImage} />}
 
                     <View style={styles.modalButtons}>
-                        <TouchableOpacity style={[styles.modalButton, { borderColor: "red", borderWidth:1 }]}>
-                            <Text style={[styles.modalButtonText, {color:"red"}]}>Cancel</Text>
+                        <TouchableOpacity style={[styles.modalButton, { borderColor: "red", borderWidth: 1 }]}>
+                            <Text style={[styles.modalButtonText, { color: "red" }]}>Cancel</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={[styles.modalButton, { borderColor: Colors.secondary, borderWidth:1 }]}
+                            style={[styles.modalButton, { borderColor: Colors.secondary, borderWidth: 1 }]}
                             onPress={handleAddCleaner}
                         >
                             {loading ? (
@@ -172,8 +188,8 @@ const EditProfileScreen: React.FC = () => {
                             )}
                         </TouchableOpacity>
                     </View>
-                    <TouchableOpacity style={{alignItems:"center", marginTop:20}} >
-                    <Text style={{color:"red", fontWeight:"semibold", fontSize:14}} >Delete my account</Text>
+                    <TouchableOpacity style={{ alignItems: "center", marginTop: 20 }} >
+                        <Text style={{ color: "red", fontWeight: "semibold", fontSize: 14 }} >Delete my account</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -193,7 +209,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: Colors.primary,
         marginTop: 100,
-        textAlign:"center"
+        textAlign: "center"
     },
     wave_image: {
         width: "110%",
