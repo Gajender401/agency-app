@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     StyleSheet,
     TouchableOpacity,
     Text,
     Image,
-    TextInput,
     SafeAreaView,
     ScrollView,
     Platform,
@@ -15,16 +14,48 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { Picker } from "@react-native-picker/picker";
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { GestureHandlerRootView, TextInput } from "react-native-gesture-handler";
 
 const AddServiceHistoryScreen: React.FC = () => {
     const [garageName, setGarageName] = useState("");
     const [garageNumber, setGarageNumber] = useState("");
-    const [date, setDate] = useState("");
+    const [date, setDate] = useState<Date | undefined>(undefined);
+    const [showDatePicker, setShowDatePicker] = useState(false);
     const [workDescription, setWorkDescription] = useState("");
     const [vehicleNumber, setVehicleNumber] = useState("");
     const [billImage, setBillImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
     const { apiCaller } = useGlobalContext();
+
+    const extractNumbers = (data: Vehicle[]): { id: string, number: string }[] => {
+        return data.map(vehicle => ({ id: vehicle._id, number: vehicle.number }));
+    };
+
+    const fetchVehicles = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/vehicle');
+            setVehicleNumbers(extractNumbers(response.data.data));
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchVehicles();
+    }, []);
+
+    const onChangeDate = (event: any, selectedDate?: Date) => {
+        setShowDatePicker(false);
+        if (selectedDate) {
+            setDate(selectedDate);
+        }
+    };
 
     const handleAddServiceHistory = async () => {
         if (!garageName || !garageNumber || !date || !workDescription || !vehicleNumber || !billImage) {
@@ -35,11 +66,14 @@ const AddServiceHistoryScreen: React.FC = () => {
         const newServiceHistory = {
             garageName,
             garageNumber,
-            date,
+            date: date.toISOString().split('T')[0],
             workDescription,
             vehicleNumeber:vehicleNumber,
-            bill:billImage,
+            bill: billImage,
         };
+
+        console.log(newServiceHistory);
+        
 
         setLoading(true);
         try {
@@ -70,78 +104,95 @@ const AddServiceHistoryScreen: React.FC = () => {
     const resetForm = () => {
         setGarageName("");
         setGarageNumber("");
-        setDate("");
+        setDate(undefined);
         setWorkDescription("");
         setVehicleNumber("");
         setBillImage(null);
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView style={styles.modalContainer}>
-                <View style={styles.modalContent}>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Garage Name</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={garageName}
-                            onChangeText={(text) => setGarageName(text)}
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Garage Number</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={garageNumber}
-                            onChangeText={(text) => setGarageNumber(text)}
-                            keyboardType="phone-pad"
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Date</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={date}
-                            onChangeText={(text) => setDate(text)}
-                            placeholder="YYYY-MM-DD"
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Work Description</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={workDescription}
-                            onChangeText={(text) => setWorkDescription(text)}
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Vehicle Number</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={vehicleNumber}
-                            onChangeText={(text) => setVehicleNumber(text)}
-                        />
-                    </View>
-                    <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
-                        <Text style={styles.imagePickerText}>Select Bill Image</Text>
-                    </TouchableOpacity>
-                    {billImage && <Image source={{ uri: billImage }} style={styles.previewImage} />}
-
-                    <View style={styles.modalButtons}>
-                        <TouchableOpacity
-                            style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
-                            onPress={handleAddServiceHistory}
-                        >
-                            {loading ? (
-                                <ActivityIndicator color="#fff" />
-                            ) : (
-                                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Submit</Text>
+        <GestureHandlerRootView style={{ flex: 1 }} >
+            <SafeAreaView style={styles.container}>
+                <ScrollView style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Vehicle Number</Text>
+                            <View style={styles.pickerContainer}>
+                                <Picker
+                                    selectedValue={vehicleNumber}
+                                    onValueChange={(itemValue) => setVehicleNumber(itemValue)}
+                                    style={styles.picker}
+                                >
+                                    <Picker.Item label="Select Vehicle Number" value="" />
+                                    {vehicleNumbers.map((number, index) => (
+                                        <Picker.Item key={index} label={number.number} value={number.number} />
+                                    ))}
+                                </Picker>
+                            </View>
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Garage Name</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={garageName}
+                                onChangeText={(text) => setGarageName(text)}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Garage Number</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={garageNumber}
+                                onChangeText={(text) => setGarageNumber(text)}
+                                keyboardType="phone-pad"
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Date</Text>
+                            <TouchableOpacity
+                                style={styles.input}
+                                onPress={() => setShowDatePicker(true)}
+                            >
+                                <Text>{date ? date.toDateString() : "Select Date"}</Text>
+                            </TouchableOpacity>
+                            {showDatePicker && (
+                                <DateTimePicker
+                                    value={date || new Date()}
+                                    mode="date"
+                                    display="default"
+                                    onChange={onChangeDate}
+                                />
                             )}
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Work Description</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={workDescription}
+                                onChangeText={(text) => setWorkDescription(text)}
+                            />
+                        </View>
+                        <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
+                            <Text style={styles.imagePickerText}>Select Bill Image</Text>
                         </TouchableOpacity>
+                        {billImage && <Image source={{ uri: billImage }} style={styles.previewImage} />}
+
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
+                                onPress={handleAddServiceHistory}
+                            >
+                                {loading ? (
+                                    <ActivityIndicator color="#fff" />
+                                ) : (
+                                    <Text style={[styles.modalButtonText, { color: "#fff" }]}>Submit</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+                </ScrollView>
+            </SafeAreaView>
+        </GestureHandlerRootView>
     );
 };
 
@@ -176,6 +227,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingHorizontal: 10,
         height: 40,
+        justifyContent: 'center'
     },
     imagePicker: {
         backgroundColor: Colors.darkBlue,
@@ -209,6 +261,18 @@ const styles = StyleSheet.create({
     modalButtonText: {
         fontSize: 16,
         fontWeight: "bold",
+    },
+    pickerContainer: {
+        borderColor: Colors.secondary,
+        borderWidth: 1,
+        borderRadius: 10,
+        overflow: 'hidden',
+    },
+    picker: {
+        height: 40,
+        width: '100%',
+        marginTop: -6,
+        marginBottom: 6
     },
 });
 

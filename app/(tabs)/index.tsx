@@ -41,7 +41,7 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
 );
 
 export default function HomeScreen() {
-  const { isLogged, loading } = useGlobalContext();
+  const { isLogged, loading, userData } = useGlobalContext();
   const videoRef = useRef<Video>(null);
   const whatsNewVideoRef = useRef<Video>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -76,7 +76,7 @@ export default function HomeScreen() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={{ padding: 20 }}>
-        <Text style={{ fontSize: 15, fontWeight: '500' }}>Hi, Riya</Text>
+        <Text style={{ fontSize: 15, fontWeight: '500' }}>Hi, {userData?.userName}</Text>
       </View>
       <ScrollView>
         <View style={styles.carouselContainer}>

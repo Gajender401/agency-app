@@ -42,7 +42,7 @@ interface ServiceHistory {
     garageNumber: string;
     date: string;
     workDescription: string;
-    vehicleNumber: string;
+    vehicle: string;
     bill: string;
 }
 
@@ -58,7 +58,7 @@ const ServiceHistoryScreen: React.FC = () => {
     const fetchVehiclesDocs = async () => {
         try {
             setLoading(true);
-            const response = await apiCaller.get('/api/vehicle');
+            const response = await apiCaller.get('/api/service');
             setDocs(response.data.data)
         } catch (err) {
             console.log(err);
@@ -105,14 +105,14 @@ const ServiceHistoryScreen: React.FC = () => {
                     {docs.map((record, index) => (
                         <View key={index} style={styles.card}>
                             <View style={styles.cardHeader}>
-                                <TouchableOpacity onPress={() => { setEditData(record); router.push("edit_truck") }} style={styles.editButton}>
+                                <TouchableOpacity onPress={() => { setEditData(record); router.push("edit_vehicle_servicing_history") }} style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => { setShowDeleteModal(true); setIdToDelete(record._id) }}>
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>
-                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{record.vehicleNumber}</Text></Text>
+                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{record.vehicle}</Text></Text>
                             <Text style={styles.cardText}>Garage Number: <Text style={{ color: "black" }}>{record.garageNumber}</Text></Text>
                             <Text style={styles.cardText}>Garage Name: <Text style={{ color: "black" }}>{record.garageName}</Text></Text>
                             <Text style={styles.cardText}>Date: <Text style={{ color: "black" }}>{record.date}</Text></Text>

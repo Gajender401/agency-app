@@ -304,3 +304,28 @@ interface DailyRoute {
   departureTime: string;
   instructions: string;
 }
+
+
+interface User {
+  packageBookings: any[];
+  services: any[];
+  _id: string;
+  userName: string;
+  companyName: string;
+  mobileNumber: string;
+  whatsappNumber: string;
+  state: string;
+  city: string;
+  email: string;
+  password: string;
+  type: string;
+  drivers: any[];
+  employees: any[];
+  technicians: any[];
+  cleaners: any[];
+  vehicles: any[];
+  dailyRoutes: string[];
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}

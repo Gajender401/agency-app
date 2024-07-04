@@ -15,9 +15,9 @@ interface GlobalContextProps {
   token: string | null;
   setToken: React.Dispatch<React.SetStateAction<string | null>>;
   loading: boolean;
-  userName: string | null;
+  userData: User | null;
   setEditData: React.Dispatch<React.SetStateAction<any>>;
-  setUserName: React.Dispatch<React.SetStateAction<string | null>>;
+  setUserData: React.Dispatch<React.SetStateAction<User | null>>;
   setInvoiceData: React.Dispatch<React.SetStateAction<Package | null>>;
   invoiceData: Package | null
   editData: any
@@ -41,7 +41,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [isLogged, setIsLogged] = useState<boolean>(false);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [userName, setUserName] = useState<string | null>(null);
+  const [userData, setUserData] = useState<User | null>(null);
   const [editData, setEditData] = useState<any>()
   const [invoiceData, setInvoiceData] = useState<Package | null>(null)
 
@@ -55,7 +55,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     //       setToken(res);
     //     } else {
     setIsLogged(true);
-    setToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjdmZTYwZjI4NWZjNDdmODc4ZjMzMDgiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3MTk4MjYyNTB9.7ibc5WF_zDMSENrCsrxJDpyANzE-31DO26i3hTDVN_Y");
+    setToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjdlNWIwOGI1ZDkwYTM3YzkyZThjOGMiLCJyb2xlIjoiQUdFTkNZIiwiaWF0IjoxNzE5NTU2ODcyfQ.b_bf4Xz16nIJLp36IIxQhEJDuaPfxUDgXixFpt3l3_0");
     //   }
     // })
     // .catch((error) => {
@@ -81,6 +81,18 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     (error) => Promise.reject(error),
   );
 
+  async function fetchUser() {
+    const response = await apiCaller.get('/api/user/');
+    setUserData(response.data.data)
+    
+  }
+  useEffect(() => {
+    if (token) {
+      fetchUser()
+    }
+  }, [token])
+  
+
   return (
     <GlobalContext.Provider
       value={{
@@ -90,8 +102,8 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         token,
         setToken,
         loading,
-        userName,
-        setUserName,
+        userData,
+        setUserData,
         setEditData,
         editData,
         invoiceData,
