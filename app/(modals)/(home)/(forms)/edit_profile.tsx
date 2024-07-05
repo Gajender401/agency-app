@@ -28,48 +28,52 @@ const EditProfileScreen: React.FC = () => {
     const [whatsappNumber, setWhatsappNumber] = useState("");
     const [userImage, setUserImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const { userData } = useGlobalContext();
+    const { userData, apiCaller } = useGlobalContext();
     
     useEffect(() => {
         if (userData) {
-            setName("");
-            setEmail("");
-            setContactNumber("");
-            setCompanyName("");
-            setState("");
-            setCity("");
-            setWhatsappNumber("");
+            setName(userData.userName);
+            setEmail(userData.email);
+            setContactNumber(userData.mobileNumber);
+            setCompanyName(userData.companyName);
+            setState(userData.state);
+            setCity(userData.city);
+            setWhatsappNumber(userData.whatsappNumber);
             setUserImage(null);
         }
     }, [userData])
     
 
-    const handleAddCleaner = () => {
+    const handleAddData = async() => {
         if (!name || !email || !contactNumber || !companyName || !city || !state || !whatsappNumber || !userImage) {
             Alert.alert("Please fill all fields and provide an image.");
             return;
         }
 
-        const newCleaner = {
-            name,
+        const newData = {
+            userName:name,
             email,
-            contactNumber,
+            mobileNumber:contactNumber,
             companyName,
             state,
             city,
             whatsappNumber,
-            userImage,
+            // userImage,
         };
 
-        console.log("New Cleaner Data:", newCleaner);
 
-        // Simulate loading state (you can replace this with actual API call)
         setLoading(true);
-        setTimeout(() => {
+        try {
+            const res = await apiCaller.patch(`/api/user/`, newData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            console.log(res);
+            
             setLoading(false);
-            resetForm();
-            Alert.alert("Success", "Cleaner added successfully!");
-        }, 1500);
+            Alert.alert("Success", "Profile updated successfully!");
+          } catch (error) {
+            console.log(error);
+            setLoading(false);
+            Alert.alert("Error", "Failed to update profile. Please try again.");
+          }
     };
 
     const handleImagePicker = async () => {
@@ -85,16 +89,6 @@ const EditProfileScreen: React.FC = () => {
         }
     };
 
-    const resetForm = () => {
-        setName("");
-        setEmail("");
-        setContactNumber("");
-        setCompanyName("");
-        setState("");
-        setCity("");
-        setWhatsappNumber("");
-        setUserImage(null);
-    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -179,7 +173,7 @@ const EditProfileScreen: React.FC = () => {
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.modalButton, { borderColor: Colors.secondary, borderWidth: 1 }]}
-                            onPress={handleAddCleaner}
+                            onPress={handleAddData}
                         >
                             {loading ? (
                                 <ActivityIndicator color={Colors.secondary} />
