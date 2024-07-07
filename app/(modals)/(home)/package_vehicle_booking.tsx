@@ -194,7 +194,9 @@ const PackageVehicleListScreen: React.FC = () => {
               {pkg.vehicle &&
                 <Text style={styles.cardText}>Vehicle Number: <Text style={styles.textValue}>{pkg.vehicle.number}</Text></Text>
               }
-              <Text style={styles.cardText}>Other Vehicle: <Text style={styles.textValue}>{pkg.otherVehicle}</Text></Text>
+              {pkg.otherVehicle._id &&
+                <Text style={styles.cardText}>Other Vehicle: <Text style={styles.textValue}>{pkg.otherVehicle._id}</Text></Text>
+              }
 
               <TouchableOpacity
                 style={styles.viewMoreButton}
@@ -285,13 +287,13 @@ const PackageVehicleListScreen: React.FC = () => {
                 </Picker>
               </View>
               <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Instructions</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={instruction}
-                            onChangeText={(text) => setInstruction(text)}
-                        />
-                    </View>
+                <Text style={styles.label}>Instructions</Text>
+                <TextInput
+                  style={styles.input}
+                  value={instruction}
+                  onChangeText={(text) => setInstruction(text)}
+                />
+              </View>
               <View style={styles.modalButtons}>
                 <TouchableOpacity style={[styles.modalButton, { backgroundColor: "#ccc" }]} onPress={() => setShowAddDriverModal(false)}>
                   <Text style={styles.modalButtonText}>Cancel</Text>
