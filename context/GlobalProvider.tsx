@@ -15,12 +15,12 @@ interface GlobalContextProps {
   token: string | null;
   setToken: React.Dispatch<React.SetStateAction<string | null>>;
   loading: boolean;
-  userData: User | null;
+  userName: string | null;
   setEditData: React.Dispatch<React.SetStateAction<any>>;
-  setUserData: React.Dispatch<React.SetStateAction<User | null>>;
-  setInvoiceData: React.Dispatch<React.SetStateAction<Package | null>>;
-  invoiceData: Package | null
-  editData: any
+  setUserName: React.Dispatch<React.SetStateAction<string | null>>;
+  editData: any,
+  setDriverId: React.Dispatch<React.SetStateAction<string | null>>;
+  driverId: string | null;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -40,31 +40,37 @@ interface GlobalProviderProps {
 const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [isLogged, setIsLogged] = useState<boolean>(false);
   const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [userData, setUserData] = useState<User | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [userName, setUserName] = useState<string | null>(null);
   const [editData, setEditData] = useState<any>()
-  const [invoiceData, setInvoiceData] = useState<Package | null>(null)
+  const [driverId, setDriverId] = useState<string | null>(null);
 
   const baseURL = process.env.EXPO_PUBLIC_URL as string;
 
   useEffect(() => {
-    // SecureStore.getItemAsync("access_token")
-    //   .then((res) => {
-    //     if (res) {
-    //       setIsLogged(true);
-    //       setToken(res);
-    //     } else {
-    setIsLogged(true);
-    setToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjdlNWIwOGI1ZDkwYTM3YzkyZThjOGMiLCJyb2xlIjoiQUdFTkNZIiwiaWF0IjoxNzE5NTU2ODcyfQ.b_bf4Xz16nIJLp36IIxQhEJDuaPfxUDgXixFpt3l3_0");
-    //   }
-    // })
-    // .catch((error) => {
-    //   console.log(error);
-    // })
-    // .finally(() => {
-    //   setLoading(false);
-    // });
-  }, []);
+    SecureStore.getItemAsync("access_token")
+      .then((res) => {
+        if (res) {
+          setIsLogged(true);
+          setToken(res);
+        } else {
+          setToken(token);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+
+      SecureStore.getItemAsync("driver_id")
+      .then((res) => {
+        if (res) {
+          setDriverId(res);
+        }
+      })
+  }, [token]);
 
   const apiCaller = axios.create({
     baseURL,
@@ -81,18 +87,6 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
     (error) => Promise.reject(error),
   );
 
-  async function fetchUser() {
-    const response = await apiCaller.get('/api/user/');
-    setUserData(response.data.data)
-    
-  }
-  useEffect(() => {
-    if (token) {
-      fetchUser()
-    }
-  }, [token])
-  
-
   return (
     <GlobalContext.Provider
       value={{
@@ -102,12 +96,12 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         token,
         setToken,
         loading,
-        userData,
-        setUserData,
+        userName,
+        setUserName,
         setEditData,
         editData,
-        invoiceData,
-        setInvoiceData
+        driverId,
+        setDriverId
       }}
     >
       {children}

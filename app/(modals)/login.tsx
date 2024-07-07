@@ -8,45 +8,41 @@ import {
     TextInput,
     SafeAreaView,
     Image,
+    Alert,
+    ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
-import axios from 'axios';
-import Checkbox from 'expo-checkbox';
 import { Colors } from "@/constants/Colors";
+import Checkbox from 'expo-checkbox';
+import axios from 'axios';
+import * as SecureStore from "expo-secure-store";
 import { useGlobalContext } from '@/context/GlobalProvider';
-import * as SecureStore from 'expo-secure-store';
-
-const baseURL = process.env.EXPO_PUBLIC_URL as string;
 
 const LoginScreen = () => {
-    const [username, setUsername] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const { setIsLogged, setToken, setUserName } = useGlobalContext();
+    const [isLoading, setIsLoading] = useState(false);
+    const {setToken, setIsLogged} = useGlobalContext()
 
     const handleNext = async () => {
-        setLoading(true);
+        setIsLoading(true);
+        let data = {
+            'password': password,
+            'mobileNumber': phoneNumber
+        };
         try {
-            const response = await axios.post(`${baseURL}/api/user/login`, {
-                userName:username,
-                password,
-            });
-            
-            if (response.status === 200) {
-                setUserName(username)
-                setToken(response.data.data.authToken)
-                await SecureStore.setItemAsync("access_token", response.data.data.authToken);
-                setIsLogged(true)
-                router.push("/(modals)/welcome");
-            } else {
-                alert('Login failed. Please check your credentials.');
-            }
+            const response = await axios.post(`${process.env.EXPO_PUBLIC_URL}/api/user/login`, data);
+            await SecureStore.setItemAsync("access_token", response.data.authToken);
+            await SecureStore.setItemAsync("driver_id", response.data.data._id);
+            setToken(response.data.authToken)
+            setIsLogged(true)
+            router.push("/");
         } catch (error) {
-            console.error('Login error:', error);
-            alert('An error occurred during login. Please try again.');
+            console.log(error);
+            Alert.alert("Login Failed", "Please check your credentials and try again.");
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -55,19 +51,20 @@ const LoginScreen = () => {
             <StatusBar barStyle="dark-content" />
             <Image style={styles.wave_image} source={require('@/assets/images/wave.png')} />
 
-            <View style={{ marginTop: 150 }}>
+            <View style={{ marginTop: 150 }} >
                 <Text style={styles.welcomeText}>Welcome</Text>
                 <Text style={styles.welcomeText}>Back</Text>
             </View>
 
-            <View style={styles.innerContainer}>
+            <View style={styles.innerContainer} >
                 <View style={styles.inputContainer}>
                     <TextInput
-                        placeholder="Username"
-                        value={username}
-                        onChangeText={setUsername}
+                        placeholder="Phone Number"
+                        value={phoneNumber}
+                        onChangeText={setPhoneNumber}
                         style={styles.input}
                         placeholderTextColor="#FFFFFF"
+                        keyboardType="phone-pad"
                     />
                     <TextInput
                         placeholder="Password"
@@ -85,23 +82,21 @@ const LoginScreen = () => {
                             />
                             <Text style={styles.rememberMeText}>Remember Me</Text>
                         </View>
-                        <TouchableOpacity onPress={() => router.push("/(modals)/forgotPassword")}>
+                        <TouchableOpacity onPress={() => router.push("/(modals)/forgotPassword")} >
                             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
 
-                <TouchableOpacity onPress={handleNext} style={styles.button}>
-                    <Text style={styles.buttonText}>{loading ? 'Logging in...' : 'Login'}</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.signUpContainer}>
-                    <Text style={styles.signUpText}>Don’t Have an account? </Text>
-                    <TouchableOpacity onPress={() => router.push("/(modals)/signup")}>
-                        <Text style={{ fontWeight: "800" }}>Sign Up</Text>
-                    </TouchableOpacity>
+                <TouchableOpacity onPress={handleNext} style={styles.button} disabled={isLoading}>
+                    {isLoading ? (
+                        <ActivityIndicator color={Colors.primary} />
+                    ) : (
+                        <Text style={styles.buttonText}>Login</Text>
+                    )}
                 </TouchableOpacity>
             </View>
+
         </SafeAreaView>
     );
 };
@@ -165,6 +160,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingHorizontal: 50,
         borderColor: Colors.primary,
+        minWidth: 150,
     },
     buttonText: {
         fontSize: 21,
