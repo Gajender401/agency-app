@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -9,15 +10,11 @@ import {
   SafeAreaView,
   ScrollView,
   ActivityIndicator,
-  TouchableWithoutFeedback,
-  Alert,
 } from "react-native";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
-import { BlurView } from "expo-blur";
-import { Picker } from '@react-native-picker/picker';
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -27,67 +24,19 @@ function formatDate(dateString: string): string {
   return `${month}/${day}/${year}`;
 }
 
-interface BlurOverlayProps {
-  visible: boolean;
-  onRequestClose: () => void;
-}
-
-const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) => (
-  <Modal
-    animationType="fade"
-    transparent={true}
-    visible={visible}
-    onRequestClose={onRequestClose}
-  >
-    <TouchableWithoutFeedback onPress={onRequestClose}>
-      <BlurView intensity={90} tint="light" style={styles.overlay} />
-    </TouchableWithoutFeedback>
-  </Modal>
-);
-
 const PackageVehicleListScreen: React.FC = () => {
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
-  const [showAddDriverModal, setShowAddDriverModal] = useState(false);
-  const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [cleaners, setCleaners] = useState<Cleaner[]>([]);
-  const [selectedPrimaryDriver, setSelectedPrimaryDriver] = useState<string>("");
-  const [selectedSecondaryDriver, setSelectedSecondaryDriver] = useState<string>("");
-  const [selectedCleaner, setSelectedCleaner] = useState<string>("");
-  const [instruction, setInstruction] = useState("")
-  const { apiCaller, setEditData, setInvoiceData } = useGlobalContext();
+  const { apiCaller, setInvoiceData } = useGlobalContext();
 
   const fetchPackages = async () => {
     try {
       setLoading(true);
       const response = await apiCaller.get('/api/packageBooking');
-      setPackages(response.data.data);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchDrivers = async () => {
-    try {
-      setLoading(true);
-      const response = await apiCaller.get('/api/driver');
-      setDrivers(response.data.data);
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCleaners = async () => {
-    try {
-      setLoading(true);
-      const response = await apiCaller.get('/api/cleaner');
-      setCleaners(response.data.data);
+      const filteredRoutes = response.data.data.filter((route: Package) => route.status !== "COMPLETED");
+      setPackages(filteredRoutes);
     } catch (err) {
       console.log(err);
     } finally {
@@ -97,8 +46,6 @@ const PackageVehicleListScreen: React.FC = () => {
 
   useEffect(() => {
     fetchPackages();
-    fetchDrivers();
-    fetchCleaners();
   }, []);
 
   const handleDelete = async () => {
@@ -113,33 +60,6 @@ const PackageVehicleListScreen: React.FC = () => {
     }
   };
 
-  const handleAddDriver = async () => {
-    if (!selectedPrimaryDriver || !selectedSecondaryDriver || !selectedCleaner || !instruction) {
-      Alert.alert("Please select all fields.");
-      return;
-    }
-
-    const newDriverData = {
-      primaryDriverId: selectedPrimaryDriver,
-      secondaryDriverId: selectedSecondaryDriver,
-      cleanerId: selectedCleaner,
-      instructions: instruction
-    };
-
-    try {
-      setLoading(true);
-      await apiCaller.patch(`/api/packageBooking/finalize?bookingId=${selectedPackage?._id}`, newDriverData);
-      Alert.alert("Success", "Drivers and cleaner added successfully!");
-      fetchPackages();
-      setShowAddDriverModal(false);
-    } catch (error) {
-      console.error("Error adding drivers and cleaner:", error);
-      Alert.alert("Error", "Failed to add drivers and cleaner. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.searchContainer}>
@@ -151,10 +71,6 @@ const PackageVehicleListScreen: React.FC = () => {
         />
       </View>
 
-      <TouchableOpacity onPress={() => router.push("add_package_vehicle_booking")} style={styles.addButton}>
-        <Text style={styles.addButtonText}>Create Customer Invoice</Text>
-      </TouchableOpacity>
-
       {loading ? (
         <ActivityIndicator size="large" color={Colors.darkBlue} />
       ) : (
@@ -162,17 +78,8 @@ const PackageVehicleListScreen: React.FC = () => {
           {packages.map((pkg) => (
             <View key={pkg._id} style={styles.card}>
               <View style={styles.cardHeader}>
-                <TouchableOpacity onPress={() => { setEditData(pkg); router.push("edit_package_vehicle_booking") }} style={styles.editButton}>
-                  <Text style={styles.editButtonText}>Edit Booking</Text>
-                </TouchableOpacity>
                 <TouchableOpacity onPress={() => { setInvoiceData(pkg); router.push("invoice") }} style={styles.editButton}>
                   <Text style={styles.editButtonText}>View Invoice</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.editButton} onPress={() => {
-                  setSelectedPackage(pkg);
-                  setShowAddDriverModal(true);
-                }}>
-                  <Text style={styles.editButtonText}>Add Driver</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => { setShowDeleteModal(true); setSelectedPackage(pkg); }}>
                   <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
@@ -236,76 +143,6 @@ const PackageVehicleListScreen: React.FC = () => {
         </View>
       </Modal>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showAddDriverModal}
-        onRequestClose={() => setShowAddDriverModal(false)}
-      >
-        <BlurOverlay visible={showAddDriverModal} onRequestClose={() => setShowAddDriverModal(false)} />
-
-        <TouchableWithoutFeedback onPress={() => setShowAddDriverModal(false)}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Primary Driver</Text>
-                <Picker
-                  selectedValue={selectedPrimaryDriver}
-                  onValueChange={(itemValue) => setSelectedPrimaryDriver(itemValue)}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Select Primary Driver" value="" />
-                  {drivers.filter(driver => driver._id !== selectedSecondaryDriver).map((driver) => (
-                    <Picker.Item key={driver._id} label={driver.name} value={driver._id} />
-                  ))}
-                </Picker>
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Secondary Driver</Text>
-                <Picker
-                  selectedValue={selectedSecondaryDriver}
-                  onValueChange={(itemValue) => setSelectedSecondaryDriver(itemValue)}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Select Secondary Driver" value="" />
-                  {drivers.filter(driver => driver._id !== selectedPrimaryDriver).map((driver) => (
-                    <Picker.Item key={driver._id} label={driver.name} value={driver._id} />
-                  ))}
-                </Picker>
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Cleaner</Text>
-                <Picker
-                  selectedValue={selectedCleaner}
-                  onValueChange={(itemValue) => setSelectedCleaner(itemValue)}
-                  style={styles.picker}
-                >
-                  <Picker.Item label="Select Cleaner" value="" />
-                  {cleaners.map((cleaner) => (
-                    <Picker.Item key={cleaner._id} label={cleaner.name} value={cleaner._id} />
-                  ))}
-                </Picker>
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Instructions</Text>
-                <TextInput
-                  style={styles.input}
-                  value={instruction}
-                  onChangeText={(text) => setInstruction(text)}
-                />
-              </View>
-              <View style={styles.modalButtons}>
-                <TouchableOpacity style={[styles.modalButton, { backgroundColor: "#ccc" }]} onPress={() => setShowAddDriverModal(false)}>
-                  <Text style={styles.modalButtonText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]} onPress={handleAddDriver}>
-                  <Text style={[styles.modalButtonText, { color: "#fff" }]}>Add Driver</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
     </SafeAreaView>
   );
 };

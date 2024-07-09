@@ -49,8 +49,10 @@ export default function RootLayout() {
         <Stack.Screen name="(modals)/(home)/tempo_list" options={{ headerShadowVisible:false, headerTitle:"Tempo Traveller List", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/truck_list" options={{ headerShadowVisible:false, headerTitle:"Truck List", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/package_vehicle_booking" options={{ headerShadowVisible:false, headerTitle:"Package Vehicle booking", headerTitleAlign:"center" }} />
+        <Stack.Screen name="(modals)/(home)/package_vehicle_booking_inspection" options={{ headerShadowVisible:false, headerTitle:"Package Vehicle booking", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/package_vehicle_booking_more/[pkgId]" options={{ headerShadowVisible:false, headerTitle:"Package Vehicle booking", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/daily_route_vehicles" options={{ headerShadowVisible:false, headerTitle:"Daily Route Vehicles", headerTitleAlign:"center" }} />
+        <Stack.Screen name="(modals)/(home)/daily_route_vehicles_inspection" options={{ headerShadowVisible:false, headerTitle:"Daily Route Vehicles", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/technician_support" options={{ headerShadowVisible:false, headerTitle:"Technician Support", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/vehicle_documents" options={{ headerShadowVisible:false, headerTitle:"Vehicle Documents", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/vehicle_servicing_history" options={{ headerShadowVisible:false, headerTitle:"Vehicle Servicing history", headerTitleAlign:"center" }} />

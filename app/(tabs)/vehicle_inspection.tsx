@@ -3,7 +3,6 @@ import {
     StyleSheet,
     TouchableOpacity,
     Text,
-    Image,
     SafeAreaView,
     ScrollView,
     StatusBar,
@@ -15,10 +14,10 @@ const VehicleInspectionScreen: React.FC = () => {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView style={styles.driversList}>
-                <TouchableOpacity onPress={() => router.push("car_list")} style={styles.carListButton}>
+                <TouchableOpacity onPress={() => router.push("package_vehicle_booking_inspection")} style={styles.carListButton}>
                     <Text style={styles.carListText}>Package Vehicle Booking</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => router.push("bus_list")} style={styles.carListButton}>
+                <TouchableOpacity onPress={() => router.push("daily_route_vehicles_inspection")} style={styles.carListButton}>
                     <Text style={styles.carListText}>Daily Route Vehicle</Text>
                 </TouchableOpacity>
             </ScrollView>

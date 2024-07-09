@@ -291,6 +291,7 @@ interface Package {
   instructions: string;
   createdAt: string;
   updatedAt: string;
+  status: string;
 }
 
 

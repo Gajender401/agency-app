@@ -19,6 +19,8 @@ interface GlobalContextProps {
   setEditData: React.Dispatch<React.SetStateAction<any>>;
   setUserData: React.Dispatch<React.SetStateAction<User | null>>;
   editData: any,
+  setInvoiceData: React.Dispatch<React.SetStateAction<Package | null>>;
+  invoiceData: Package | null
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -41,7 +43,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [userData, setUserData] = useState<User | null>(null);
   const [editData, setEditData] = useState<any>()
-
+  const [invoiceData, setInvoiceData] = useState<Package | null>(null)
   const baseURL = process.env.EXPO_PUBLIC_URL as string;
 
   useEffect(() => {
@@ -102,6 +104,8 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setUserData,
         setEditData,
         editData,
+        invoiceData,
+        setInvoiceData
       }}
     >
       {children}
