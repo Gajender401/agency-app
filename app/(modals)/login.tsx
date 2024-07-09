@@ -19,7 +19,7 @@ import * as SecureStore from "expo-secure-store";
 import { useGlobalContext } from '@/context/GlobalProvider';
 
 const LoginScreen = () => {
-    const [phoneNumber, setPhoneNumber] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -29,12 +29,11 @@ const LoginScreen = () => {
         setIsLoading(true);
         let data = {
             'password': password,
-            'mobileNumber': phoneNumber
+            'userName': username
         };
         try {
             const response = await axios.post(`${process.env.EXPO_PUBLIC_URL}/api/user/login`, data);
             await SecureStore.setItemAsync("access_token", response.data.authToken);
-            await SecureStore.setItemAsync("driver_id", response.data.data._id);
             setToken(response.data.authToken)
             setIsLogged(true)
             router.push("/");
@@ -59,12 +58,11 @@ const LoginScreen = () => {
             <View style={styles.innerContainer} >
                 <View style={styles.inputContainer}>
                     <TextInput
-                        placeholder="Phone Number"
-                        value={phoneNumber}
-                        onChangeText={setPhoneNumber}
+                        placeholder="Username"
+                        value={username}
+                        onChangeText={setUsername}
                         style={styles.input}
                         placeholderTextColor="#FFFFFF"
-                        keyboardType="phone-pad"
                     />
                     <TextInput
                         placeholder="Password"

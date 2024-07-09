@@ -9,10 +9,13 @@ import {
     SafeAreaView,
     Image,
     ScrollView,
+    Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
-import Checkbox from 'expo-checkbox';
+import axios from 'axios';
+import * as SecureStore from "expo-secure-store";
+import { useGlobalContext } from '@/context/GlobalProvider';
 
 const SignUpScreen = () => {
     const [ownerName, setOwnerName] = useState('');
@@ -23,10 +26,69 @@ const SignUpScreen = () => {
     const [state, setState] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [termsAccepted, setTermsAccepted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const {setToken, setIsLogged} = useGlobalContext()
 
-    const handleSignUp = () => {
-        router.push("/(modals)/accountCreatedDone");
+    const validateInputs = () => {
+        if (!ownerName || !companyName || !contact || !whatsapp || !city || !state || !email || !password) {
+            Alert.alert("Error", "All fields are required.");
+            return false;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            Alert.alert("Error", "Please enter a valid email address.");
+            return false;
+        }
+
+        const phoneRegex = /^\d{10}$/;
+        if (!phoneRegex.test(contact) || !phoneRegex.test(whatsapp)) {
+            Alert.alert("Error", "Please enter valid 10-digit phone numbers.");
+            return false;
+        }
+
+        if (password.length < 6) {
+            Alert.alert("Error", "Password must be at least 6 characters long.");
+            return false;
+        }
+
+        return true;
+    };
+
+    const handleSignUp = async () => {
+        if (!validateInputs()) {
+            return;
+        }
+
+        setIsLoading(true);
+        let data = {
+            userName: ownerName,
+            companyName: companyName,
+            mobileNumber: contact,
+            whatsappNumber: whatsapp,
+            state: state,
+            city: city,
+            email: email,
+            password: password,
+            type: 'AGENCY'
+        };
+        try {
+            const response = await axios.post(`${process.env.EXPO_PUBLIC_URL}/api/user/`, data);
+            
+            if (response.data.authToken && response.data.data._id) {
+                await SecureStore.setItemAsync("access_token", response.data.authToken);
+                setToken(response.data.authToken)
+                setIsLogged(true)
+                router.push("/");
+            }
+            
+            router.push("/");
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Sign Up Failed", "Please check your information and try again.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -109,8 +171,8 @@ const SignUpScreen = () => {
                     </View> */}
                 </ScrollView>
 
-                <TouchableOpacity onPress={handleSignUp} style={styles.button}>
-                    <Text style={styles.buttonText}>Sign Up</Text>
+                <TouchableOpacity onPress={handleSignUp} style={styles.button} disabled={isLoading}>
+                    <Text style={styles.buttonText}>{isLoading ? "Signing Up..." : "Sign Up"}</Text>
                 </TouchableOpacity>
 
                 <View style={styles.loginContainer}>

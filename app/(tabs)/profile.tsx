@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     View,
     Text,
@@ -7,22 +7,33 @@ import {
     TouchableOpacity,
     SafeAreaView,
     Image,
+    ActivityIndicator,
 } from "react-native";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { FontAwesome } from '@expo/vector-icons';
 import { useGlobalContext } from "@/context/GlobalProvider";
+import * as SecureStore from "expo-secure-store";
 
 const ProfileScreen = () => {
-    const {userData } = useGlobalContext();
+    const { userData, setToken, setIsLogged } = useGlobalContext();
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleEdit = () => {
         router.push('/edit_profile');
     };
 
-    const handleLogout = () => {
-        // Handle logout logic here
-        console.log('User logged out');
+    const handleLogout = async () => {
+        setIsLoading(true);
+        try {
+            await SecureStore.deleteItemAsync("access_token");
+            setIsLogged(false);
+            setToken(null);
+        } catch (error) {
+            console.error("Error during logout:", error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -47,13 +58,17 @@ const ProfileScreen = () => {
                 </View>
                 <Text style={styles.galleryTitle}>Gallery</Text>
                 <View style={styles.divider} />
-                <TouchableOpacity onPress={()=> router.push('all_photos')} style={styles.galleryContainer}>
+                <TouchableOpacity onPress={() => router.push('all_photos')} style={styles.galleryContainer}>
                     <FontAwesome name="photo" size={24} color={Colors.primary} />
                     <Text style={styles.galleryText}>All Photos</Text>
                 </TouchableOpacity>
                 <View style={styles.divider} />
-                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                    <Text style={styles.logoutButtonText}>Logout</Text>
+                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} disabled={isLoading}>
+                    {isLoading ? (
+                        <ActivityIndicator color="white" />
+                    ) : (
+                        <Text style={styles.logoutButtonText}>Logout</Text>
+                    )}
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

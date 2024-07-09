@@ -15,12 +15,10 @@ interface GlobalContextProps {
   token: string | null;
   setToken: React.Dispatch<React.SetStateAction<string | null>>;
   loading: boolean;
-  userName: string | null;
+  userData: User | null;
   setEditData: React.Dispatch<React.SetStateAction<any>>;
-  setUserName: React.Dispatch<React.SetStateAction<string | null>>;
+  setUserData: React.Dispatch<React.SetStateAction<User | null>>;
   editData: any,
-  setDriverId: React.Dispatch<React.SetStateAction<string | null>>;
-  driverId: string | null;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -41,9 +39,8 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [isLogged, setIsLogged] = useState<boolean>(false);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [userName, setUserName] = useState<string | null>(null);
+  const [userData, setUserData] = useState<User | null>(null);
   const [editData, setEditData] = useState<any>()
-  const [driverId, setDriverId] = useState<string | null>(null);
 
   const baseURL = process.env.EXPO_PUBLIC_URL as string;
 
@@ -64,12 +61,6 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setLoading(false);
       });
 
-      SecureStore.getItemAsync("driver_id")
-      .then((res) => {
-        if (res) {
-          setDriverId(res);
-        }
-      })
   }, [token]);
 
   const apiCaller = axios.create({
@@ -80,6 +71,17 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
       "authtoken": `${token}`,
     },
   });
+
+  async function fetchUser() {
+    const response = await apiCaller.get('/api/user/');
+    setUserData(response.data.data)
+
+  }
+  useEffect(() => {
+    if (token) {
+      fetchUser()
+    }
+  }, [token])
 
   apiCaller.interceptors.response.use(
     (response) => response,
@@ -96,12 +98,10 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         token,
         setToken,
         loading,
-        userName,
-        setUserName,
+        userData,
+        setUserData,
         setEditData,
         editData,
-        driverId,
-        setDriverId
       }}
     >
       {children}
