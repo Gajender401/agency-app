@@ -25,11 +25,9 @@ const AddCarScreen: React.FC = () => {
     const [location, setLocation] = useState("");
     const [carName, setCarName] = useState("");
     const [contactNo, setContactNo] = useState("");
-    const [bodyType, setBodyType] = useState("");
-    const [chassisBrand, setChassisBrand] = useState("");
-    const [selectedAC, setSelectedAC] = useState<string | null>(null); // State for AC/Non-AC selection
-    const [selectedForRent, setSelectedForRent] = useState<boolean>(false); // State for For Rent selection
-    const [selectedForSell, setSelectedForSell] = useState<boolean>(false); // State for For Sell selection
+    const [selectedAC, setSelectedAC] = useState<string | null>(null);
+    const [selectedForRent, setSelectedForRent] = useState<boolean>(false); 
+    const [selectedForSell, setSelectedForSell] = useState<boolean>(false); 
     const [carImages, setCarImages] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const { apiCaller } = useGlobalContext();
@@ -45,8 +43,6 @@ const AddCarScreen: React.FC = () => {
             seatingCapacity,
             model: vehicleModel,
             location,
-            bodyType,
-            chassisBrand,
             contactNumber: contactNo,
             isAC: selectedAC === "AC",
             isForRent: selectedForRent,
@@ -88,8 +84,6 @@ const AddCarScreen: React.FC = () => {
         setLocation("");
         setCarName("");
         setContactNo("");
-        setBodyType("");
-        setChassisBrand("");
         setSelectedAC(null);
         setSelectedForRent(false);
         setSelectedForSell(false);
@@ -149,22 +143,6 @@ const AddCarScreen: React.FC = () => {
                             value={contactNo}
                             onChangeText={(text) => setContactNo(text)}
                             keyboardType="phone-pad"
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Body Type</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={bodyType}
-                            onChangeText={(text) => setBodyType(text)}
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Chassis Number</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={chassisBrand}
-                            onChangeText={(text) => setChassisBrand(text)}
                         />
                     </View>
 

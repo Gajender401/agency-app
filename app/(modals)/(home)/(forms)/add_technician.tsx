@@ -104,6 +104,7 @@ const AddTechnicianScreen: React.FC = () => {
                                 <Picker.Item label="SPRING WORK" value="SPRINGWORK" />
                                 <Picker.Item label="BATTERY SERVICES" value="BATTERYSERVICES" />
                                 <Picker.Item label="VEHICLE BODY REPAIR" value="VEHICLEBODYREPAIR" />
+                                <Picker.Item label="CRANE SERVICE" value="CRANESERVICES" />
                             </Picker>
                         </View>
                     </View>
@@ -120,6 +121,7 @@ const AddTechnicianScreen: React.FC = () => {
                                 <Picker.Item label="TRUCK" value="TRUCK" />
                                 <Picker.Item label="BUS" value="BUS" />
                                 <Picker.Item label="TEMPO" value="TAMPO" />
+                                <Picker.Item label="ALL" value="ALL" />
                             </Picker>
                         </View>
                     </View>

@@ -26,8 +26,6 @@ const AddBusScreen: React.FC = () => {
   const [chassisBrand, setChassisBrand] = useState("");
   const [location, setLocation] = useState("");
   const [contactNo, setContactNo] = useState("");
-  const [noOfTyres, setNoOfTyres] = useState("");
-  const [vehicleWeightInKGS, setVehicleWeightInKGS] = useState("");
   const [selectedAC, setSelectedAC] = useState<string | null>(null);
   const [selectedForRent, setSelectedForRent] = useState<boolean>(false);
   const [selectedForSell, setSelectedForSell] = useState<boolean>(false);
@@ -36,7 +34,7 @@ const AddBusScreen: React.FC = () => {
   const { apiCaller } = useGlobalContext(); // Destructuring apiCaller from context
 
   const handleAddBus = async () => {
-    if (!vehicleNo || !seatingCapacity || !vehicleModel || !bodyType || !chassisBrand || !location || !contactNo || !noOfTyres || !vehicleWeightInKGS || busImages.length === 0) {
+    if (!vehicleNo || !seatingCapacity || !vehicleModel || !bodyType || !chassisBrand || !location || !contactNo || busImages.length === 0) {
       Alert.alert("Please fill all fields and upload bus images.");
       return;
     }
@@ -49,8 +47,6 @@ const AddBusScreen: React.FC = () => {
       bodyType,
       chassisBrand,
       contactNumber: contactNo,
-      noOfTyres,
-      vehicleWeightInKGS,
       isAC: selectedAC === "AC",
       isForRent: selectedForRent,
       isForSell: selectedForSell,
@@ -91,8 +87,6 @@ const AddBusScreen: React.FC = () => {
     setChassisBrand("");
     setLocation("");
     setContactNo("");
-    setNoOfTyres("");
-    setVehicleWeightInKGS("");
     setSelectedAC(null);
     setSelectedForRent(false);
     setSelectedForSell(false);
@@ -138,7 +132,7 @@ const AddBusScreen: React.FC = () => {
             />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Chassis Number</Text>
+            <Text style={styles.label}>Chassis Company</Text>
             <TextInput
               style={styles.input}
               value={chassisBrand}
@@ -160,24 +154,6 @@ const AddBusScreen: React.FC = () => {
               value={contactNo}
               onChangeText={(text) => setContactNo(text)}
               keyboardType="phone-pad"
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Number of Tyres</Text>
-            <TextInput
-              style={styles.input}
-              value={noOfTyres}
-              onChangeText={(text) => setNoOfTyres(text)}
-              keyboardType="numeric"
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Vehicle Weight (in KGS)</Text>
-            <TextInput
-              style={styles.input}
-              value={vehicleWeightInKGS}
-              onChangeText={(text) => setVehicleWeightInKGS(text)}
-              keyboardType="numeric"
             />
           </View>
 

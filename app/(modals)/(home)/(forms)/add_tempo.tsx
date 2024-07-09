@@ -22,18 +22,16 @@ const AddTempoScreen: React.FC = () => {
   const [vehicleNo, setVehicleNo] = useState("");
   const [seatingCapacity, setSeatingCapacity] = useState("");
   const [vehicleModel, setVehicleModel] = useState("");
-  const [bodyType, setBodyType] = useState("");
   const [location, setLocation] = useState("");
   const [contactNo, setContactNo] = useState("");
-  const [chassisBrand, setChassisBrand] = useState(""); // New field
   const [selectedForRent, setSelectedForRent] = useState<boolean>(false);
   const [selectedForSell, setSelectedForSell] = useState<boolean>(false);
   const [tempoImages, setTempoImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const { apiCaller } = useGlobalContext(); // Destructuring apiCaller from context
+  const { apiCaller } = useGlobalContext(); 
 
   const handleAddTempo = async () => {
-    if (!vehicleNo || !seatingCapacity || !vehicleModel || !bodyType || !location || !contactNo || !chassisBrand || tempoImages.length === 0) {
+    if (!vehicleNo || !seatingCapacity || !vehicleModel || !location || !contactNo ||  tempoImages.length === 0) {
       Alert.alert("Please fill all fields and upload tempo images.");
       return;
     }
@@ -43,9 +41,7 @@ const AddTempoScreen: React.FC = () => {
       seatingCapacity,
       model: vehicleModel,
       location,
-      bodyType,
       contactNumber: contactNo,
-      chassisBrand, // Include new field in the payload
       isAC: false,
       isForRent: selectedForRent,
       isForSell: selectedForSell,
@@ -82,10 +78,8 @@ const AddTempoScreen: React.FC = () => {
     setVehicleNo("");
     setSeatingCapacity("");
     setVehicleModel("");
-    setBodyType("");
     setLocation("");
     setContactNo("");
-    setChassisBrand(""); // Reset the new field
     setSelectedForRent(false);
     setSelectedForSell(false);
     setTempoImages([]);
@@ -123,14 +117,6 @@ const AddTempoScreen: React.FC = () => {
             />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Body Type</Text>
-            <TextInput
-              style={styles.input}
-              value={bodyType}
-              onChangeText={(text) => setBodyType(text)}
-            />
-          </View>
-          <View style={styles.inputGroup}>
             <Text style={styles.label}>Location</Text>
             <TextInput
               style={styles.input}
@@ -145,14 +131,6 @@ const AddTempoScreen: React.FC = () => {
               value={contactNo}
               onChangeText={(text) => setContactNo(text)}
               keyboardType="phone-pad"
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Chassis Number</Text>
-            <TextInput
-              style={styles.input}
-              value={chassisBrand}
-              onChangeText={(text) => setChassisBrand(text)}
             />
           </View>
 

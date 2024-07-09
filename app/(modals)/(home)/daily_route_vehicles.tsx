@@ -210,7 +210,7 @@ const DailyRouteVehicles: React.FC = () => {
 
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalText}>Are you sure you want to delete this car?</Text>
+            <Text style={styles.modalText}>Are you sure you want to delete this vehicle?</Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity style={[styles.modalButton, { backgroundColor: "#ccc" }]} onPress={() => setShowDeleteModal(false)}>
                 <Text style={styles.modalButtonText}>Cancel</Text>

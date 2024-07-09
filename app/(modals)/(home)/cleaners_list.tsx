@@ -109,7 +109,6 @@ const CleanerListScreen: React.FC = () => {
                             <Text style={styles.cardText}>Mobile: <Text style={{ color: "black" }}>{cleaner.mobileNumber}</Text></Text>
                             <Text style={styles.cardText}>City: <Text style={{ color: "black" }}>{cleaner.city}</Text></Text>
                             <Text style={styles.cardText}>State: <Text style={{ color: "black" }}>{cleaner.state}</Text></Text>
-                            <Text style={styles.cardText}>Type: <Text style={{ color: "black" }}>{cleaner.cleanerType}</Text></Text>
                             <View style={styles.aadharContainer}>
                                 <Text style={styles.cardText}>Aadhar card</Text>
                                 <TouchableOpacity style={styles.viewAadharButton} onPress={() => handleViewImage(cleaner.aadharCard)}>

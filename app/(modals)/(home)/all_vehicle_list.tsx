@@ -24,7 +24,7 @@ const AllVehicleListScreen: React.FC = () => {
                 </TouchableOpacity>
                 <TouchableOpacity onPress={()=>router.push("tempo_list")} style={styles.carListButton}>
                     <Image source={require('@/assets/images/tempo.png')} />
-                    <Text style={styles.carListText}>Tempo List</Text>
+                    <Text style={styles.carListText}>Tempo Traveller List</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={()=>router.push("truck_list")} style={styles.carListButton}>
                     <Image source={require('@/assets/images/truck.png')} />

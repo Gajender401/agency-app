@@ -18,7 +18,6 @@ import { useGlobalContext } from "@/context/GlobalProvider"; // Importing useGlo
 
 const AddTruckScreen: React.FC = () => {
   const [vehicleNo, setVehicleNo] = useState("");
-  const [seatingCapacity, setSeatingCapacity] = useState("");
   const [vehicleModel, setVehicleModel] = useState("");
   const [location, setLocation] = useState("");
   const [contactNo, setContactNo] = useState("");
@@ -26,21 +25,20 @@ const AddTruckScreen: React.FC = () => {
   const [chassisBrand, setChassisBrand] = useState("");
   const [noOfTyres, setNoOfTyres] = useState("");
   const [vehicleWeightInKGS, setVehicleWeightInKGS] = useState("");
-  const [selectedForRent, setSelectedForRent] = useState<boolean>(false); // State for For Rent selection
-  const [selectedForSell, setSelectedForSell] = useState<boolean>(false); // State for For Sell selection
+  const [selectedForRent, setSelectedForRent] = useState<boolean>(false); 
+  const [selectedForSell, setSelectedForSell] = useState<boolean>(false); 
   const [truckImages, setTruckImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const { apiCaller } = useGlobalContext(); // Destructuring apiCaller from context
+  const { apiCaller } = useGlobalContext(); 
 
   const handleAddTruck = async () => {
-    if (!vehicleNo || !seatingCapacity || !vehicleModel || !location || !contactNo || !noOfTyres || !vehicleWeightInKGS || truckImages.length === 0) {
+    if (!vehicleNo || !vehicleModel || !location || !contactNo || !noOfTyres || !vehicleWeightInKGS || truckImages.length === 0) {
       Alert.alert("Please fill all fields and upload truck images.");
       return;
     }
 
     const newTruck = {
       number: vehicleNo,
-      seatingCapacity,
       model: vehicleModel,
       location,
       bodyType,
@@ -82,7 +80,6 @@ const AddTruckScreen: React.FC = () => {
 
   const resetForm = () => {
     setVehicleNo("");
-    setSeatingCapacity("");
     setVehicleModel("");
     setLocation("");
     setContactNo("");
@@ -105,15 +102,6 @@ const AddTruckScreen: React.FC = () => {
               style={styles.input}
               value={vehicleNo}
               onChangeText={(text) => setVehicleNo(text)}
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Seating Capacity</Text>
-            <TextInput
-              style={styles.input}
-              value={seatingCapacity}
-              onChangeText={(text) => setSeatingCapacity(text)}
-              keyboardType="numeric"
             />
           </View>
           <View style={styles.inputGroup}>
@@ -150,7 +138,7 @@ const AddTruckScreen: React.FC = () => {
             />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Chassis Number</Text>
+            <Text style={styles.label}>Chassis Company</Text>
             <TextInput
               style={styles.input}
               value={chassisBrand}
@@ -167,7 +155,7 @@ const AddTruckScreen: React.FC = () => {
             />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Vehicle Weight in KGS</Text>
+            <Text style={styles.label}>Vehicle Weight in Ton</Text>
             <TextInput
               style={styles.input}
               value={vehicleWeightInKGS}
