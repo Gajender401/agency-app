@@ -27,6 +27,7 @@ const AddServiceHistoryScreen: React.FC = () => {
     const [vehicleNumber, setVehicleNumber] = useState("");
     const [billImage, setBillImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [inputHeight, setInputHeight] = useState(100);
     const { apiCaller, editData } = useGlobalContext();
 
     useEffect(() => {
@@ -138,9 +139,13 @@ const AddServiceHistoryScreen: React.FC = () => {
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Work Description</Text>
                             <TextInput
-                                style={styles.input}
+                                style={[styles.input, styles.textarea, { height: Math.max(100, inputHeight) }]}
                                 value={workDescription}
                                 onChangeText={(text) => setWorkDescription(text)}
+                                multiline={true}
+                                onContentSizeChange={(event) => {
+                                    setInputHeight(event.nativeEvent.contentSize.height);
+                                }}
                             />
                         </View>
                         <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
@@ -231,6 +236,12 @@ const styles = StyleSheet.create({
     modalButtonText: {
         fontSize: 16,
         fontWeight: "bold",
+    },
+    textarea: {
+        minHeight: 100,
+        maxHeight: 300,
+        textAlignVertical: 'top',
+        paddingTop: 10,
     },
 });
 

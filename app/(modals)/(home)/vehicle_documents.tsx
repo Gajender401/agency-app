@@ -97,7 +97,7 @@ const VehicleListScreen: React.FC = () => {
             </View>
 
             <TouchableOpacity onPress={() => router.push("add_vehicle_documents")} style={styles.addButton}>
-                <Text style={styles.addButtonText}>Add Vehicle</Text>
+                <Text style={styles.addButtonText}>Add Vehicle & Document</Text>
             </TouchableOpacity>
 
             {loading ? (

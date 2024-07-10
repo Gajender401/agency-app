@@ -106,18 +106,18 @@ const DailyRouteVehicles: React.FC = () => {
   };
 
   const handleAddDriver = async () => {
-    if (!selectedPrimaryDriver || !selectedSecondaryDriver || !selectedCleaner || !instruction) {
-      Alert.alert("Please select all fields.");
+    if (!selectedPrimaryDriver && !selectedSecondaryDriver && !selectedCleaner && !instruction) {
+      Alert.alert("Please fill at least one field.");
       return;
     }
-
+  
     const newDriverData = {
-      primaryDriverId: selectedPrimaryDriver,
-      secondaryDriverId: selectedSecondaryDriver,
-      cleanerId: selectedCleaner,
-      instructions: instruction
+      primaryDriverId: selectedPrimaryDriver || null,
+      secondaryDriverId: selectedSecondaryDriver || null,
+      cleanerId: selectedCleaner || null,
+      instructions: instruction || ""
     };
-
+  
     try {
       setLoading(true);
       await apiCaller.patch(`/api/dailyRoute/finalize?routeId=${selectedRoute?._id}`, newDriverData);
@@ -131,6 +131,7 @@ const DailyRouteVehicles: React.FC = () => {
       setLoading(false);
     }
   };
+  
 
 
 
@@ -187,13 +188,13 @@ const DailyRouteVehicles: React.FC = () => {
                 Departure Time: <Text style={{ color: "black" }}>{route.departureTime}</Text>
               </Text>
               <Text style={styles.cardText}>
-                Cleaner Name: <Text style={{ color: "black" }}>{route.cleaner ? route.cleaner.name : "N/A"}</Text>
+                Cleaner Name: <Text style={{ color: "black" }}>{route.cleaner ? route.cleaner.name : ""}</Text>
               </Text>
               <Text style={styles.cardText}>
-                Primary Driver : <Text style={{ color: "black" }}>{route.primaryDriver ? route.primaryDriver.name : "N/A"}</Text>
+                Primary Driver : <Text style={{ color: "black" }}>{route.primaryDriver ? route.primaryDriver.name : ""}</Text>
               </Text>
               <Text style={styles.cardText}>
-                Secondary Driver: <Text style={{ color: "black" }}>{route.secondaryDriver ? route.secondaryDriver.name : "N/A"}</Text>
+                Secondary Driver: <Text style={{ color: "black" }}>{route.secondaryDriver ? route.secondaryDriver.name : ""}</Text>
               </Text>
             </View>
           ))}

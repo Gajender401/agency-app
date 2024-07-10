@@ -93,7 +93,7 @@ export default function HomeScreen() {
 
         <View style={styles.dividerContainer}>
           <View style={styles.divider}>
-            <Text style={styles.dividerText}>Lorem Ipsum</Text>
+            <Text style={styles.dividerText}>Our Services</Text>
           </View>
         </View>
 
@@ -138,7 +138,7 @@ export default function HomeScreen() {
 
         <View style={styles.dividerContainer}>
           <View style={styles.divider}>
-            <Text style={styles.dividerText}>Lorem Ipsum</Text>
+            <Text style={styles.dividerText}>Watch Videos</Text>
           </View>
         </View>
 

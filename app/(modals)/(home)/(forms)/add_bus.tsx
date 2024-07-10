@@ -16,7 +16,22 @@ import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 //@ts-ignore
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
-import { useGlobalContext } from "@/context/GlobalProvider"; // Importing useGlobalContext
+import { useGlobalContext } from "@/context/GlobalProvider";
+
+  
+const formatVehicleNumber = (input: string) => {
+  const cleanInput = input.replace(/\s/g, '').toUpperCase();
+  
+  let formatted = '';
+  for (let i = 0; i < cleanInput.length; i++) {
+    if (i === 2 || i === 4 || i === 5) {
+      formatted += ' ';
+    }
+    formatted += cleanInput[i];
+  }
+  
+  return formatted.trim();
+};
 
 const AddBusScreen: React.FC = () => {
   const [vehicleNo, setVehicleNo] = useState("");
@@ -31,7 +46,7 @@ const AddBusScreen: React.FC = () => {
   const [selectedForSell, setSelectedForSell] = useState<boolean>(false);
   const [busImages, setBusImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const { apiCaller } = useGlobalContext(); // Destructuring apiCaller from context
+  const { apiCaller } = useGlobalContext();
 
   const handleAddBus = async () => {
     if (!vehicleNo || !seatingCapacity || !vehicleModel || !bodyType || !chassisBrand || !location || !contactNo || busImages.length === 0) {
@@ -102,7 +117,9 @@ const AddBusScreen: React.FC = () => {
             <TextInput
               style={styles.input}
               value={vehicleNo}
-              onChangeText={(text) => setVehicleNo(text)}
+              onChangeText={(text) => setVehicleNo(formatVehicleNumber(text))}
+              placeholderTextColor={Colors.secondary}
+              autoCapitalize="characters"
             />
           </View>
           <Text style={styles.vehicleNumberLabel}>“If your vehicle is to be sold to other vehicle owners or is to be given on rent, then you will have to fill the option given below.”</Text>

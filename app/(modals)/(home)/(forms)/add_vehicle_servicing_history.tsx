@@ -25,9 +25,10 @@ const AddServiceHistoryScreen: React.FC = () => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [workDescription, setWorkDescription] = useState("");
     const [vehicleNumber, setVehicleNumber] = useState("");
-    const [billImage, setBillImage] = useState<string | null>(null);
+    const [billImages, setBillImages] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
+    const [inputHeight, setInputHeight] = useState(100);
     const { apiCaller } = useGlobalContext();
 
     const extractNumbers = (data: Vehicle[]): { id: string, number: string }[] => {
@@ -58,8 +59,8 @@ const AddServiceHistoryScreen: React.FC = () => {
     };
 
     const handleAddServiceHistory = async () => {
-        if (!garageName || !garageNumber || !date || !workDescription || !vehicleNumber || !billImage) {
-            Alert.alert("Please fill all fields and provide the bill image.");
+        if (!garageName || !garageNumber || !date || !workDescription || !vehicleNumber || billImages.length === 0) {
+            Alert.alert("Please fill all fields and provide at least one bill image.");
             return;
         }
 
@@ -68,12 +69,11 @@ const AddServiceHistoryScreen: React.FC = () => {
             garageNumber,
             date: date.toISOString().split('T')[0],
             workDescription,
-            vehicleNumeber:vehicleNumber,
-            bill: billImage,
+            vehicleNumeber: vehicleNumber,
+            bills: billImages,
         };
 
         console.log(newServiceHistory);
-        
 
         setLoading(true);
         try {
@@ -91,13 +91,12 @@ const AddServiceHistoryScreen: React.FC = () => {
     const handleImagePicker = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: false,
-            aspect: [4, 3],
+            allowsMultipleSelection: true,
             quality: 1,
         });
 
         if (!result.canceled) {
-            setBillImage(result.assets[0].uri);
+            setBillImages(result.assets.map(asset => asset.uri));
         }
     };
 
@@ -107,7 +106,7 @@ const AddServiceHistoryScreen: React.FC = () => {
         setDate(undefined);
         setWorkDescription("");
         setVehicleNumber("");
-        setBillImage(null);
+        setBillImages([]);
     };
 
     return (
@@ -167,15 +166,23 @@ const AddServiceHistoryScreen: React.FC = () => {
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Work Description</Text>
                             <TextInput
-                                style={styles.input}
+                                style={[styles.input, styles.textarea, { height: Math.max(100, inputHeight) }]}
                                 value={workDescription}
                                 onChangeText={(text) => setWorkDescription(text)}
+                                multiline={true}
+                                onContentSizeChange={(event) => {
+                                    setInputHeight(event.nativeEvent.contentSize.height);
+                                }}
                             />
                         </View>
                         <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
-                            <Text style={styles.imagePickerText}>Select Bill Image</Text>
+                            <Text style={styles.imagePickerText}>Select Bill Images</Text>
                         </TouchableOpacity>
-                        {billImage && <Image source={{ uri: billImage }} style={styles.previewImage} />}
+                        <View style={styles.imagePreviewContainer}>
+                            {billImages.map((uri, index) => (
+                                <Image key={index} source={{ uri }} style={styles.previewImage} />
+                            ))}
+                        </View>
 
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
@@ -229,6 +236,12 @@ const styles = StyleSheet.create({
         height: 40,
         justifyContent: 'center'
     },
+    textarea: {
+        minHeight: 100,
+        maxHeight: 300,
+        textAlignVertical: 'top',
+        paddingTop: 10,
+    },
     imagePicker: {
         backgroundColor: Colors.darkBlue,
         padding: 15,
@@ -240,11 +253,16 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
     },
+    imagePreviewContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+    },
     previewImage: {
-        width: "100%",
-        height: 200,
+        width: "48%",
+        height: 100,
         borderRadius: 10,
-        marginBottom: 15,
+        marginBottom: 10,
     },
     modalButtons: {
         flexDirection: "row",

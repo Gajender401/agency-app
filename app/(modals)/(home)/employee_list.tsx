@@ -227,12 +227,16 @@ const styles = StyleSheet.create({
         padding: 20,
         borderRadius: 5,
         marginBottom: 20,
-        elevation: 3,
         shadowColor: "#000",
-        shadowOffset: { width: 2, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 5,
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
         position: "relative",
+        marginHorizontal:5
     },
     employeeImage: {
         width: 70,
