@@ -38,13 +38,17 @@ const PackageBookingForm: React.FC = () => {
     const [addNote, setAddNote] = useState("");
     const [entryParking, setEntryParking] = useState("");
     const [loading, setLoading] = useState(false);
-    const [vehicleNumbers, setVehicleNumbers] = useState<{id: string, number: string}[]>([]);
+    const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
     const { apiCaller } = useGlobalContext();
+    const [departureDate, setDepartureDate] = useState<Date | undefined>(undefined);
+    const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
+    const [showDepartureDatePicker, setShowDepartureDatePicker] = useState<boolean>(false);
+    const [showReturnDatePicker, setShowReturnDatePicker] = useState<boolean>(false);
 
-    const extractNumbers = (data: Vehicle[]): {id: string, number: string}[] => {
+    const extractNumbers = (data: Vehicle[]): { id: string, number: string }[] => {
         return data.map(vehicle => ({ id: vehicle._id, number: vehicle.number }));
     };
-    
+
     const fetchVehicles = async () => {
         try {
             setLoading(true);
@@ -75,8 +79,27 @@ const PackageBookingForm: React.FC = () => {
         }
     };
 
+    const onChangeDepartureDate = (event: any, selectedDate?: Date) => {
+        setShowDepartureDatePicker(false);
+        if (selectedDate) {
+            setDepartureDate(selectedDate);
+        }
+    };
+
+    const onChangeReturnDate = (event: any, selectedDate?: Date) => {
+        setShowReturnDatePicker(false);
+        if (selectedDate) {
+            setReturnDate(selectedDate);
+        }
+    };
+
+    const formatDate = (date: Date | undefined) => {
+        if (!date) return "";
+        return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear().toString().slice(-2)}`;
+    };
+
     const handleBooking = async () => {
-        if (!vehicleNumber || !otherVehicleNumber || !customerName || !mobileNumber || !alternateNumber || !kmStarting || !perKmRate || !advancedAmount || !remainingAmount || !departurePlace || !destinationPlace || !departureTime || !returnTime || !toll || !otherStateTax || !instructions || !addNote || !entryParking) {
+        if (!vehicleNumber || !otherVehicleNumber || !customerName || !mobileNumber || !alternateNumber || !kmStarting || !perKmRate || !advancedAmount || !remainingAmount || !departurePlace || !destinationPlace || !departureTime || !returnTime || !departureDate || !returnDate || !toll || !otherStateTax || !instructions || !addNote || !entryParking) {
             Alert.alert("Please fill all fields.");
             return;
         }
@@ -95,6 +118,8 @@ const PackageBookingForm: React.FC = () => {
             destinationPlace,
             departureTime: departureTime.toISOString(),
             returnTime: returnTime.toISOString(),
+            departureDate: departureDate.toISOString(),
+            returnDate: returnDate.toISOString(),
             tollInINR: toll,
             otherStateTaxInINR: otherStateTax,
             instructions,
@@ -129,6 +154,8 @@ const PackageBookingForm: React.FC = () => {
         setDestinationPlace("");
         setDepartureTime(undefined);
         setReturnTime(undefined);
+        setDepartureDate(undefined);
+        setReturnDate(undefined);
         setToll("");
         setOtherStateTax("");
         setInstructions("");
@@ -242,6 +269,23 @@ const PackageBookingForm: React.FC = () => {
                         />
                     </View>
                     <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Departure Date</Text>
+                        <TouchableOpacity
+                            style={styles.input}
+                            onPress={() => setShowDepartureDatePicker(true)}
+                        >
+                            <Text>{departureDate ? formatDate(departureDate) : "Select Date"}</Text>
+                        </TouchableOpacity>
+                        {showDepartureDatePicker && (
+                            <DateTimePicker
+                                value={departureDate || new Date()}
+                                mode="date"
+                                display="default"
+                                onChange={onChangeDepartureDate}
+                            />
+                        )}
+                    </View>
+                    <View style={styles.inputGroup}>
                         <Text style={styles.label}>Departure Time</Text>
                         <TouchableOpacity
                             style={styles.input}
@@ -255,6 +299,23 @@ const PackageBookingForm: React.FC = () => {
                                 mode="time"
                                 display="default"
                                 onChange={onChangeDepartureTime}
+                            />
+                        )}
+                    </View>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Return Date</Text>
+                        <TouchableOpacity
+                            style={styles.input}
+                            onPress={() => setShowReturnDatePicker(true)}
+                        >
+                            <Text>{returnDate ? formatDate(returnDate) : "Select Date"}</Text>
+                        </TouchableOpacity>
+                        {showReturnDatePicker && (
+                            <DateTimePicker
+                                value={returnDate || new Date()}
+                                mode="date"
+                                display="default"
+                                onChange={onChangeReturnDate}
                             />
                         )}
                     </View>

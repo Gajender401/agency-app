@@ -15,13 +15,24 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
-import { Picker } from '@react-native-picker/picker';
+import { Dropdown } from 'react-native-element-dropdown';
 import { State, City } from 'country-state-city';
 
 type CityType = {
     countryCode: string;
     name: string;
     stateCode: string;
+};
+
+type StateType = {
+    countryCode: string;
+    isoCode: string;
+    name: string;
+};
+
+type DropdownItem = {
+    label: string;
+    value: string;
 };
 
 const AddDriverScreen: React.FC = () => {
@@ -35,15 +46,29 @@ const AddDriverScreen: React.FC = () => {
     const [aadharImage, setAadharImage] = useState<string | null>(null);
     const [licenseImage, setLicenseImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [stateList, setStateList] = useState<StateType[]>([]);
     const [cityList, setCityList] = useState<CityType[]>([]);
+    const [stateDropdownData, setStateDropdownData] = useState<DropdownItem[]>([]);
+    const [cityDropdownData, setCityDropdownData] = useState<DropdownItem[]>([]);
     const { apiCaller } = useGlobalContext();
 
     useEffect(() => {
+        const states = State.getStatesOfCountry("IN");
+        setStateList(states);
+        setStateDropdownData(states.map(state => ({
+            label: state.name,
+            value: state.isoCode
+        })));
+    }, []);
+
+    useEffect(() => {
         if (state) {
-            const stateData = State.getStatesOfCountry("IN").find(s => s.isoCode === state);
-            if (stateData) {
-                setCityList(City.getCitiesOfState("IN", stateData.isoCode));
-            }
+            const cities = City.getCitiesOfState("IN", state);
+            setCityList(cities);
+            setCityDropdownData(cities.map(city => ({
+                label: city.name,
+                value: city.name
+            })));
         }
     }, [state]);
 
@@ -65,6 +90,8 @@ const AddDriverScreen: React.FC = () => {
             license: licenseImage,
         };
 
+        console.log(newDriver);
+        
         setLoading(true);
         try {
             await apiCaller.post('/api/driver', newDriver, { headers: { 'Content-Type': 'multipart/form-data' } });
@@ -141,50 +168,69 @@ const AddDriverScreen: React.FC = () => {
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>State</Text>
-                        <View style={styles.pickerContainer}>
-                            <Picker
-                                selectedValue={state}
-                                onValueChange={(itemValue) => setState(itemValue)}
-                                style={styles.picker}
-                            >
-                                <Picker.Item style={{ color: Colors.secondary }} label="Select State" value="" />
-                                {State.getStatesOfCountry("IN").map((s) => (
-                                    <Picker.Item key={s.isoCode} label={s.name} value={s.isoCode} />
-                                ))}
-                            </Picker>
-                        </View>
+                        <Dropdown
+                            style={styles.dropdown}
+                            placeholderStyle={styles.placeholderStyle}
+                            selectedTextStyle={styles.selectedTextStyle}
+                            inputSearchStyle={styles.inputSearchStyle}
+                            iconStyle={styles.iconStyle}
+                            data={stateDropdownData}
+                            search
+                            maxHeight={300}
+                            labelField="label"
+                            valueField="value"
+                            placeholder="Select state"
+                            searchPlaceholder="Search..."
+                            value={state}
+                            onChange={item => {
+                                setState(item.value);
+                            }}
+                        />
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>City</Text>
-                        <View style={styles.pickerContainer}>
-                            <Picker
-                                selectedValue={city}
-                                onValueChange={(itemValue) => setCity(itemValue)}
-                                style={styles.picker}
-                                enabled={!!state}
-                            >
-                                <Picker.Item style={{ color: Colors.secondary }} label="Select City" value="" />
-                                {cityList.map((c) => (
-                                    <Picker.Item key={c.name} label={c.name} value={c.name} />
-                                ))}
-                            </Picker>
-                        </View>
+                        <Dropdown
+                            style={styles.dropdown}
+                            placeholderStyle={styles.placeholderStyle}
+                            selectedTextStyle={styles.selectedTextStyle}
+                            inputSearchStyle={styles.inputSearchStyle}
+                            iconStyle={styles.iconStyle}
+                            data={cityDropdownData}
+                            search
+                            maxHeight={300}
+                            labelField="label"
+                            valueField="value"
+                            placeholder="Select city"
+                            searchPlaceholder="Search..."
+                            value={city}
+                            onChange={item => {
+                                setCity(item.value);
+                            }}
+                        />
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Vehicle Type</Text>
-                        <View style={styles.pickerContainer}>
-                            <Picker
-                                selectedValue={vehicleType}
-                                onValueChange={(itemValue) => setVehicleType(itemValue)}
-                                style={styles.picker}
-                            >
-                                <Picker.Item style={{ color: Colors.secondary }} label="Select Vehicle Type" value="" />
-                                <Picker.Item label="CAR" value="CAR" />
-                                <Picker.Item label="TRUCK" value="TRUCK" />
-                                <Picker.Item label="BUS" value="BUS" />
-                                <Picker.Item label="TEMPO TRAVELLER" value="TAMPO" />
-                            </Picker>
-                        </View>
+                        <Dropdown
+                            style={styles.dropdown}
+                            placeholderStyle={styles.placeholderStyle}
+                            selectedTextStyle={styles.selectedTextStyle}
+                            inputSearchStyle={styles.inputSearchStyle}
+                            iconStyle={styles.iconStyle}
+                            data={[
+                                { label: 'CAR', value: 'CAR' },
+                                { label: 'TRUCK', value: 'TRUCK' },
+                                { label: 'BUS', value: 'BUS' },
+                                { label: 'TEMPO TRAVELLER', value: 'TAMPO' },
+                            ]}
+                            maxHeight={300}
+                            labelField="label"
+                            valueField="value"
+                            placeholder="Select vehicle type"
+                            value={vehicleType}
+                            onChange={item => {
+                                setVehicleType(item.value);
+                            }}
+                        />
                     </View>
 
                     <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("driver")}>
@@ -252,14 +298,27 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         height: 40,
     },
-    pickerContainer: {
+    dropdown: {
+        height: 50,
         borderColor: Colors.secondary,
         borderWidth: 1,
         borderRadius: 10,
+        paddingHorizontal: 8,
     },
-    picker: {
-        width: "100%",
-        marginVertical: -6,
+    placeholderStyle: {
+        fontSize: 16,
+        color: Colors.secondary,
+    },
+    selectedTextStyle: {
+        fontSize: 16,
+    },
+    iconStyle: {
+        width: 20,
+        height: 20,
+    },
+    inputSearchStyle: {
+        height: 40,
+        fontSize: 16,
     },
     imagePicker: {
         backgroundColor: Colors.darkBlue,
@@ -294,5 +353,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
 });
+
 
 export default AddDriverScreen;

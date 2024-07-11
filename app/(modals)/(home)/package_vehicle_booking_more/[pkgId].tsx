@@ -4,6 +4,14 @@ import { Colors } from '@/constants/Colors'; // Ensure to import your color cons
 import { useLocalSearchParams } from 'expo-router';
 import { useGlobalContext } from '@/context/GlobalProvider';
 
+function timestampToTime(timestamp: string): string {
+  const date = new Date(timestamp);
+  const hours = date.getUTCHours().toString().padStart(2, '0');
+  const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+  const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+
+  return `${hours}:${minutes}:${seconds}`;
+}
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -50,7 +58,7 @@ const VehicleDetailsScreen: React.FC = () => {
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Other Vehicle Number:</Text>
-        <Text style={styles.value}>{vehicleDetails.otherVehicle}</Text>
+        <Text style={styles.value}>{vehicleDetails.otherVehicle.number}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Customer Name:</Text>
@@ -89,12 +97,20 @@ const VehicleDetailsScreen: React.FC = () => {
         <Text style={styles.value}>{vehicleDetails.destinationPlace}</Text>
       </View>
       <View style={styles.section}>
+        <Text style={styles.label}>Departure Date:</Text>
+        <Text style={styles.value}>{formatDate(vehicleDetails?.departureDate)}</Text>
+      </View>
+      <View style={styles.section}>
         <Text style={styles.label}>Departure Time:</Text>
-        <Text style={styles.value}>{formatDate(vehicleDetails.departureTime)}</Text>
+        <Text style={styles.value}>{timestampToTime(vehicleDetails.departureTime)}</Text>
+      </View>
+      <View style={styles.section}>
+        <Text style={styles.label}>Return Date:</Text>
+        <Text style={styles.value}>{formatDate(vehicleDetails?.returnDate)}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Return Time:</Text>
-        <Text style={styles.value}>{formatDate(vehicleDetails.returnTime)}</Text>
+        <Text style={styles.value}>{timestampToTime(vehicleDetails.returnTime)}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Toll:</Text>

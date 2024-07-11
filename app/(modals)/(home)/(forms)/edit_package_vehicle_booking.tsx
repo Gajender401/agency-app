@@ -27,8 +27,12 @@ const EditPackageBookingForm: React.FC = () => {
     const [remainingAmount, setRemainingAmount] = useState("");
     const [departurePlace, setDeparturePlace] = useState("");
     const [destinationPlace, setDestinationPlace] = useState("");
+    const [departureDate, setDepartureDate] = useState<Date | undefined>(undefined);
+    const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
     const [departureTime, setDepartureTime] = useState<Date | undefined>(undefined);
     const [returnTime, setReturnTime] = useState<Date | undefined>(undefined);
+    const [showDepartureDatePicker, setShowDepartureDatePicker] = useState(false);
+    const [showReturnDatePicker, setShowReturnDatePicker] = useState(false);
     const [showDepartureTimePicker, setShowDepartureTimePicker] = useState(false);
     const [showReturnTimePicker, setShowReturnTimePicker] = useState(false);
     const [toll, setToll] = useState("");
@@ -54,6 +58,8 @@ const EditPackageBookingForm: React.FC = () => {
             setRemainingAmount(editData.remainingAmountInINR);
             setDeparturePlace(editData.departurePlace);
             setDestinationPlace(editData.destinationPlace);
+            setDepartureDate(new Date(editData.departureDate));
+            setReturnDate(new Date(editData.returnDate));
             setDepartureTime(new Date(editData.departureTime));
             setReturnTime(new Date(editData.returnTime));
             setToll(editData.tollInINR);
@@ -65,7 +71,7 @@ const EditPackageBookingForm: React.FC = () => {
     }, [editData])
 
     const handleBooking = async () => {
-        if (!vehicleNumber || !otherVehicleNumber || !customerName || !mobileNumber || !alternateNumber || !kmStarting || !perKmRate || !advancedAmount || !remainingAmount || !departurePlace || !destinationPlace || !departureTime || !returnTime || !toll || !otherStateTax || !instructions || !addNote || !entryParking) {
+        if (!vehicleNumber || !otherVehicleNumber || !customerName || !mobileNumber || !alternateNumber || !kmStarting || !perKmRate || !advancedAmount || !remainingAmount || !departurePlace || !destinationPlace || !departureDate || !returnDate || !departureTime || !returnTime || !toll || !otherStateTax || !instructions || !addNote || !entryParking) {
             Alert.alert("Please fill all fields.");
             return;
         }
@@ -82,6 +88,8 @@ const EditPackageBookingForm: React.FC = () => {
             remainingAmountInINR: remainingAmount,
             departurePlace,
             destinationPlace,
+            departureDate: departureDate?.toISOString(),
+            returnDate: returnDate?.toISOString(),
             departureTime: departureTime?.toISOString(),
             returnTime: returnTime?.toISOString(),
             tollInINR: toll,
@@ -103,6 +111,20 @@ const EditPackageBookingForm: React.FC = () => {
         }
     };
 
+    const onChangeDepartureDate = (event: any, selectedDate?: Date) => {
+        setShowDepartureDatePicker(false);
+        if (selectedDate) {
+            setDepartureDate(selectedDate);
+        }
+    };
+
+    const onChangeReturnDate = (event: any, selectedDate?: Date) => {
+        setShowReturnDatePicker(false);
+        if (selectedDate) {
+            setReturnDate(selectedDate);
+        }
+    };
+
     const onChangeDepartureTime = (event: any, selectedDate?: Date) => {
         setShowDepartureTimePicker(false);
         if (selectedDate) {
@@ -115,6 +137,11 @@ const EditPackageBookingForm: React.FC = () => {
         if (selectedDate) {
             setReturnTime(selectedDate);
         }
+    };
+
+    const formatDate = (date: Date | undefined) => {
+        if (!date) return "";
+        return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear().toString().slice(-2)}`;
     };
 
     return (
@@ -216,6 +243,23 @@ const EditPackageBookingForm: React.FC = () => {
                         />
                     </View>
                     <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Departure Date</Text>
+                        <TouchableOpacity
+                            style={styles.input}
+                            onPress={() => setShowDepartureDatePicker(true)}
+                        >
+                            <Text>{departureDate ? formatDate(departureDate) : "Select Date"}</Text>
+                        </TouchableOpacity>
+                        {showDepartureDatePicker && (
+                            <DateTimePicker
+                                value={departureDate || new Date()}
+                                mode="date"
+                                display="default"
+                                onChange={onChangeDepartureDate}
+                            />
+                        )}
+                    </View>
+                    <View style={styles.inputGroup}>
                         <Text style={styles.label}>Departure Time</Text>
                         <TouchableOpacity
                             style={styles.input}
@@ -229,6 +273,23 @@ const EditPackageBookingForm: React.FC = () => {
                                 mode="time"
                                 display="default"
                                 onChange={onChangeDepartureTime}
+                            />
+                        )}
+                    </View>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Return Date</Text>
+                        <TouchableOpacity
+                            style={styles.input}
+                            onPress={() => setShowReturnDatePicker(true)}
+                        >
+                            <Text>{returnDate ? formatDate(returnDate) : "Select Date"}</Text>
+                        </TouchableOpacity>
+                        {showReturnDatePicker && (
+                            <DateTimePicker
+                                value={returnDate || new Date()}
+                                mode="date"
+                                display="default"
+                                onChange={onChangeReturnDate}
                             />
                         )}
                     </View>

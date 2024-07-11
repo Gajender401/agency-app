@@ -29,7 +29,7 @@ const AddTechnicianScreen: React.FC = () => {
             Alert.alert("Please fill all fields.");
             return;
         }
-
+ 
         const newTechnician = {
             name,
             mobileNumber: mobile,

@@ -37,6 +37,15 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
   </Modal>
 );
 
+function timestampToTime(timestamp: string): string {
+  const date = new Date(timestamp);
+  const hours = date.getUTCHours().toString().padStart(2, '0');
+  const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+  const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+
+  return `${hours}:${minutes}:${seconds}`;
+}
+
 const DailyRouteVehicles: React.FC = () => {
   const [dailyRoutes, setDailyRoutes] = useState<DailyRoute[]>([]);
   const [loading, setLoading] = useState(true);
@@ -185,7 +194,7 @@ const DailyRouteVehicles: React.FC = () => {
                 Vehicle Number: <Text style={{ color: "black" }}>{route.vehicleNumber}</Text>
               </Text>
               <Text style={styles.cardText}>
-                Departure Time: <Text style={{ color: "black" }}>{route.departureTime}</Text>
+                Departure Time: <Text style={{ color: "black" }}>{timestampToTime(route.departureTime)}</Text>
               </Text>
               <Text style={styles.cardText}>
                 Cleaner Name: <Text style={{ color: "black" }}>{route.cleaner ? route.cleaner.name : ""}</Text>

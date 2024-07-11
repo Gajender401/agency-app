@@ -292,6 +292,8 @@ interface Package {
   createdAt: string;
   updatedAt: string;
   status: string;
+  departureDate:string;
+  returnDate:string;
 }
 
 
