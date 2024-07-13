@@ -76,7 +76,7 @@ const BusListScreen: React.FC = () => {
     const [showPhotoModal, setShowPhotoModal] = React.useState(false);
     const [idToDelete, setIdToDelete] = useState<null|string>(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const { apiCaller, setEditData } = useGlobalContext();
+    const { apiCaller, setEditData, refresh } = useGlobalContext();
 
     const filterByType = (data: Vehicle[], type: string): Vehicle[] => {
         return data.filter(vehicle => vehicle.type === type);
@@ -97,7 +97,7 @@ const BusListScreen: React.FC = () => {
 
     useEffect(() => {
         fetchBuses();
-    }, []);
+    }, [refresh]);
 
     const handleDelete = async() => {
         await apiCaller.delete(`/api/vehicle?vehicleId=${idToDelete}`);

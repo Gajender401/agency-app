@@ -56,7 +56,7 @@ const VehicleListScreen: React.FC = () => {
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const { apiCaller, setEditData } = useGlobalContext();
+    const { apiCaller, setEditData, refresh } = useGlobalContext();
 
     const fetchVehicles = async () => {
         try {
@@ -73,7 +73,7 @@ const VehicleListScreen: React.FC = () => {
 
     useEffect(() => {
         fetchVehicles();
-    }, []);
+    }, [refresh]);
 
     const handleSearch = (query: string) => {
         setSearchQuery(query);

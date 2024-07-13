@@ -64,7 +64,7 @@ const DailyRouteVehicles: React.FC = () => {
   const [selectedCleaner, setSelectedCleaner] = useState<string>("");
   const [instruction, setInstruction] = useState("")
   const [searchQuery, setSearchQuery] = useState("");
-  const { apiCaller, setEditData } = useGlobalContext();
+  const { apiCaller, setEditData, refresh } = useGlobalContext();
 
   const fetchDailyRoutes = async () => {
     try {
@@ -106,7 +106,7 @@ const DailyRouteVehicles: React.FC = () => {
     fetchDailyRoutes();
     fetchDrivers();
     fetchCleaners();
-  }, []);
+  }, [refresh]);
 
   const handleDelete = async () => {
     if (selectedRoute) {

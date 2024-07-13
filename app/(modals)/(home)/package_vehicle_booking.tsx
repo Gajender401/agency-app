@@ -60,7 +60,7 @@ const PackageVehicleListScreen: React.FC = () => {
   const [instruction, setInstruction] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVehicleType, setSelectedVehicleType] = useState("");
-  const { apiCaller, setEditData, setInvoiceData } = useGlobalContext();
+  const { apiCaller, setEditData, setInvoiceData, refresh } = useGlobalContext();
 
   const fetchPackages = async () => {
     try {
@@ -102,7 +102,7 @@ const PackageVehicleListScreen: React.FC = () => {
     fetchPackages();
     fetchDrivers();
     fetchCleaners();
-  }, []);
+  }, [refresh]);
 
   useEffect(() => {
     filterPackages();

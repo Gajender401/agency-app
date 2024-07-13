@@ -54,7 +54,7 @@ const ServiceHistoryScreen: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [idToDelete, setIdToDelete] = useState<null | string>(null)
     const [searchQuery, setSearchQuery] = useState("");
-    const { apiCaller, setEditData } = useGlobalContext();
+    const { apiCaller, setEditData, refresh } = useGlobalContext();
 
     const fetchVehiclesDocs = async () => {
         try {
@@ -70,7 +70,7 @@ const ServiceHistoryScreen: React.FC = () => {
 
     useEffect(() => {
         fetchVehiclesDocs();
-    }, []);
+    }, [refresh]);
 
     const handleViewBill = (billUrl: string) => {
         console.log("Bill URL:", billUrl);

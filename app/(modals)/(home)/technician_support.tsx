@@ -59,7 +59,7 @@ const TechnicianSupport: React.FC = () => {
     const [idToDelete, setIdToDelete] = useState<null|string>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [vehicleFilter, setVehicleFilter] = useState('');
-    const { apiCaller, setEditData } = useGlobalContext();
+    const { apiCaller, setEditData, refresh } = useGlobalContext();
 
     const fetchTechnicians = async () => {
         try {
@@ -76,7 +76,7 @@ const TechnicianSupport: React.FC = () => {
 
     useEffect(() => {
         fetchTechnicians();
-    }, []);
+    }, [refresh]);
 
     useEffect(() => {
         const filtered = technicians.filter(tech => 

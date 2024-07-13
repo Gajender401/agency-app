@@ -44,7 +44,7 @@ const DriverListScreen: React.FC = () => {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [idToDelete, setIdToDelete] = useState<null|string>(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const { apiCaller, setEditData } = useGlobalContext();
+    const { apiCaller, setEditData, refresh } = useGlobalContext();
 
     const fetchDrivers = async () => {
         try {
@@ -60,7 +60,7 @@ const DriverListScreen: React.FC = () => {
 
     useEffect(() => {
         fetchDrivers();
-    }, []);
+    }, [refresh]);
 
     const handleDelete = async() => {
         await apiCaller.delete(`/api/driver?driverId=${idToDelete}`);

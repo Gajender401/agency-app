@@ -37,7 +37,6 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
 );
 
 const CleanerListScreen: React.FC = () => {
-    // State declarations
     const [cleaners, setCleaners] = useState<Cleaner[]>([]);
     const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -45,9 +44,8 @@ const CleanerListScreen: React.FC = () => {
     const [showImageModal, setShowImageModal] = useState(false);
     const [idToDelete, setIdToDelete] = useState<null|string>(null);
     const [searchQuery, setSearchQuery] = useState(""); // New state for search query
-    const { apiCaller, setEditData } = useGlobalContext();
+    const { apiCaller, setEditData, refresh } = useGlobalContext();
 
-    // Fetch cleaners from API
     const fetchCleaners = async () => {
         try {
             setLoading(true);
@@ -60,25 +58,21 @@ const CleanerListScreen: React.FC = () => {
         }
     };
 
-    // Load cleaners on component mount
     useEffect(() => {
         fetchCleaners();
-    }, []);
+    }, [refresh]);
 
-    // Handle cleaner deletion
     const handleDelete = async() => {
         await apiCaller.delete(`/api/cleaner?cleanerId=${idToDelete}`);
         setShowDeleteModal(false);
         fetchCleaners();
     };
 
-    // Handle viewing cleaner's image
     const handleViewImage = (imageUri: string) => {
         setSelectedImage(imageUri);
         setShowImageModal(true);
     };
 
-    // New function to filter cleaners based on search query
     const filterCleaners = (query: string) => {
         return cleaners.filter((cleaner) =>
             Object.values(cleaner).some((value) =>
@@ -87,18 +81,14 @@ const CleanerListScreen: React.FC = () => {
         );
     };
 
-    // New function to handle search
     const handleSearch = () => {
-        // This will re-render the component with the filtered results
         setSearchQuery(searchQuery);
     };
 
-    // Filter cleaners based on search query
     const filteredCleaners = searchQuery ? filterCleaners(searchQuery) : cleaners;
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* Search input */}
             <View style={styles.searchContainer}>
                 <TouchableOpacity onPress={handleSearch}>
                     <FontAwesome5 name="search" size={18} color={Colors.secondary} />
@@ -112,12 +102,10 @@ const CleanerListScreen: React.FC = () => {
                 />
             </View>
 
-            {/* Add cleaner button */}
             <TouchableOpacity onPress={() => router.push("add_cleaner")} style={styles.addButton}>
                 <Text style={styles.addButtonText}>Add cleaner</Text>
             </TouchableOpacity>
 
-            {/* Cleaner list */}
             {loading ? (
                 <ActivityIndicator size="large" color={Colors.darkBlue} />
             ) : (

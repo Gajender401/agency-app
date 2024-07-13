@@ -40,7 +40,7 @@ const DailyRouteVehicles: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<DailyRoute | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const { apiCaller } = useGlobalContext();
+  const { apiCaller, refresh } = useGlobalContext();
 
   const fetchDailyRoutes = async () => {
     try {
@@ -56,7 +56,7 @@ const DailyRouteVehicles: React.FC = () => {
 
   useEffect(() => {
     fetchDailyRoutes();
-  }, []);
+  }, [refresh]);
 
   const handleDelete = async () => {
     if (selectedRoute) {
