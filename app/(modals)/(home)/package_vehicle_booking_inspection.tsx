@@ -308,12 +308,13 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     marginBottom: 10,
+    marginTop:-10
   },
   filterPicker: {
     height: 40,
     width: '100%',
-    backgroundColor: '#f0f0f0',
     borderRadius: 5,
+    marginBottom:10
   },
 });
 

@@ -59,7 +59,6 @@ const TechnicianSupport: React.FC = () => {
     const [idToDelete, setIdToDelete] = useState<null|string>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [vehicleFilter, setVehicleFilter] = useState('');
-    const [cityFilter, setCityFilter] = useState('');
     const { apiCaller, setEditData } = useGlobalContext();
 
     const fetchTechnicians = async () => {
@@ -82,11 +81,10 @@ const TechnicianSupport: React.FC = () => {
     useEffect(() => {
         const filtered = technicians.filter(tech => 
             tech.technicianType.toLowerCase().includes(searchQuery.toLowerCase()) &&
-            (vehicleFilter === '' || tech.vehicleType === vehicleFilter) &&
-            (cityFilter === '' || tech.city === cityFilter)
+            (vehicleFilter === '' || tech.vehicleType === vehicleFilter)
         );
         setFilteredTechnicians(filtered);
-    }, [searchQuery, vehicleFilter, cityFilter, technicians]);
+    }, [searchQuery, vehicleFilter, technicians]);
 
     const handleDelete = async() => {
         await apiCaller.delete(`/api/technician?technicianId=${idToDelete}`);
@@ -122,17 +120,6 @@ const TechnicianSupport: React.FC = () => {
                     <Picker.Item label="BUS" value="BUS" />
                     <Picker.Item label="TRUCK" value="TRUCK" />
                     <Picker.Item label="TAMPO" value="TAMPO" />
-                </Picker>
-                <Picker
-                    selectedValue={cityFilter}
-                    style={styles.picker}
-                    onValueChange={(itemValue) => setCityFilter(itemValue)}
-                >
-                    <Picker.Item label="All Cities" value="" />
-                    <Picker.Item label="Pune" value="Pune" />
-                    <Picker.Item label="Mumbai" value="Mumbai" />
-                    <Picker.Item label="Delhi" value="Delhi" />
-                    {/* Add more cities as needed */}
                 </Picker>
             </View>
 

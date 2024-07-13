@@ -74,10 +74,10 @@ const AddServiceHistoryScreen: React.FC = () => {
         const newServiceHistory = {
             garageName,
             garageNumber,
-            date: date ? formatDate(date) : '',
+            date: date,
             workDescription,
             vehicleNumeber: vehicleNumber,
-            bills: billImages,
+            bill: billImages,
         };
 
         console.log(newServiceHistory);

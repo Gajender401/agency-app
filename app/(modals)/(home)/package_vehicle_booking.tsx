@@ -525,14 +525,15 @@ const styles = StyleSheet.create({
     borderColor: Colors.secondary,
     borderRadius: 5,
   },
-  filterContainer: {
+    filterContainer: {
     marginBottom: 10,
+    marginTop:-10
   },
   filterPicker: {
     height: 40,
     width: '100%',
-    backgroundColor: '#f0f0f0',
     borderRadius: 5,
+    marginBottom:10
   },
 });
 

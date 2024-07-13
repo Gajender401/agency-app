@@ -77,8 +77,8 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   async function fetchUser() {
     const response = await apiCaller.get('/api/user/');
     setUserData(response.data.data)
-
   }
+
   useEffect(() => {
     if (token) {
       fetchUser()
