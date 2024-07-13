@@ -19,6 +19,7 @@ import { Colors } from "@/constants/Colors";
 import { FontAwesome5, MaterialIcons, Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { Picker } from '@react-native-picker/picker';
 
 interface BlurOverlayProps {
     visible: boolean;
@@ -53,9 +54,13 @@ interface Technician {
 
 const TechnicianSupport: React.FC = () => {
     const [technicians, setTechnicians] = useState<Technician[]>([]);
+    const [filteredTechnicians, setFilteredTechnicians] = useState<Technician[]>([]);
     const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [idToDelete, setIdToDelete] = useState<null|string>(null)
+    const [idToDelete, setIdToDelete] = useState<null|string>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [vehicleFilter, setVehicleFilter] = useState('');
+    const [cityFilter, setCityFilter] = useState('');
     const { apiCaller, setEditData } = useGlobalContext();
 
     const fetchTechnicians = async () => {
@@ -63,6 +68,7 @@ const TechnicianSupport: React.FC = () => {
             setLoading(true);
             const response = await apiCaller.get('/api/technician');
             setTechnicians(response.data.data);
+            setFilteredTechnicians(response.data.data);
         } catch (err) {
             console.log(err);
         } finally {
@@ -73,6 +79,15 @@ const TechnicianSupport: React.FC = () => {
     useEffect(() => {
         fetchTechnicians();
     }, []);
+
+    useEffect(() => {
+        const filtered = technicians.filter(tech => 
+            tech.technicianType.toLowerCase().includes(searchQuery.toLowerCase()) &&
+            (vehicleFilter === '' || tech.vehicleType === vehicleFilter) &&
+            (cityFilter === '' || tech.city === cityFilter)
+        );
+        setFilteredTechnicians(filtered);
+    }, [searchQuery, vehicleFilter, cityFilter, technicians]);
 
     const handleDelete = async() => {
         await apiCaller.delete(`/api/technician?technicianId=${idToDelete}`);
@@ -90,9 +105,35 @@ const TechnicianSupport: React.FC = () => {
                 <FontAwesome5 name="search" size={18} color={Colors.secondary} />
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Search..."
+                    placeholder="Search technician category..."
                     placeholderTextColor={Colors.secondary}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
                 />
+            </View>
+
+            <View style={styles.filterContainer}>
+                <Picker
+                    selectedValue={vehicleFilter}
+                    style={styles.picker}
+                    onValueChange={(itemValue) => setVehicleFilter(itemValue)}
+                >
+                    <Picker.Item label="All Vehicles" value="" />
+                    <Picker.Item label="Car" value="car" />
+                    <Picker.Item label="Bus" value="bus" />
+                    <Picker.Item label="Truck" value="truck" />
+                </Picker>
+                <Picker
+                    selectedValue={cityFilter}
+                    style={styles.picker}
+                    onValueChange={(itemValue) => setCityFilter(itemValue)}
+                >
+                    <Picker.Item label="All Cities" value="" />
+                    <Picker.Item label="Pune" value="Pune" />
+                    <Picker.Item label="Mumbai" value="Mumbai" />
+                    <Picker.Item label="Delhi" value="Delhi" />
+                    {/* Add more cities as needed */}
+                </Picker>
             </View>
 
             <TouchableOpacity onPress={() => router.push("add_technician")} style={styles.addButton}>
@@ -103,7 +144,7 @@ const TechnicianSupport: React.FC = () => {
                 <ActivityIndicator size="large" color={Colors.darkBlue} />
             ) : (
                 <ScrollView style={styles.techniciansList}>
-                    {technicians.map((technician) => (
+                    {filteredTechnicians.map((technician) => (
                         <View key={technician._id} style={styles.card}>
                             <View style={styles.cardHeader}>
                                 <TouchableOpacity onPress={()=>{setEditData(technician);router.push("edit_technician")}} style={styles.editButton}>
@@ -122,9 +163,9 @@ const TechnicianSupport: React.FC = () => {
                                 </TouchableOpacity>
                             </View>
                             <Text style={styles.cardText}>Technician Name: <Text style={{ color: "black" }}> {technician.name}</Text></Text>
-                            <Text style={styles.cardText}>Alternate Number: <Text style={{ color: "black" }}> {technician.alternateNumber}</Text></Text>
                             <Text style={styles.cardText}>Technician Type: <Text style={{ color: "black" }}> {technician.technicianType}</Text></Text>
                             <Text style={styles.cardText}>Vehicle Type: <Text style={{ color: "black" }}> {technician.vehicleType}</Text></Text>
+                            <Text style={styles.cardText}>City: <Text style={{ color: "black" }}> {technician.city}</Text></Text>
                         </View>
                     ))}
                 </ScrollView>
@@ -174,13 +215,22 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderRadius: 5,
         paddingHorizontal: 15,
-        marginBottom: 20,
+        marginBottom: 10,
         paddingVertical: 5,
     },
     searchInput: {
         flex: 1,
         marginLeft: 10,
         color: Colors.secondary,
+    },
+    filterContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 10,
+    },
+    picker: {
+        flex: 1,
+        marginHorizontal: 5,
     },
     addButton: {
         backgroundColor: Colors.darkBlue,
@@ -233,7 +283,6 @@ const styles = StyleSheet.create({
         fontWeight: "500",
         fontSize: 13,
     },
-    // Modal Styles
     modalContainer: {
         justifyContent: "center",
         alignItems: "center",

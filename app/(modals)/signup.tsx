@@ -6,11 +6,11 @@ import {
     StyleSheet,
     TouchableOpacity,
     TextInput,
-    SafeAreaView,
     Image,
-    ScrollView,
+    Platform,
     Alert,
 } from "react-native";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import axios from 'axios';
@@ -92,17 +92,21 @@ const SignUpScreen = () => {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <StatusBar barStyle="dark-content" />
             <Image style={styles.wave_image} source={require('@/assets/images/wave.png')} />
 
-            <View style={{marginTop:150}} >
+            <View style={styles.headerContainer}>
                 <Text style={styles.headingText}>Create</Text>
                 <Text style={styles.headingText}>Account</Text>
             </View>
 
-            <View style={styles.innerContainer} >
-                <ScrollView style={styles.inputContainer}>
+            <KeyboardAwareScrollView 
+                style={styles.scrollView}
+                contentContainerStyle={styles.scrollViewContent}
+                keyboardShouldPersistTaps="handled"
+            >
+                <View style={styles.inputContainer}>
                     <TextInput
                         placeholder="Owner Name"
                         value={ownerName}
@@ -123,6 +127,7 @@ const SignUpScreen = () => {
                         onChangeText={setContact}
                         style={styles.input}
                         placeholderTextColor="#FFFFFF"
+                        keyboardType="phone-pad"
                     />
                     <TextInput
                         placeholder="WhatsApp Number"
@@ -130,6 +135,7 @@ const SignUpScreen = () => {
                         onChangeText={setWhatsapp}
                         style={styles.input}
                         placeholderTextColor="#FFFFFF"
+                        keyboardType="phone-pad"
                     />
                     <TextInput
                         placeholder="City"
@@ -151,6 +157,7 @@ const SignUpScreen = () => {
                         onChangeText={setEmail}
                         style={styles.input}
                         placeholderTextColor="#FFFFFF"
+                        keyboardType="email-address"
                     />
                     <TextInput
                         placeholder="Password"
@@ -160,30 +167,22 @@ const SignUpScreen = () => {
                         style={styles.input}
                         placeholderTextColor="#FFFFFF"
                     />
-                    {/* <View style={styles.optionsContainer}>
-                        <View style={styles.termsContainer}>
-                            <Checkbox
-                                value={termsAccepted}
-                                onValueChange={setTermsAccepted}
-                            />
-                            <Text style={styles.termsText}>I accept the Terms & Conditions</Text>
-                        </View>
-                    </View> */}
-                </ScrollView>
-
-                <TouchableOpacity onPress={handleSignUp} style={styles.button} disabled={isLoading}>
-                    <Text style={styles.buttonText}>{isLoading ? "Signing Up..." : "Sign Up"}</Text>
-                </TouchableOpacity>
-
-                <View style={styles.loginContainer}>
-                    <Text style={styles.loginText}>Already have an account? </Text>
-                    <TouchableOpacity onPress={()=>router.push("(modals)/login")} >
-                    <Text style={{fontWeight:"800"}} >Login</Text>
-                    </TouchableOpacity>
                 </View>
-            </View>
 
-        </SafeAreaView>
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity onPress={handleSignUp} style={styles.button} disabled={isLoading}>
+                        <Text style={styles.buttonText}>{isLoading ? "Signing Up..." : "Sign Up"}</Text>
+                    </TouchableOpacity>
+
+                    <View style={styles.loginContainer}>
+                        <Text style={styles.loginText}>Already have an account? </Text>
+                        <TouchableOpacity onPress={()=>router.push("(modals)/login")}>
+                            <Text style={styles.loginLinkText}>Login</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </KeyboardAwareScrollView>
+        </View>
     );
 };
 
@@ -191,14 +190,19 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#fff",
-        marginTop: StatusBar.currentHeight,
-        padding: 20,
+        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
-    innerContainer: {
-        justifyContent: "space-around",
-        alignItems: "center",
-        width: "100%",
+    headerContainer: {
+        marginTop: 150,
+        paddingHorizontal: 20,
+    },
+    scrollView: {
         flex: 1,
+    },
+    scrollViewContent: {
+        flexGrow: 1,
+        justifyContent: 'space-between',
+        paddingBottom: 20,
     },
     headingText: {
         color: "#10354B",
@@ -207,8 +211,7 @@ const styles = StyleSheet.create({
     },
     inputContainer: {
         width: "100%",
-        backgroundColor:"#FFFF",
-        marginVertical:10
+        paddingHorizontal: 20,
     },
     wave_image: {
         width: "110%",
@@ -226,17 +229,9 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
         paddingHorizontal: 20,
     },
-    optionsContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-    },
-    termsContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    termsText: {
-        marginLeft: 5,
+    buttonContainer: {
+        alignItems: 'center',
+        marginTop: 20,
     },
     button: {
         borderRadius: 30,
@@ -255,6 +250,11 @@ const styles = StyleSheet.create({
         flexDirection: "row",
     },
     loginText: {
+        color: Colors.primary,
+        fontSize: 14,
+    },
+    loginLinkText: {
+        fontWeight: "800",
         color: Colors.primary,
         fontSize: 14,
     },

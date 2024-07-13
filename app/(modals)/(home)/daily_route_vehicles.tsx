@@ -39,11 +39,16 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
 
 function timestampToTime(timestamp: string): string {
   const date = new Date(timestamp);
-  const hours = date.getUTCHours().toString().padStart(2, '0');
+  let hours = date.getUTCHours();
   const minutes = date.getUTCMinutes().toString().padStart(2, '0');
   const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
 
-  return `${hours}:${minutes}:${seconds}`;
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  const formattedHours = hours.toString().padStart(2, '0');
+
+  return `${formattedHours}:${minutes}:${seconds} ${ampm}`;
 }
 
 const DailyRouteVehicles: React.FC = () => {

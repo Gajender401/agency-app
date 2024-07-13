@@ -79,6 +79,9 @@ export default function HomeScreen() {
         <Text style={{ fontSize: 15, fontWeight: '500' }}>Hi, {userData?.userName}</Text>
       </View>
       <ScrollView>
+      <View style={styles.logoContainer}>
+  <Image source={require('@/assets/images/logo.png')} style={styles.image} />
+</View>
         <View style={styles.carouselContainer}>
           <Carousel
             width={deviceWidth * 0.9}
@@ -300,9 +303,12 @@ const styles = StyleSheet.create({
     height: 30,
     lineHeight: 15,
   },
+  logoContainer: {
+    alignItems: 'center',
+    marginVertical: 10,
+  },
   buttonContainer: {
     alignItems: 'center',
-    marginVertical: 20,
   },
   button: {
     backgroundColor: Colors.secondary,
@@ -443,5 +449,9 @@ const styles = StyleSheet.create({
     justifyContent:"center",
     paddingTop:50,
     gap:100
+  },
+  image: {
+    width: 300,
+    height: 180,
   },
 });

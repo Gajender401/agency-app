@@ -58,6 +58,13 @@ const AddServiceHistoryScreen: React.FC = () => {
         }
     };
 
+    const formatDate = (date: Date): string => {
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear().toString().slice(-2);
+        return `${day}/${month}/${year}`;
+    };
+
     const handleAddServiceHistory = async () => {
         if (!garageName || !garageNumber || !date || !workDescription || !vehicleNumber || billImages.length === 0) {
             Alert.alert("Please fill all fields and provide at least one bill image.");
@@ -67,7 +74,7 @@ const AddServiceHistoryScreen: React.FC = () => {
         const newServiceHistory = {
             garageName,
             garageNumber,
-            date: date.toISOString().split('T')[0],
+            date: date ? formatDate(date) : '',
             workDescription,
             vehicleNumeber: vehicleNumber,
             bills: billImages,
@@ -152,7 +159,7 @@ const AddServiceHistoryScreen: React.FC = () => {
                                 style={styles.input}
                                 onPress={() => setShowDatePicker(true)}
                             >
-                                <Text>{date ? date.toDateString() : "Select Date"}</Text>
+                                <Text>{date ? formatDate(date) : "Select Date"}</Text>
                             </TouchableOpacity>
                             {showDatePicker && (
                                 <DateTimePicker
