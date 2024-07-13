@@ -9,11 +9,12 @@ import {
     Image,
     Dimensions,
     ActivityIndicator,
+    TouchableOpacity,
 } from "react-native";
 import PagerView from "react-native-pager-view";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { Colors } from "@/constants/Colors"; // Make sure to import your Colors from the correct path
-import { useGlobalContext } from "@/context/GlobalProvider"; // Adjust path as per your project structure
+import { Colors } from "@/constants/Colors";
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 const { width: viewportWidth } = Dimensions.get("window");
 
@@ -36,8 +37,9 @@ interface Vehicle {
 const SellVehicleScreen: React.FC = () => {
     const [activeSlide, setActiveSlide] = useState(0);
     const [loading, setLoading] = useState(true);
-    const { apiCaller, token } = useGlobalContext(); // Ensure useGlobalContext is correctly imported and used
+    const { apiCaller, token } = useGlobalContext();
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const renderPagerItem = (item: string, index: number) => {
         return (
@@ -49,7 +51,7 @@ const SellVehicleScreen: React.FC = () => {
 
     const filterByType = (data: Vehicle[]): Vehicle[] => {
         return data.filter(vehicle => vehicle.isForRent === true);
-      };
+    };
 
     const fetchVehicles = async () => {
         try {
@@ -68,22 +70,40 @@ const SellVehicleScreen: React.FC = () => {
         fetchVehicles();
     }, []);
 
+    const filterVehicles = (query: string) => {
+        return vehicles.filter((vehicle) =>
+            Object.values(vehicle).some((value) =>
+                String(value).toLowerCase().includes(query.toLowerCase())
+            )
+        );
+    };
+
+    const handleSearch = () => {
+        setSearchQuery(searchQuery);
+    };
+
+    const filteredVehicles = searchQuery ? filterVehicles(searchQuery) : vehicles;
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>
                 <View style={styles.searchContainer}>
-                    <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                    <TouchableOpacity onPress={handleSearch}>
+                        <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                    </TouchableOpacity>
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Search..."
                         placeholderTextColor={Colors.secondary}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
                     />
                 </View>
 
                 {loading ? (
                     <ActivityIndicator size="large" color={Colors.darkBlue} style={{ marginTop: 20 }} />
                 ) : (
-                    vehicles.map((vehicle, index) => (
+                    filteredVehicles.map((vehicle, index) => (
                         <View key={index} style={styles.card}>
                             <PagerView
                                 style={styles.pagerView}

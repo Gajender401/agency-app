@@ -45,7 +45,7 @@ function timestampToTime(timestamp: string): string {
   const ampm = hours >= 12 ? 'PM' : 'AM';
 
   hours = hours % 12;
-  hours = hours ? hours : 12; // the hour '0' should be '12'
+  hours = hours ? hours : 12;
   const formattedHours = hours.toString().padStart(2, '0');
 
   return `${formattedHours}:${minutes}:${seconds} ${ampm}`;
@@ -63,6 +63,7 @@ const DailyRouteVehicles: React.FC = () => {
   const [selectedSecondaryDriver, setSelectedSecondaryDriver] = useState<string>("");
   const [selectedCleaner, setSelectedCleaner] = useState<string>("");
   const [instruction, setInstruction] = useState("")
+  const [searchQuery, setSearchQuery] = useState("");
   const { apiCaller, setEditData } = useGlobalContext();
 
   const fetchDailyRoutes = async () => {
@@ -145,9 +146,14 @@ const DailyRouteVehicles: React.FC = () => {
       setLoading(false);
     }
   };
-  
 
-
+  const filterDailyRoutes = (query: string) => {
+    return dailyRoutes.filter((route) =>
+      Object.values(route).some((value) =>
+        String(value).toLowerCase().includes(query.toLowerCase())
+      )
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -157,6 +163,8 @@ const DailyRouteVehicles: React.FC = () => {
           style={styles.searchInput}
           placeholder="Search..."
           placeholderTextColor={Colors.secondary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
       </View>
 
@@ -168,7 +176,7 @@ const DailyRouteVehicles: React.FC = () => {
         <ActivityIndicator size="large" color={Colors.darkBlue} />
       ) : (
         <ScrollView style={styles.routesList}>
-          {dailyRoutes.map((route) => (
+          {filterDailyRoutes(searchQuery).map((route) => (
             <View key={route._id} style={styles.card}>
               <View style={styles.cardHeader}>
                 <TouchableOpacity style={styles.editButton} onPress={() => {
@@ -289,13 +297,13 @@ const DailyRouteVehicles: React.FC = () => {
                 </Picker>
               </View>
               <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Instructions</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={instruction}
-                            onChangeText={(text) => setInstruction(text)}
-                        />
-                    </View>
+                <Text style={styles.label}>Instructions</Text>
+                <TextInput
+                  style={styles.input}
+                  value={instruction}
+                  onChangeText={(text) => setInstruction(text)}
+                />
+              </View>
               <View style={styles.modalButtons}>
                 <TouchableOpacity style={[styles.modalButton, { backgroundColor: "#ccc" }]} onPress={() => setShowAddDriverModal(false)}>
                   <Text style={styles.modalButtonText}>Cancel</Text>

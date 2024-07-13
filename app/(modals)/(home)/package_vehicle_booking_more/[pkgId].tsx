@@ -54,11 +54,13 @@ const VehicleDetailsScreen: React.FC = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.section}>
         <Text style={styles.label}>Vehicle Number:</Text>
-        <Text style={styles.value}>{vehicleDetails.vehicle.number}</Text>
+        {/*@ts-ignore*/}
+        <Text style={styles.value}>{vehicleDetails.vehicle}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Other Vehicle Number:</Text>
-        <Text style={styles.value}>{vehicleDetails.otherVehicle.number}</Text>
+        {/*@ts-ignore*/}
+        <Text style={styles.value}>{vehicleDetails.otherVehicle}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Customer Name:</Text>

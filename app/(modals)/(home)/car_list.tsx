@@ -55,28 +55,29 @@ interface Vehicle {
 const CarListScreen: React.FC = () => {
     const [cars, setCars] = useState<Vehicle[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showDeleteModal, setShowDeleteModal] = React.useState(false);
-    const [selectedCarImage, setSelectedCarImage] = React.useState<string[] | null>(null);
-    const [showPhotoModal, setShowPhotoModal] = React.useState(false);
-    const [idToDelete, setIdToDelete] = useState<null|string>(null)
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedCarImage, setSelectedCarImage] = useState<string[] | null>(null);
+    const [showPhotoModal, setShowPhotoModal] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<null|string>(null);
+    const [searchQuery, setSearchQuery] = useState("");
     const { apiCaller, setEditData } = useGlobalContext();
 
     const filterByType = (data: Vehicle[], type: string): Vehicle[] => {
         return data.filter(vehicle => vehicle.type === type);
-      };
+    };
 
-      const fetchVehicles = async () => {
-          try {
-              setLoading(true);
-              const response = await apiCaller.get('/api/vehicle');
-              const filteredData = filterByType(response.data.data, 'CAR')
-              setCars(filteredData);
-          } catch (err) {
-              console.log(err);
-          } finally {
-              setLoading(false);
-          }
-      };
+    const fetchVehicles = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/vehicle');
+            const filteredData = filterByType(response.data.data, 'CAR')
+            setCars(filteredData);
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
         fetchVehicles();
@@ -93,14 +94,32 @@ const CarListScreen: React.FC = () => {
         setShowPhotoModal(true);
     };
 
+    const filterCars = (query: string) => {
+        return cars.filter((car) =>
+            Object.values(car).some((value) =>
+                String(value).toLowerCase().includes(query.toLowerCase())
+            )
+        );
+    };
+
+    const handleSearch = () => {
+        setSearchQuery(searchQuery);
+    };
+
+    const filteredCars = searchQuery ? filterCars(searchQuery) : cars;
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.searchContainer}>
-                <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                <TouchableOpacity onPress={handleSearch}>
+                    <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                </TouchableOpacity>
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Search..."
                     placeholderTextColor={Colors.secondary}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
                 />
             </View>
 
@@ -112,7 +131,7 @@ const CarListScreen: React.FC = () => {
                 <ActivityIndicator size="large" color={Colors.darkBlue} />
             ) : (
                 <ScrollView style={styles.carsList}>
-                    {cars.map((car) => (
+                    {filteredCars.map((car) => (
                         <View key={car._id} style={styles.card}>
                             <View style={styles.cardHeader}>
                                 <TouchableOpacity onPress={()=> {setEditData(car);router.push("edit_car")}} style={styles.editButton}>
@@ -136,7 +155,6 @@ const CarListScreen: React.FC = () => {
                 </ScrollView>
             )}
 
-            {/* Delete Confirmation Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -160,7 +178,6 @@ const CarListScreen: React.FC = () => {
                 </View>
             </Modal>
 
-            {/* Photo Modal */}
             <Modal
                 animationType="fade"
                 transparent={true}

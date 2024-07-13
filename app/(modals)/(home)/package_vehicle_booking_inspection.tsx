@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -15,6 +14,7 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { Picker } from '@react-native-picker/picker';
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -26,9 +26,12 @@ function formatDate(dateString: string): string {
 
 const PackageVehicleListScreen: React.FC = () => {
   const [packages, setPackages] = useState<Package[]>([]);
+  const [filteredPackages, setFilteredPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedVehicleType, setSelectedVehicleType] = useState("");
   const { apiCaller, setInvoiceData } = useGlobalContext();
 
   const fetchPackages = async () => {
@@ -47,6 +50,29 @@ const PackageVehicleListScreen: React.FC = () => {
   useEffect(() => {
     fetchPackages();
   }, []);
+
+  useEffect(() => {
+    filterPackages();
+  }, [packages, searchQuery, selectedVehicleType]);
+
+  const filterPackages = () => {
+    let filtered = packages;
+
+    if (searchQuery) {
+      filtered = filtered.filter(pkg => 
+        pkg.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pkg.departurePlace.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pkg.destinationPlace.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (pkg.vehicle && pkg.vehicle.number.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }
+
+    if (selectedVehicleType) {
+      filtered = filtered.filter(pkg => pkg.vehicle && pkg.vehicle.type === selectedVehicleType);
+    }
+
+    setFilteredPackages(filtered);
+  };
 
   const handleDelete = async () => {
     if (selectedPackage) {
@@ -68,14 +94,30 @@ const PackageVehicleListScreen: React.FC = () => {
           style={styles.searchInput}
           placeholder="Search..."
           placeholderTextColor={Colors.secondary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
+      </View>
+
+      <View style={styles.filterContainer}>
+        <Picker
+          selectedValue={selectedVehicleType}
+          onValueChange={(itemValue) => setSelectedVehicleType(itemValue)}
+          style={styles.filterPicker}
+        >
+          <Picker.Item label="All Vehicle Types" value="" />
+          <Picker.Item label="CAR" value="CAR" />
+          <Picker.Item label="BUS" value="BUS" />
+          <Picker.Item label="TRUCK" value="TRUCK" />
+          <Picker.Item label="TAMPO" value="TAMPO" />
+        </Picker>
       </View>
 
       {loading ? (
         <ActivityIndicator size="large" color={Colors.darkBlue} />
       ) : (
         <ScrollView style={styles.packagesList}>
-          {packages.map((pkg) => (
+          {filteredPackages.map((pkg) => (
             <View key={pkg._id} style={styles.card}>
               <View style={styles.cardHeader}>
                 <TouchableOpacity onPress={() => { setInvoiceData(pkg); router.push("invoice") }} style={styles.editButton}>
@@ -146,6 +188,7 @@ const PackageVehicleListScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -166,19 +209,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 10,
     color: Colors.secondary,
-  },
-  addButton: {
-    backgroundColor: Colors.darkBlue,
-    paddingVertical: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    marginBottom: 20,
-    width: 150,
-  },
-  addButtonText: {
-    color: "#fff",
-    fontWeight: "semibold",
-    fontSize: 12,
   },
   packagesList: {
     flex: 1,
@@ -212,19 +242,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "semibold",
     fontSize: 10,
-  },
-  packageInfo: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 5,
-  },
-  label: {
-    fontWeight: "semibold",
-    fontSize: 14,
-  },
-  value: {
-    fontWeight: "semibold",
-    fontSize: 15,
   },
   cardText: {
     marginBottom: 6,
@@ -289,34 +306,13 @@ const styles = StyleSheet.create({
     color: "white",
     fontWeight: "bold",
   },
-  overlay: {
-    flex: 1,
+  filterContainer: {
+    marginBottom: 10,
   },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalScroll: {
-    width: "100%",
-  },
-
-  inputGroup: {
-    marginBottom: 15,
-    width: "100%"
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    fontSize: 16,
-  },
-  picker: {
-    width: "100%",
-    height: 50,
-    borderWidth: 1,
-    borderColor: Colors.secondary,
+  filterPicker: {
+    height: 40,
+    width: '100%',
+    backgroundColor: '#f0f0f0',
     borderRadius: 5,
   },
 });

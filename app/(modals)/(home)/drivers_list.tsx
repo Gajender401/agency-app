@@ -36,14 +36,14 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
     </Modal>
 );
 
-
 const DriverListScreen: React.FC = () => {
     const [drivers, setDrivers] = useState<Driver[]>([]);
     const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    const [idToDelete, setIdToDelete] = useState<null|string>(null)
+    const [idToDelete, setIdToDelete] = useState<null|string>(null);
+    const [searchQuery, setSearchQuery] = useState("");
     const { apiCaller, setEditData } = useGlobalContext();
 
     const fetchDrivers = async () => {
@@ -73,14 +73,32 @@ const DriverListScreen: React.FC = () => {
         setShowImageModal(true);
     };
 
+    const filterDrivers = (query: string) => {
+        return drivers.filter((driver) =>
+            Object.values(driver).some((value) =>
+                String(value).toLowerCase().includes(query.toLowerCase())
+            )
+        );
+    };
+
+    const handleSearch = () => {
+        setSearchQuery(searchQuery);
+    };
+
+    const filteredDrivers = searchQuery ? filterDrivers(searchQuery) : drivers;
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.searchContainer}>
-                <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                <TouchableOpacity onPress={handleSearch}>
+                    <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                </TouchableOpacity>
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Search..."
                     placeholderTextColor={Colors.secondary}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
                 />
             </View>
 
@@ -92,7 +110,7 @@ const DriverListScreen: React.FC = () => {
                 <ActivityIndicator size="large" color={Colors.darkBlue} />
             ) : (
                 <ScrollView style={styles.driversList}>
-                    {drivers.map((driver) => (
+                    {filteredDrivers.map((driver) => (
                         <View key={driver._id} style={styles.card}>
                             <Image
                                 source={{ uri: driver.photo }}
@@ -138,7 +156,6 @@ const DriverListScreen: React.FC = () => {
                 </ScrollView>
             )}
 
-            {/* Delete Confirmation Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -162,7 +179,6 @@ const DriverListScreen: React.FC = () => {
                 </View>
             </Modal>
 
-            {/* Image View Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -285,7 +301,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 20,
     },
-    // Modal Styles
     modalContainer: {
         flex: 1,
         justifyContent: "center",

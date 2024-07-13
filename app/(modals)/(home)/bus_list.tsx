@@ -74,7 +74,8 @@ const BusListScreen: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
     const [selectedBusImage, setSelectedBusImage] = React.useState<string[] | null>(null);
     const [showPhotoModal, setShowPhotoModal] = React.useState(false);
-    const [idToDelete, setIdToDelete] = useState<null|string>(null)
+    const [idToDelete, setIdToDelete] = useState<null|string>(null);
+    const [searchQuery, setSearchQuery] = useState("");
     const { apiCaller, setEditData } = useGlobalContext();
 
     const filterByType = (data: Vehicle[], type: string): Vehicle[] => {
@@ -109,14 +110,32 @@ const BusListScreen: React.FC = () => {
         setShowPhotoModal(true);
     };
 
+    const filterBuses = (query: string) => {
+        return buses.filter((bus) =>
+            Object.values(bus).some((value) =>
+                String(value).toLowerCase().includes(query.toLowerCase())
+            )
+        );
+    };
+
+    const handleSearch = () => {
+        setSearchQuery(searchQuery);
+    };
+
+    const filteredBuses = searchQuery ? filterBuses(searchQuery) : buses;
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.searchContainer}>
-                <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                <TouchableOpacity onPress={handleSearch}>
+                    <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                </TouchableOpacity>
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Search..."
                     placeholderTextColor={Colors.secondary}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
                 />
             </View>
 
@@ -128,7 +147,7 @@ const BusListScreen: React.FC = () => {
                 <ActivityIndicator size="large" color={Colors.darkBlue} />
             ) : (
                 <ScrollView style={styles.busesList}>
-                    {buses.map((bus) => (
+                    {filteredBuses.map((bus) => (
                         <View key={bus._id} style={styles.card}>
                             <View style={styles.cardHeader}>
                                 <TouchableOpacity onPress={()=> {setEditData(bus);router.push("edit_bus")}} style={styles.editButton}>

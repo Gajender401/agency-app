@@ -47,6 +47,7 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
 
 const PackageVehicleListScreen: React.FC = () => {
   const [packages, setPackages] = useState<Package[]>([]);
+  const [filteredPackages, setFilteredPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
@@ -56,7 +57,9 @@ const PackageVehicleListScreen: React.FC = () => {
   const [selectedPrimaryDriver, setSelectedPrimaryDriver] = useState<string>("");
   const [selectedSecondaryDriver, setSelectedSecondaryDriver] = useState<string>("");
   const [selectedCleaner, setSelectedCleaner] = useState<string>("");
-  const [instruction, setInstruction] = useState("")
+  const [instruction, setInstruction] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedVehicleType, setSelectedVehicleType] = useState("");
   const { apiCaller, setEditData, setInvoiceData } = useGlobalContext();
 
   const fetchPackages = async () => {
@@ -100,6 +103,29 @@ const PackageVehicleListScreen: React.FC = () => {
     fetchDrivers();
     fetchCleaners();
   }, []);
+
+  useEffect(() => {
+    filterPackages();
+  }, [packages, searchQuery, selectedVehicleType]);
+
+  const filterPackages = () => {
+    let filtered = packages;
+
+    if (searchQuery) {
+      filtered = filtered.filter(pkg => 
+        pkg.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pkg.departurePlace.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pkg.destinationPlace.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (pkg.vehicle && pkg.vehicle.number.toLowerCase().includes(searchQuery.toLowerCase()))
+      );
+    }
+
+    if (selectedVehicleType) {
+      filtered = filtered.filter(pkg => pkg.vehicle && pkg.vehicle.type === selectedVehicleType);
+    }
+
+    setFilteredPackages(filtered);
+  };
 
   const handleDelete = async () => {
     if (selectedPackage) {
@@ -148,7 +174,23 @@ const PackageVehicleListScreen: React.FC = () => {
           style={styles.searchInput}
           placeholder="Search..."
           placeholderTextColor={Colors.secondary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
+      </View>
+
+      <View style={styles.filterContainer}>
+        <Picker
+          selectedValue={selectedVehicleType}
+          onValueChange={(itemValue) => setSelectedVehicleType(itemValue)}
+          style={styles.filterPicker}
+        >
+          <Picker.Item label="All Vehicle Types" value="" />
+          <Picker.Item label="CAR" value="CAR" />
+          <Picker.Item label="BUS" value="BUS" />
+          <Picker.Item label="TRUCK" value="TRUCK" />
+          <Picker.Item label="TAMPO" value="TAMPO" />
+        </Picker>
       </View>
 
       <TouchableOpacity onPress={() => router.push("add_package_vehicle_booking")} style={styles.addButton}>
@@ -159,7 +201,7 @@ const PackageVehicleListScreen: React.FC = () => {
         <ActivityIndicator size="large" color={Colors.darkBlue} />
       ) : (
         <ScrollView style={styles.packagesList}>
-          {packages.map((pkg) => (
+          {filteredPackages.map((pkg) => (
             <View key={pkg._id} style={styles.card}>
               <View style={styles.cardHeader}>
                 <TouchableOpacity onPress={() => { setEditData(pkg); router.push("edit_package_vehicle_booking") }} style={styles.editButton}>
@@ -309,6 +351,7 @@ const PackageVehicleListScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -480,6 +523,15 @@ const styles = StyleSheet.create({
     height: 50,
     borderWidth: 1,
     borderColor: Colors.secondary,
+    borderRadius: 5,
+  },
+  filterContainer: {
+    marginBottom: 10,
+  },
+  filterPicker: {
+    height: 40,
+    width: '100%',
+    backgroundColor: '#f0f0f0',
     borderRadius: 5,
   },
 });

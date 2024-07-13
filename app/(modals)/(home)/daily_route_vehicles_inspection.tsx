@@ -39,7 +39,8 @@ const DailyRouteVehicles: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<DailyRoute | null>(null);
-  const { apiCaller} = useGlobalContext();
+  const [searchQuery, setSearchQuery] = useState("");
+  const { apiCaller } = useGlobalContext();
 
   const fetchDailyRoutes = async () => {
     try {
@@ -69,6 +70,16 @@ const DailyRouteVehicles: React.FC = () => {
     }
   };
 
+  const filterDailyRoutes = (routes: DailyRoute[], query: string) => {
+    return routes.filter((route) =>
+      Object.values(route).some((value) =>
+        String(value).toLowerCase().includes(query.toLowerCase())
+      )
+    );
+  };
+
+  const filteredRoutes = filterDailyRoutes(dailyRoutes, searchQuery);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.searchContainer}>
@@ -77,6 +88,8 @@ const DailyRouteVehicles: React.FC = () => {
           style={styles.searchInput}
           placeholder="Search..."
           placeholderTextColor={Colors.secondary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
       </View>
 
@@ -84,7 +97,7 @@ const DailyRouteVehicles: React.FC = () => {
         <ActivityIndicator size="large" color={Colors.darkBlue} />
       ) : (
         <ScrollView style={styles.routesList}>
-          {dailyRoutes.map((route) => (
+          {filteredRoutes.map((route) => (
             <View key={route._id} style={styles.card}>
               <View style={styles.cardHeader}>
                 <TouchableOpacity onPress={() => { setShowDeleteModal(true); setSelectedRoute(route); }}>

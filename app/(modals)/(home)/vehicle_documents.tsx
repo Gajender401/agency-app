@@ -49,11 +49,13 @@ interface VehicleDocuments {
 
 const VehicleListScreen: React.FC = () => {
     const [vehicles, setVehicles] = useState<VehicleDocuments[]>([]);
+    const [filteredVehicles, setFilteredVehicles] = useState<VehicleDocuments[]>([]);
     const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState("");
     const { apiCaller, setEditData } = useGlobalContext();
 
     const fetchVehicles = async () => {
@@ -61,6 +63,7 @@ const VehicleListScreen: React.FC = () => {
             setLoading(true);
             const response = await apiCaller.get('/api/vehicle');
             setVehicles(response.data.data);
+            setFilteredVehicles(response.data.data);
         } catch (err) {
             console.log(err);
         } finally {
@@ -71,6 +74,14 @@ const VehicleListScreen: React.FC = () => {
     useEffect(() => {
         fetchVehicles();
     }, []);
+
+    const handleSearch = (query: string) => {
+        setSearchQuery(query);
+        const filtered = vehicles.filter(vehicle => 
+            vehicle.number.toLowerCase().includes(query.toLowerCase())
+        );
+        setFilteredVehicles(filtered);
+    };
 
     const handleDelete = async () => {
         if (selectedVehicleId) {
@@ -91,8 +102,10 @@ const VehicleListScreen: React.FC = () => {
                 <FontAwesome5 name="search" size={18} color={Colors.secondary} />
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Search..."
+                    placeholder="Search by vehicle number..."
                     placeholderTextColor={Colors.secondary}
+                    value={searchQuery}
+                    onChangeText={handleSearch}
                 />
             </View>
 
@@ -104,7 +117,7 @@ const VehicleListScreen: React.FC = () => {
                 <ActivityIndicator size="large" color={Colors.darkBlue} />
             ) : (
                 <ScrollView style={styles.vehiclesList}>
-                    {vehicles.map((vehicle) => (
+                    {filteredVehicles.map((vehicle) => (
                         <View key={vehicle._id} style={styles.card}>
                             <View style={styles.cardHeader}>
                                 <TouchableOpacity onPress={()=> {setEditData(vehicle); router.push("edit_vehicle_documents")}} style={styles.editButton}>
@@ -140,7 +153,6 @@ const VehicleListScreen: React.FC = () => {
                 </ScrollView>
             )}
 
-            {/* Delete Confirmation Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -164,7 +176,6 @@ const VehicleListScreen: React.FC = () => {
                 </View>
             </Modal>
 
-            {/* Image View Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}

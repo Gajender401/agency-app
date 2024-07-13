@@ -36,13 +36,30 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
     </Modal>
 );
 
+interface Vehicle {
+    _id: string;
+    number: string;
+    noOfTyres: number;
+    vehicleWeightInKGS: number;
+    model: string;
+    bodyType: string;
+    chassisBrand: string;
+    location: string;
+    contactNumber: string;
+    photos: string[];
+    isForRent: boolean;
+    isForSell: boolean;
+    type: string;
+}
+
 const TruckListScreen: React.FC = () => {
     const [trucks, setTrucks] = useState<Vehicle[]>([]);
     const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedTruckImage, setSelectedTruckImage] = useState<string[] | null>(null);
     const [showPhotoModal, setShowPhotoModal] = useState(false);
-    const [idToDelete, setIdToDelete] = useState<null|string>(null)
+    const [idToDelete, setIdToDelete] = useState<null|string>(null);
+    const [searchQuery, setSearchQuery] = useState("");
     const { apiCaller, setEditData } = useGlobalContext();
 
     const filterByType = (data: Vehicle[], type: string): Vehicle[] => {
@@ -77,14 +94,32 @@ const TruckListScreen: React.FC = () => {
         setShowPhotoModal(true);
     };
 
+    const filterTrucks = (query: string) => {
+        return trucks.filter((truck) =>
+            Object.values(truck).some((value) =>
+                String(value).toLowerCase().includes(query.toLowerCase())
+            )
+        );
+    };
+
+    const handleSearch = () => {
+        setSearchQuery(searchQuery);
+    };
+
+    const filteredTrucks = searchQuery ? filterTrucks(searchQuery) : trucks;
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.searchContainer}>
-                <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                <TouchableOpacity onPress={handleSearch}>
+                    <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                </TouchableOpacity>
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Search..."
                     placeholderTextColor={Colors.secondary}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
                 />
             </View>
 
@@ -96,7 +131,7 @@ const TruckListScreen: React.FC = () => {
                 <ActivityIndicator size="large" color={Colors.darkBlue} />
             ) : (
                 <ScrollView style={styles.trucksList}>
-                    {trucks.map((truck) => (
+                    {filteredTrucks.map((truck) => (
                         <View key={truck._id} style={styles.card}>
                             <View style={styles.cardHeader}>
                                 <TouchableOpacity onPress={()=> {setEditData(truck);router.push("edit_truck")}} style={styles.editButton}>
@@ -129,7 +164,6 @@ const TruckListScreen: React.FC = () => {
                             </Text>
                             <Text style={styles.cardText}>{truck.isForRent&&" Rent /"} {truck.isForSell&&" Sell"}</Text>
 
-
                             <TouchableOpacity style={styles.viewPhotoButton} onPress={() => handleViewPhoto(truck.photos)}>
                                 <Text style={styles.viewPhotoButtonText}>View Photos</Text>
                             </TouchableOpacity>
@@ -138,7 +172,6 @@ const TruckListScreen: React.FC = () => {
                 </ScrollView>
             )}
 
-            {/* Delete Confirmation Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -162,7 +195,6 @@ const TruckListScreen: React.FC = () => {
                 </View>
             </Modal>
 
-            {/* Photo Modal */}
             <Modal
                 animationType="fade"
                 transparent={true}

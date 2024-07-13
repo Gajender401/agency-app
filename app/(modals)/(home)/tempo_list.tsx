@@ -55,10 +55,11 @@ interface Vehicle {
 const TempoListScreen: React.FC = () => {
     const [tempos, setTempos] = useState<Vehicle[]>([]);
     const [loading, setLoading] = useState(true);
-    const [showDeleteModal, setShowDeleteModal] = React.useState(false);
-    const [selectedTempoImage, setSelectedTempoImage] = React.useState<string[] | null>(null);
-    const [showPhotoModal, setShowPhotoModal] = React.useState(false);
-    const [idToDelete, setIdToDelete] = useState<null | string>(null)
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedTempoImage, setSelectedTempoImage] = useState<string[] | null>(null);
+    const [showPhotoModal, setShowPhotoModal] = useState(false);
+    const [idToDelete, setIdToDelete] = useState<null | string>(null);
+    const [searchQuery, setSearchQuery] = useState("");
     const { apiCaller, setEditData } = useGlobalContext();
 
     const filterByType = (data: Vehicle[], type: string): Vehicle[] => {
@@ -79,14 +80,13 @@ const TempoListScreen: React.FC = () => {
     };
 
     useEffect(() => {
-
         fetchVehicles();
     }, []);
 
     const handleDelete = async () => {
         await apiCaller.delete(`/api/vehicle?vehicleId=${idToDelete}`);
         setShowDeleteModal(false);
-        fetchVehicles()
+        fetchVehicles();
     };
 
     const handleViewPhoto = (imageUrl: string[]) => {
@@ -94,14 +94,32 @@ const TempoListScreen: React.FC = () => {
         setShowPhotoModal(true);
     };
 
+    const filterTempos = (query: string) => {
+        return tempos.filter((tempo) =>
+            Object.values(tempo).some((value) =>
+                String(value).toLowerCase().includes(query.toLowerCase())
+            )
+        );
+    };
+
+    const handleSearch = () => {
+        setSearchQuery(searchQuery);
+    };
+
+    const filteredTempos = searchQuery ? filterTempos(searchQuery) : tempos;
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.searchContainer}>
-                <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                <TouchableOpacity onPress={handleSearch}>
+                    <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                </TouchableOpacity>
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Search..."
                     placeholderTextColor={Colors.secondary}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
                 />
             </View>
 
@@ -113,10 +131,10 @@ const TempoListScreen: React.FC = () => {
                 <ActivityIndicator size="large" color={Colors.darkBlue} />
             ) : (
                 <ScrollView style={styles.temposList}>
-                    {tempos.map((tempo) => (
+                    {filteredTempos.map((tempo) => (
                         <View key={tempo._id} style={styles.card}>
                             <View style={styles.cardHeader}>
-                                <TouchableOpacity onPress={()=> {setEditData(tempo);router.push("edit_tempo")}} style={styles.editButton}>
+                                <TouchableOpacity onPress={() => { setEditData(tempo); router.push("edit_tempo") }} style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => { setShowDeleteModal(true); setIdToDelete(tempo._id) }}>
@@ -137,7 +155,6 @@ const TempoListScreen: React.FC = () => {
                 </ScrollView>
             )}
 
-            {/* Delete Confirmation Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -161,7 +178,6 @@ const TempoListScreen: React.FC = () => {
                 </View>
             </Modal>
 
-            {/* Photo Modal */}
             <Modal
                 animationType="fade"
                 transparent={true}
@@ -271,18 +287,26 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
+        marginTop: 22,
     },
     modalContent: {
-        width: "80%",
-        backgroundColor: "#fff",
-        borderRadius: 5,
-        padding: 20,
+        width: 300,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
         alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
     },
     modalText: {
-        fontSize: 18,
+        marginBottom: 15,
         textAlign: "center",
-        marginBottom: 20,
     },
     modalButtons: {
         flexDirection: "row",
@@ -290,44 +314,48 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     modalButton: {
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        borderRadius: 5,
+        borderRadius: 10,
+        padding: 10,
+        elevation: 2,
+        marginHorizontal: 5,
+        width: 100,
         alignItems: "center",
     },
     modalButtonText: {
-        fontSize: 16,
+        color: "white",
         fontWeight: "bold",
     },
     overlay: {
-        ...StyleSheet.absoluteFillObject,
+        flex: 1,
     },
     photoModalContainer: {
         flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
     },
     photoModalOverlay: {
-        flex: 1,
+        position: "absolute",
+        width: "100%",
+        height: "100%",
         backgroundColor: "rgba(0, 0, 0, 0.5)",
     },
     photoModalContent: {
-        position: "absolute",
-        bottom: 0,
-        width: "100%",
-        height: "70%",
+        width: "80%",
+        height: "80%",
         backgroundColor: "#fff",
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        overflow: "hidden",
+        borderRadius: 10,
+        padding: 20,
+        elevation: 10,
         marginVertical: 100
     },
     photoModalContentContainer: {
         alignItems: "center",
-        padding: 20,
     },
     fullImage: {
-        width: "100%",
-        height: 400,
-        marginBottom: 10,
+        width: 250,
+        height: 250,
+        marginBottom: 20,
+        resizeMode: "contain",
     },
 });
 

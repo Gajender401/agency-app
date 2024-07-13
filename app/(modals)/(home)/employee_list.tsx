@@ -55,7 +55,8 @@ const EmployeeListScreen: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [showImageModal, setShowImageModal] = useState(false);
-    const [idToDelete, setIdToDelete] = useState<null|string>(null)
+    const [idToDelete, setIdToDelete] = useState<null|string>(null);
+    const [searchQuery, setSearchQuery] = useState("");
     const { apiCaller, setEditData } = useGlobalContext();
 
     const fetchEmployees = async () => {
@@ -85,14 +86,32 @@ const EmployeeListScreen: React.FC = () => {
         setShowImageModal(true);
     };
 
+    const filterEmployees = (query: string) => {
+        return employees.filter((employee) =>
+            Object.values(employee).some((value) =>
+                String(value).toLowerCase().includes(query.toLowerCase())
+            )
+        );
+    };
+
+    const handleSearch = () => {
+        setSearchQuery(searchQuery);
+    };
+
+    const filteredEmployees = searchQuery ? filterEmployees(searchQuery) : employees;
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.searchContainer}>
-                <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                <TouchableOpacity onPress={handleSearch}>
+                    <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                </TouchableOpacity>
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Search..."
                     placeholderTextColor={Colors.secondary}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
                 />
             </View>
 
@@ -104,7 +123,7 @@ const EmployeeListScreen: React.FC = () => {
                 <ActivityIndicator size="large" color={Colors.darkBlue} />
             ) : (
                 <ScrollView style={styles.employeesList}>
-                    {employees.map((employee) => (
+                    {filteredEmployees.map((employee) => (
                         <View key={employee._id} style={styles.card}>
                             <Image
                                 source={{ uri: employee.photo }}
@@ -138,7 +157,6 @@ const EmployeeListScreen: React.FC = () => {
                 </ScrollView>
             )}
 
-            {/* Delete Confirmation Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -162,7 +180,6 @@ const EmployeeListScreen: React.FC = () => {
                 </View>
             </Modal>
 
-            {/* Image View Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -283,7 +300,6 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
     },
-    // Modal Styles
     modalContainer: {
         flex: 1,
         justifyContent: "center",

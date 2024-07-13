@@ -53,6 +53,7 @@ const ServiceHistoryScreen: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [idToDelete, setIdToDelete] = useState<null | string>(null)
+    const [searchQuery, setSearchQuery] = useState("");
     const { apiCaller, setEditData } = useGlobalContext();
 
     const fetchVehiclesDocs = async () => {
@@ -72,7 +73,7 @@ const ServiceHistoryScreen: React.FC = () => {
     }, []);
 
     const handleViewBill = (billUrl: string) => {
-        console.log("Bill URL:", billUrl);  // Log the bill URL to verify it's correct
+        console.log("Bill URL:", billUrl);
         setSelectedBill(billUrl);
         setShowBillModal(true);
     };
@@ -83,14 +84,32 @@ const ServiceHistoryScreen: React.FC = () => {
         fetchVehiclesDocs()
     };
 
+    const filterServiceHistory = (query: string) => {
+        return docs.filter((record) =>
+            Object.values(record).some((value) =>
+                String(value).toLowerCase().includes(query.toLowerCase())
+            )
+        );
+    };
+
+    const handleSearch = () => {
+        setSearchQuery(searchQuery);
+    };
+
+    const filteredServiceHistory = searchQuery ? filterServiceHistory(searchQuery) : docs;
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.searchContainer}>
-                <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                <TouchableOpacity onPress={handleSearch}>
+                    <FontAwesome5 name="search" size={18} color={Colors.secondary} />
+                </TouchableOpacity>
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Search..."
                     placeholderTextColor={Colors.secondary}
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
                 />
             </View>
 
@@ -102,7 +121,7 @@ const ServiceHistoryScreen: React.FC = () => {
                 <ActivityIndicator size="large" color={Colors.darkBlue} />
             ) : (
                 <ScrollView style={styles.recordsList}>
-                    {docs.map((record, index) => (
+                    {filteredServiceHistory.map((record, index) => (
                         <View key={index} style={styles.card}>
                             <View style={styles.cardHeader}>
                                 <TouchableOpacity onPress={() => { setEditData(record); router.push("edit_vehicle_servicing_history") }} style={styles.editButton}>

@@ -9,14 +9,13 @@ import {
     TextInput,
     SafeAreaView,
     ScrollView,
-    Alert,
-    Platform,
     ActivityIndicator,
     Linking,
+    Platform,
 } from "react-native";
 import { BlurView } from 'expo-blur';
 import { Colors } from "@/constants/Colors";
-import { FontAwesome5, MaterialIcons, Feather } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { Picker } from '@react-native-picker/picker';
@@ -118,10 +117,11 @@ const TechnicianSupport: React.FC = () => {
                     style={styles.picker}
                     onValueChange={(itemValue) => setVehicleFilter(itemValue)}
                 >
-                    <Picker.Item label="All Vehicles" value="" />
-                    <Picker.Item label="Car" value="car" />
-                    <Picker.Item label="Bus" value="bus" />
-                    <Picker.Item label="Truck" value="truck" />
+                    <Picker.Item label="All Vehicle Types" value="" />
+                    <Picker.Item label="CAR" value="CAR" />
+                    <Picker.Item label="BUS" value="BUS" />
+                    <Picker.Item label="TRUCK" value="TRUCK" />
+                    <Picker.Item label="TAMPO" value="TAMPO" />
                 </Picker>
                 <Picker
                     selectedValue={cityFilter}
@@ -201,6 +201,7 @@ const TechnicianSupport: React.FC = () => {
         </SafeAreaView>
     );
 };
+
 
 const styles = StyleSheet.create({
     container: {
