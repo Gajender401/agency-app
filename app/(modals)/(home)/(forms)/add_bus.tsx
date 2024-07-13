@@ -17,6 +17,7 @@ import { Colors } from "@/constants/Colors";
 //@ts-ignore
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { router } from "expo-router";
 
   
 const formatVehicleNumber = (input: string) => {
@@ -46,7 +47,7 @@ const AddBusScreen: React.FC = () => {
   const [selectedForSell, setSelectedForSell] = useState<boolean>(false);
   const [busImages, setBusImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const { apiCaller } = useGlobalContext();
+  const { apiCaller, setRefresh } = useGlobalContext();
 
   const handleAddBus = async () => {
     if (!vehicleNo || !seatingCapacity || !vehicleModel || !bodyType || !chassisBrand || !location || !contactNo || busImages.length === 0) {
@@ -73,8 +74,10 @@ const AddBusScreen: React.FC = () => {
     try {
       await apiCaller.post('/api/vehicle', newBus, { headers: { 'Content-Type': 'multipart/form-data' } });
       setLoading(false);
+      setRefresh(prev=>!prev)
       resetForm();
       Alert.alert("Success", "Bus added successfully!");
+      router.back()
     } catch (error) {
       console.log(error);
       setLoading(false);

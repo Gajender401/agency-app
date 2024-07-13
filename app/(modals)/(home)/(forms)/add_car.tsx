@@ -17,6 +17,7 @@ import { Colors } from "@/constants/Colors";
 //@ts-ignore
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { router } from "expo-router";
 
 const AddCarScreen: React.FC = () => {
     const [vehicleNo, setVehicleNo] = useState("");
@@ -30,7 +31,7 @@ const AddCarScreen: React.FC = () => {
     const [selectedForSell, setSelectedForSell] = useState<boolean>(false); 
     const [carImages, setCarImages] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
-    const { apiCaller } = useGlobalContext();
+    const { apiCaller, setRefresh } = useGlobalContext();
 
     const handleAddCar = async () => {
         if (!vehicleNo || !seatingCapacity || !vehicleModel || !location || !carName || !contactNo || carImages.length === 0) {
@@ -56,8 +57,10 @@ const AddCarScreen: React.FC = () => {
         try {
             await apiCaller.post('/api/vehicle', newCar, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
+            setRefresh(prev=>!prev)
             resetForm();
             Alert.alert("Success", "Car added successfully!");
+            router.back()
         } catch (error) {
             console.log(error);
             setLoading(false);

@@ -17,6 +17,7 @@ import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider"; // Importing useGlobalContext
 //@ts-ignore
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
+import { router } from "expo-router";
 
 const AddTempoScreen: React.FC = () => {
   const [vehicleNo, setVehicleNo] = useState("");
@@ -28,7 +29,7 @@ const AddTempoScreen: React.FC = () => {
   const [selectedForSell, setSelectedForSell] = useState<boolean>(false);
   const [tempoImages, setTempoImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const { apiCaller } = useGlobalContext(); 
+  const { apiCaller, setRefresh } = useGlobalContext(); 
 
   const handleAddTempo = async () => {
     if (!vehicleNo || !seatingCapacity || !vehicleModel || !location || !contactNo ||  tempoImages.length === 0) {
@@ -53,8 +54,10 @@ const AddTempoScreen: React.FC = () => {
     try {
       await apiCaller.post('/api/vehicle', newTempo, { headers: { 'Content-Type': 'multipart/form-data' } });
       setLoading(false);
+      setRefresh(prev=>!prev)
       resetForm();
       Alert.alert("Success", "Tempo added successfully!");
+      router.back()
     } catch (error) {
       console.log(error);
       setLoading(false);

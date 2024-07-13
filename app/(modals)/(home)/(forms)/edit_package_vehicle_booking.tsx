@@ -14,6 +14,7 @@ import {
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { router } from "expo-router";
 
 const EditPackageBookingForm: React.FC = () => {
     const [vehicleNumber, setVehicleNumber] = useState("");
@@ -41,7 +42,7 @@ const EditPackageBookingForm: React.FC = () => {
     const [addNote, setAddNote] = useState("");
     const [entryParking, setEntryParking] = useState("");
     const [loading, setLoading] = useState(false);
-    const { apiCaller, editData } = useGlobalContext();
+    const { apiCaller, editData, setRefresh } = useGlobalContext();
 
     useEffect(() => {
         if (editData) {
@@ -103,7 +104,9 @@ const EditPackageBookingForm: React.FC = () => {
         try {
             await apiCaller.put(`/api/packageBooking/${editData._id}`, updatedBooking);
             setLoading(false);
+            setRefresh(prev=>!prev)
             Alert.alert("Success", "Booking updated successfully!");
+            router.back()
         } catch (error) {
             console.log(error);
             setLoading(false);

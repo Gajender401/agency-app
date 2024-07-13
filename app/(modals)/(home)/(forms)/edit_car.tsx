@@ -17,6 +17,7 @@ import { Colors } from "@/constants/Colors";
 //@ts-ignore
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { router } from "expo-router";
 
 const AddCarScreen: React.FC = () => {
     const [vehicleNo, setVehicleNo] = useState("");
@@ -32,7 +33,7 @@ const AddCarScreen: React.FC = () => {
     const [selectedForSell, setSelectedForSell] = useState<boolean>(false); // State for For Sell selection
     const [carImages, setCarImages] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
-    const { apiCaller, editData } = useGlobalContext();
+    const { apiCaller, editData, setRefresh } = useGlobalContext();
 
     useEffect(() => {
         if (editData) {
@@ -77,8 +78,10 @@ const AddCarScreen: React.FC = () => {
         try {
             await apiCaller.patch(`/api/vehicle?vehicleId=${editData._id}`, newCar, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
+            setRefresh(prev=>!prev)
             resetForm();
             Alert.alert("Success", "Car updated successfully!");
+            router.back()
         } catch (error) {
             console.log(error);
             setLoading(false);

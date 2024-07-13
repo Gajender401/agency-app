@@ -28,7 +28,7 @@ const AddServiceHistoryScreen: React.FC = () => {
     const [billImage, setBillImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [inputHeight, setInputHeight] = useState(100);
-    const { apiCaller, editData } = useGlobalContext();
+    const { apiCaller, editData, setRefresh } = useGlobalContext();
 
     useEffect(() => {
         if (editData) {
@@ -67,6 +67,7 @@ const AddServiceHistoryScreen: React.FC = () => {
         try {
             await apiCaller.patch(`/api/service?serviceId=${editData._id}`, newServiceHistory, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
+            setRefresh(prev=>!prev)
             router.back()
             Alert.alert("Success", "Service history updated successfully!");
         } catch (error) {

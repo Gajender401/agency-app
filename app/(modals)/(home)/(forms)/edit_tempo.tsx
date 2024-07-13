@@ -15,6 +15,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { router } from "expo-router";
 const AddTempoScreen: React.FC = () => {
   const [vehicleNo, setVehicleNo] = useState("");
   const [seatingCapacity, setSeatingCapacity] = useState("");
@@ -27,7 +28,7 @@ const AddTempoScreen: React.FC = () => {
   const [selectedForSell, setSelectedForSell] = useState<boolean>(false);
   const [tempoImages, setTempoImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const { apiCaller, editData } = useGlobalContext();
+  const { apiCaller, editData, setRefresh } = useGlobalContext();
 
   useEffect(() => {
       if (editData) {
@@ -69,8 +70,10 @@ const AddTempoScreen: React.FC = () => {
     try {
         await apiCaller.patch(`/api/vehicle?vehicleId=${editData._id}`, newTempo, { headers: { 'Content-Type': 'multipart/form-data' } });
       setLoading(false);
+      setRefresh(prev=>!prev)
       resetForm();
       Alert.alert("Success", "Tempo updated successfully!");
+      router.back()
     } catch (error) {
       console.log(error);
       setLoading(false);

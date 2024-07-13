@@ -17,6 +17,7 @@ import { useGlobalContext } from "@/context/GlobalProvider";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { GestureHandlerRootView, TextInput } from "react-native-gesture-handler";
+import { router } from "expo-router";
 
 const AddServiceHistoryScreen: React.FC = () => {
     const [garageName, setGarageName] = useState("");
@@ -29,7 +30,7 @@ const AddServiceHistoryScreen: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
     const [inputHeight, setInputHeight] = useState(100);
-    const { apiCaller } = useGlobalContext();
+    const { apiCaller, setRefresh } = useGlobalContext();
 
     const extractNumbers = (data: Vehicle[]): { id: string, number: string }[] => {
         return data.map(vehicle => ({ id: vehicle._id, number: vehicle.number }));
@@ -86,8 +87,10 @@ const AddServiceHistoryScreen: React.FC = () => {
         try {
             await apiCaller.post('/api/service', newServiceHistory, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
+            setRefresh(prev=>!prev)
             resetForm();
             Alert.alert("Success", "Service history added successfully!");
+            router.back()
         } catch (error) {
             console.log(error);
             setLoading(false);

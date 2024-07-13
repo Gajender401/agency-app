@@ -15,6 +15,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider"; // Importing useGlobalContext
+import { router } from "expo-router";
 
 const AddTruckScreen: React.FC = () => {
   const [vehicleNo, setVehicleNo] = useState("");
@@ -29,7 +30,7 @@ const AddTruckScreen: React.FC = () => {
   const [selectedForSell, setSelectedForSell] = useState<boolean>(false); 
   const [truckImages, setTruckImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const { apiCaller } = useGlobalContext(); 
+  const { apiCaller, setRefresh } = useGlobalContext(); 
 
   const handleAddTruck = async () => {
     if (!vehicleNo || !vehicleModel || !location || !contactNo || !noOfTyres || !vehicleWeightInKGS || truckImages.length === 0) {
@@ -57,8 +58,10 @@ const AddTruckScreen: React.FC = () => {
     try {
       await apiCaller.post('/api/vehicle', newTruck, { headers: { 'Content-Type': 'multipart/form-data' } });
       setLoading(false);
+      setRefresh(prev=>!prev)
       resetForm();
       Alert.alert("Success", "Truck added successfully!");
+      router.back()
     } catch (error) {
       console.log(error);
       setLoading(false);

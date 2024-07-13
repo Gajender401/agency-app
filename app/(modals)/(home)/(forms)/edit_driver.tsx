@@ -17,6 +17,7 @@ import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { Picker } from '@react-native-picker/picker';
 import { State, City } from 'country-state-city';
+import { router } from "expo-router";
 
 type CityType = {
     countryCode: string;
@@ -36,7 +37,7 @@ const AddDriverScreen: React.FC = () => {
     const [licenseImage, setLicenseImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [cityList, setCityList] = useState<CityType[]>([]);
-    const { apiCaller, editData } = useGlobalContext();
+    const { apiCaller, editData, setRefresh } = useGlobalContext();
 
     useEffect(() => {
         if (state) {
@@ -83,8 +84,10 @@ const AddDriverScreen: React.FC = () => {
         try {
             await apiCaller.patch(`/api/driver?driverId=${editData._id}`, newDriver, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
+            setRefresh(prev=>!prev)
             resetForm();
             Alert.alert("Success", "Driver updated successfully!");
+            router.back()
         } catch (error) {
             console.log(error);
             setLoading(false);

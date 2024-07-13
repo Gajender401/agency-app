@@ -16,6 +16,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider"; // Import the global context
 import { Picker } from "@react-native-picker/picker";
+import { router } from "expo-router";
 
 
 const AddVehicleDocumentsScreen: React.FC = () => {
@@ -28,7 +29,7 @@ const AddVehicleDocumentsScreen: React.FC = () => {
     const [pucImage, setPucImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [vehicleNumbers, setVehicleNumbers] = useState<{id: string, number: string}[]>([]);
-    const { apiCaller } = useGlobalContext(); 
+    const { apiCaller, setRefresh } = useGlobalContext(); 
 
     const extractNumbers = (data: Vehicle[]): {id: string, number: string}[] => {
         return data.map(vehicle => ({ id: vehicle._id, number: vehicle.number }));
@@ -71,8 +72,10 @@ const AddVehicleDocumentsScreen: React.FC = () => {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             setLoading(false);
+            setRefresh(prev=>!prev)
             resetForm();
             Alert.alert("Success", "Vehicle documents added successfully!");
+            router.back()
         } catch (error) {
             console.error(error);
             setLoading(false);

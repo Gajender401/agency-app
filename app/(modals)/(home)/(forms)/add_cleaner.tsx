@@ -17,6 +17,7 @@ import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider"; // Import the global context
 import { Picker } from '@react-native-picker/picker';
 import { Country, State, City } from 'country-state-city';
+import { router } from "expo-router";
 
 type CityType = {
     countryCode: string;
@@ -40,7 +41,7 @@ const AddCleanerScreen: React.FC = () => {
     const [aadharImage, setAadharImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [cityList, setCityList] = useState<CityType[]>([]);
-    const { apiCaller } = useGlobalContext(); // Use the global context
+    const { apiCaller, setRefresh } = useGlobalContext(); 
 
     useEffect(() => {
         if (state) {
@@ -71,8 +72,10 @@ const AddCleanerScreen: React.FC = () => {
         try {
             await apiCaller.post('/api/cleaner', newCleaner, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
+            setRefresh(prev=>!prev)
             resetForm();
             Alert.alert("Success", "Cleaner added successfully!");
+            router.back()
         } catch (error) {
             console.log(error);
             setLoading(false);

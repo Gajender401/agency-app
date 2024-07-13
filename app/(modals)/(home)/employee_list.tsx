@@ -57,7 +57,7 @@ const EmployeeListScreen: React.FC = () => {
     const [showImageModal, setShowImageModal] = useState(false);
     const [idToDelete, setIdToDelete] = useState<null|string>(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const { apiCaller, setEditData } = useGlobalContext();
+    const { apiCaller, setEditData, refresh } = useGlobalContext();
 
     const fetchEmployees = async () => {
         try {
@@ -73,7 +73,7 @@ const EmployeeListScreen: React.FC = () => {
 
     useEffect(() => {
         fetchEmployees();
-    }, []);
+    }, [refresh]);
 
     const handleDelete = async() => {
         await apiCaller.delete(`/api/employee?employeeId=${idToDelete}`);

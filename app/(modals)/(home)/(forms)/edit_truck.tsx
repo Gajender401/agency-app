@@ -15,6 +15,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { router } from "expo-router";
 
 const AddTruckScreen: React.FC = () => {
   const [vehicleNo, setVehicleNo] = useState("");
@@ -30,7 +31,7 @@ const AddTruckScreen: React.FC = () => {
   const [selectedForSell, setSelectedForSell] = useState<boolean>(false);
   const [truckImages, setTruckImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const { apiCaller, editData } = useGlobalContext();
+  const { apiCaller, editData, setRefresh } = useGlobalContext();
 
   useEffect(() => {
       if (editData) {
@@ -74,8 +75,10 @@ const AddTruckScreen: React.FC = () => {
     try {
       await apiCaller.patch(`/api/vehicle?vehicleId=${editData._id}`, newTruck, { headers: { 'Content-Type': 'multipart/form-data' } });
       setLoading(false);
+      setRefresh(prev=>!prev)
       resetForm();
       Alert.alert("Success", "Truck updated successfully!");
+      router.back()
     } catch (error) {
       console.log(error);
       setLoading(false);

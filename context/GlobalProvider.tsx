@@ -21,6 +21,8 @@ interface GlobalContextProps {
   editData: any,
   setInvoiceData: React.Dispatch<React.SetStateAction<Package | null>>;
   invoiceData: Package | null
+  refresh:boolean,
+  setRefresh: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -37,6 +39,8 @@ interface GlobalProviderProps {
   children: ReactNode;
 }
 
+const baseURL = process.env.EXPO_PUBLIC_URL as string;
+
 const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [isLogged, setIsLogged] = useState<boolean>(false);
   const [token, setToken] = useState<string | null>(null);
@@ -44,7 +48,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [userData, setUserData] = useState<User | null>(null);
   const [editData, setEditData] = useState<any>()
   const [invoiceData, setInvoiceData] = useState<Package | null>(null)
-  const baseURL = process.env.EXPO_PUBLIC_URL as string;
+  const [refresh, setRefresh] = useState(false)
 
   useEffect(() => {
     SecureStore.getItemAsync("access_token")
@@ -105,7 +109,9 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         setEditData,
         editData,
         invoiceData,
-        setInvoiceData
+        setInvoiceData,
+        refresh,
+        setRefresh
       }}
     >
       {children}

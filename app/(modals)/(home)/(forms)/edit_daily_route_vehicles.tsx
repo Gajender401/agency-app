@@ -15,6 +15,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { Colors } from "@/constants/Colors"; // Replace with your colors constant
 import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have this hook or context
 import { GestureHandlerRootView, TextInput } from "react-native-gesture-handler";
+import { router } from "expo-router";
 
 const AddRouteScreen: React.FC = () => {
     const [vehicleNumber, setVehicleNumber] = useState<string>("");
@@ -24,7 +25,7 @@ const AddRouteScreen: React.FC = () => {
     const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
     const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    const { apiCaller } = useGlobalContext();
+    const { apiCaller, setRefresh } = useGlobalContext();
 
     const extractNumbers = (data: Vehicle[]): { id: string, number: string }[] => {
         return data.map(vehicle => ({ id: vehicle._id, number: vehicle.number }));
@@ -63,8 +64,10 @@ const AddRouteScreen: React.FC = () => {
         try {
             await apiCaller.post('/api/dailyRoute', newRoute, { headers: { 'Content-Type': 'application/json' } });
             setLoading(false);
+            setRefresh(prev=>!prev)
             resetForm();
             Alert.alert("Success", "Route added successfully!");
+            router.back()
         } catch (error) {
             console.log(error);
             setLoading(false);

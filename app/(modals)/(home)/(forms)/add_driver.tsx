@@ -17,6 +17,7 @@ import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { Dropdown } from 'react-native-element-dropdown';
 import { State, City } from 'country-state-city';
+import { router } from "expo-router";
 
 type CityType = {
     countryCode: string;
@@ -50,7 +51,7 @@ const AddDriverScreen: React.FC = () => {
     const [cityList, setCityList] = useState<CityType[]>([]);
     const [stateDropdownData, setStateDropdownData] = useState<DropdownItem[]>([]);
     const [cityDropdownData, setCityDropdownData] = useState<DropdownItem[]>([]);
-    const { apiCaller } = useGlobalContext();
+    const { apiCaller, setRefresh } = useGlobalContext();
 
     useEffect(() => {
         const states = State.getStatesOfCountry("IN");
@@ -96,8 +97,10 @@ const AddDriverScreen: React.FC = () => {
         try {
             await apiCaller.post('/api/driver', newDriver, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
+            setRefresh(prev=>!prev)
             resetForm();
             Alert.alert("Success", "Driver added successfully!");
+            router.back()
         } catch (error) {
             console.log(error);
             setLoading(false);

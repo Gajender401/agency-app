@@ -17,6 +17,7 @@ import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { Picker } from '@react-native-picker/picker';
 import { State, City } from 'country-state-city';
+import { router } from "expo-router";
 
 
 type CityType = {
@@ -36,7 +37,7 @@ const AddEmployeeScreen: React.FC = () => {
     const [aadharImage, setAadharImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [cityList, setCityList] = useState<CityType[]>([]);
-    const { apiCaller } = useGlobalContext(); // Ensure your global context provides an apiCaller
+    const { apiCaller, setRefresh } = useGlobalContext(); // Ensure your global context provides an apiCaller
 
     useEffect(() => {
         if (state) {
@@ -73,8 +74,10 @@ const AddEmployeeScreen: React.FC = () => {
         try {
             await apiCaller.post('/api/employee', newEmployee, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
+            setRefresh(prev=>!prev)
             resetForm();
             Alert.alert("Success", "Employee added successfully!");
+            router.back()
         } catch (error) {
             console.log(error);
             setLoading(false);

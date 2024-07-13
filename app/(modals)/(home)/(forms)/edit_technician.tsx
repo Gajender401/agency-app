@@ -14,6 +14,7 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { Colors } from "@/constants/Colors"; // Replace with your colors constant
 import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have this hook or context
+import { router } from "expo-router";
 
 const EditTechnicianScreen: React.FC = () => {
     const [name, setName] = useState("");
@@ -22,7 +23,7 @@ const EditTechnicianScreen: React.FC = () => {
     const [technicianType, setTechnicianType] = useState("");
     const [vehicleType, setVehicleType] = useState("");
     const [loading, setLoading] = useState(false);
-    const { apiCaller, editData } = useGlobalContext();
+    const { apiCaller, editData, setRefresh } = useGlobalContext();
 
     const handleAddTechnician = async () => {
         if (!name || !mobile || !alternateNumber || !technicianType || !vehicleType) {
@@ -42,8 +43,10 @@ const EditTechnicianScreen: React.FC = () => {
         try {
             await apiCaller.patch(`/api/technician?technicianId=${editData._id}`, newTechnician);
             setLoading(false);
+            setRefresh(prev=>!prev)
             resetForm();
             Alert.alert("Success", "Technician updated successfully!");
+            router.back()
         } catch (error) {
             console.log(error);
             setLoading(false);

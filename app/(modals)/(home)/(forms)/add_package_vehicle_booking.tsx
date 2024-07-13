@@ -15,6 +15,7 @@ import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { Picker } from "@react-native-picker/picker";
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { router } from "expo-router";
 
 const PackageBookingForm: React.FC = () => {
     const [vehicleNumber, setVehicleNumber] = useState("");
@@ -39,7 +40,7 @@ const PackageBookingForm: React.FC = () => {
     const [entryParking, setEntryParking] = useState("");
     const [loading, setLoading] = useState(false);
     const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
-    const { apiCaller } = useGlobalContext();
+    const { apiCaller, setRefresh } = useGlobalContext();
     const [departureDate, setDepartureDate] = useState<Date | undefined>(undefined);
     const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
     const [showDepartureDatePicker, setShowDepartureDatePicker] = useState<boolean>(false);
@@ -131,8 +132,10 @@ const PackageBookingForm: React.FC = () => {
         try {
             await apiCaller.post('/api/packageBooking', newBooking);
             setLoading(false);
+            setRefresh(prev=>!prev)
             resetForm();
             Alert.alert("Success", "Booking added successfully!");
+            router.back()
         } catch (error) {
             console.log(error);
             setLoading(false);
