@@ -15,6 +15,7 @@ import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { router } from "expo-router";
+import { Picker } from "@react-native-picker/picker";
 
 const EditPackageBookingForm: React.FC = () => {
     const [vehicleNumber, setVehicleNumber] = useState("");
@@ -38,18 +39,42 @@ const EditPackageBookingForm: React.FC = () => {
     const [showReturnTimePicker, setShowReturnTimePicker] = useState(false);
     const [toll, setToll] = useState("");
     const [otherStateTax, setOtherStateTax] = useState("");
-    const [instructions, setInstructions] = useState("");
     const [addNote, setAddNote] = useState("");
     const [entryParking, setEntryParking] = useState("");
     const [loading, setLoading] = useState(false);
     const { apiCaller, editData, setRefresh } = useGlobalContext();
+    const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
+
+    const findVehicleByNumber = (number: string) => {
+        return vehicleNumbers.find(vehicle => vehicle.number === number);
+      };
+
+    const extractNumbers = (data: Vehicle[]): { id: string, number: string }[] => {
+        return data.map(vehicle => ({ id: vehicle._id, number: vehicle.number }));
+    };
+
+    const fetchVehicles = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/vehicle');
+            setVehicleNumbers(extractNumbers(response.data.data));
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchVehicles();
+    }, []);
 
     useEffect(() => {
         if (editData) {
             if (editData.vehicle) {
                 setVehicleNumber(editData.vehicle.number);
             }
-            setOtherVehicleNumber(editData.otherVehicle);
+            setOtherVehicleNumber(editData.otherVehicle.number);
             setCustomerName(editData.customerName);
             setMobileNumber(editData.mobileNumber);
             setAlternateNumber(editData.alternateNumber);
@@ -65,21 +90,20 @@ const EditPackageBookingForm: React.FC = () => {
             setReturnTime(new Date(editData.returnTime));
             setToll(editData.tollInINR);
             setOtherStateTax(editData.otherStateTaxInINR);
-            setInstructions(editData.instructions);
-            setAddNote(editData.note);
+            setAddNote(editData.instructions);
             setEntryParking(editData.advancePlace);
         }
     }, [editData])
 
     const handleBooking = async () => {
-        if (!vehicleNumber || !otherVehicleNumber || !customerName || !mobileNumber || !alternateNumber || !kmStarting || !perKmRate || !advancedAmount || !remainingAmount || !departurePlace || !destinationPlace || !departureDate || !returnDate || !departureTime || !returnTime || !toll || !otherStateTax || !instructions || !addNote || !entryParking) {
+        if (!vehicleNumber || !otherVehicleNumber || !customerName || !mobileNumber || !alternateNumber || !kmStarting || !perKmRate || !advancedAmount || !remainingAmount || !departurePlace || !destinationPlace || !departureDate || !returnDate || !departureTime || !returnTime || !toll || !otherStateTax || !addNote || !entryParking) {
             Alert.alert("Please fill all fields.");
             return;
         }
 
         const updatedBooking = {
-            vehicleId: vehicleNumber,
-            otherVehicleId: otherVehicleNumber,
+            vehicleId: findVehicleByNumber(vehicleNumber)?.id,
+            otherVehicleId: findVehicleByNumber(otherVehicleNumber)?.id,
             customerName,
             mobileNumber,
             alternateNumber,
@@ -89,22 +113,21 @@ const EditPackageBookingForm: React.FC = () => {
             remainingAmountInINR: remainingAmount,
             departurePlace,
             destinationPlace,
-            departureDate: departureDate?.toISOString(),
-            returnDate: returnDate?.toISOString(),
-            departureTime: departureTime?.toISOString(),
-            returnTime: returnTime?.toISOString(),
+            departureDate: departureDate,
+            returnDate: returnDate,
+            departureTime: departureTime,
+            returnTime: returnTime,
             tollInINR: toll,
             otherStateTaxInINR: otherStateTax,
-            instructions,
-            note: addNote,
+            instructions: addNote,
             advancePlace: entryParking,
         };
 
         setLoading(true);
         try {
-            await apiCaller.put(`/api/packageBooking/${editData._id}`, updatedBooking);
+            await apiCaller.patch(`/api/packageBooking?bookingId=${editData._id}`, updatedBooking);
             setLoading(false);
-            setRefresh(prev=>!prev)
+            setRefresh(prev => !prev)
             Alert.alert("Success", "Booking updated successfully!");
             router.back()
         } catch (error) {
@@ -153,19 +176,33 @@ const EditPackageBookingForm: React.FC = () => {
                 <View style={styles.modalContent}>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Vehicle Number</Text>
-                        <TextInput
-                            style={[styles.input]}
-                            value={vehicleNumber}
-                            editable={false}
-                        />
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={vehicleNumber}
+                                onValueChange={(itemValue) => setVehicleNumber(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label={vehicleNumber} value={findVehicleByNumber(vehicleNumber)?.id} />
+                                {vehicleNumbers.map((number, index) => (
+                                    <Picker.Item key={index} label={number.number} value={number.id} />
+                                ))}
+                            </Picker>
+                        </View>
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Other Vehicle Number</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={otherVehicleNumber}
-                            editable={false}
-                        />
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={otherVehicleNumber}
+                                onValueChange={(itemValue) => setOtherVehicleNumber(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label={otherVehicleNumber} value={findVehicleByNumber(otherVehicleNumber)?.id} />
+                                {vehicleNumbers.map((number, index) => (
+                                    <Picker.Item key={index} label={number.number} value={number.id} />
+                                ))}
+                            </Picker>
+                        </View>
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Customer Name</Text>
@@ -332,14 +369,6 @@ const EditPackageBookingForm: React.FC = () => {
                         />
                     </View>
                     <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Instructions</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={instructions}
-                            onChangeText={(text) => setInstructions(text)}
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
                         <Text style={styles.label}>Add Note</Text>
                         <TextInput
                             style={styles.input}
@@ -423,6 +452,18 @@ const styles = StyleSheet.create({
     modalButtonText: {
         fontSize: 16,
         fontWeight: "bold",
+    },
+    pickerContainer: {
+        borderColor: Colors.secondary,
+        borderWidth: 1,
+        borderRadius: 10,
+        overflow: 'hidden',
+    },
+    picker: {
+        height: 40,
+        width: '100%',
+        marginTop: -6,
+        marginBottom: 6
     },
 });
 

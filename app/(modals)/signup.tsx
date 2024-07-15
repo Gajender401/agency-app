@@ -73,7 +73,7 @@ const SignUpScreen = () => {
             type: 'AGENCY'
         };
         try {
-            const response = await axios.post(`${process.env.EXPO_PUBLIC_URL}/api/user/`, data);
+            const response = await axios.post(`${process.env.EXPO_PUBLIC_URL}api/user/`, data);
             
             if (response.data.authToken && response.data.data._id) {
                 await SecureStore.setItemAsync("access_token", response.data.authToken);

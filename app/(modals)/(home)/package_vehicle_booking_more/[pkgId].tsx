@@ -123,12 +123,8 @@ const VehicleDetailsScreen: React.FC = () => {
         <Text style={styles.value}>{vehicleDetails.otherStateTaxInINR}</Text>
       </View>
       <View style={styles.section}>
-        <Text style={styles.label}>Instructions:</Text>
-        <Text style={styles.value}>{vehicleDetails.instructions}</Text>
-      </View>
-      <View style={styles.section}>
         <Text style={styles.label}>Add Note:</Text>
-        <Text style={styles.value}>{vehicleDetails.note}</Text>
+        <Text style={styles.value}>{vehicleDetails.instructions}</Text>
       </View>
     </ScrollView>
   );

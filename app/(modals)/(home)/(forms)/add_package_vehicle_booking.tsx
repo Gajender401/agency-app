@@ -36,7 +36,6 @@ const PackageBookingForm: React.FC = () => {
     const [toll, setToll] = useState("");
     const [otherStateTax, setOtherStateTax] = useState("");
     const [instructions, setInstructions] = useState("");
-    const [addNote, setAddNote] = useState("");
     const [entryParking, setEntryParking] = useState("");
     const [loading, setLoading] = useState(false);
     const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
@@ -100,10 +99,16 @@ const PackageBookingForm: React.FC = () => {
     };
 
     const handleBooking = async () => {
-        if (!vehicleNumber || !otherVehicleNumber || !customerName || !mobileNumber || !alternateNumber || !kmStarting || !perKmRate || !advancedAmount || !remainingAmount || !departurePlace || !destinationPlace || !departureTime || !returnTime || !departureDate || !returnDate || !toll || !otherStateTax || !instructions || !addNote || !entryParking) {
+
+        console.log(vehicleNumber,otherVehicleNumber);
+        
+
+        if (!vehicleNumber || !otherVehicleNumber || !customerName || !mobileNumber || !alternateNumber || !kmStarting || !perKmRate || !advancedAmount || !remainingAmount || !departurePlace || !destinationPlace || !departureTime || !returnTime || !departureDate || !returnDate || !toll || !otherStateTax || !instructions || !entryParking) {
             Alert.alert("Please fill all fields.");
             return;
         }
+
+        
 
         const newBooking = {
             vehicleId: vehicleNumber,
@@ -117,14 +122,13 @@ const PackageBookingForm: React.FC = () => {
             remainingAmountInINR: remainingAmount,
             departurePlace,
             destinationPlace,
-            departureTime: departureTime.toISOString(),
-            returnTime: returnTime.toISOString(),
-            departureDate: departureDate.toISOString(),
-            returnDate: returnDate.toISOString(),
+            departureTime: departureTime,
+            returnTime: returnTime,
+            departureDate: departureDate,
+            returnDate: returnDate,
             tollInINR: toll,
             otherStateTaxInINR: otherStateTax,
-            instructions,
-            note: addNote,
+            instructions: instructions,
             advancePlace: entryParking,
         };
 
@@ -162,7 +166,6 @@ const PackageBookingForm: React.FC = () => {
         setToll("");
         setOtherStateTax("");
         setInstructions("");
-        setAddNote("");
         setEntryParking("");
     };
 
@@ -187,11 +190,18 @@ const PackageBookingForm: React.FC = () => {
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Other Vehicle Number</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={otherVehicleNumber}
-                            onChangeText={(text) => setOtherVehicleNumber(text)}
-                        />
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={otherVehicleNumber}
+                                onValueChange={(itemValue) => setOtherVehicleNumber(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="Select Vehicle Number" value="" />
+                                {vehicleNumbers.map((number, index) => (
+                                    <Picker.Item key={index} label={number.number} value={number.id} />
+                                ))}
+                            </Picker>
+                        </View>
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Customer Name</Text>
@@ -225,7 +235,6 @@ const PackageBookingForm: React.FC = () => {
                             style={styles.input}
                             value={kmStarting}
                             onChangeText={(text) => setKmStarting(text)}
-                            keyboardType="numeric"
                         />
                     </View>
                     <View style={styles.inputGroup}>
@@ -234,7 +243,6 @@ const PackageBookingForm: React.FC = () => {
                             style={styles.input}
                             value={perKmRate}
                             onChangeText={(text) => setPerKmRate(text)}
-                            keyboardType="numeric"
                         />
                     </View>
                     <View style={styles.inputGroup}>
@@ -345,7 +353,6 @@ const PackageBookingForm: React.FC = () => {
                             style={styles.input}
                             value={toll}
                             onChangeText={(text) => setToll(text)}
-                            keyboardType="numeric"
                         />
                     </View>
                     <View style={styles.inputGroup}>
@@ -354,23 +361,14 @@ const PackageBookingForm: React.FC = () => {
                             style={styles.input}
                             value={otherStateTax}
                             onChangeText={(text) => setOtherStateTax(text)}
-                            keyboardType="numeric"
-                        />
-                    </View>
-                    <View style={styles.inputGroup}>
-                        <Text style={styles.label}>Instructions</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={instructions}
-                            onChangeText={(text) => setInstructions(text)}
                         />
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Add Note</Text>
                         <TextInput
                             style={styles.input}
-                            value={addNote}
-                            onChangeText={(text) => setAddNote(text)}
+                            value={instructions}
+                            onChangeText={(text) => setInstructions(text)}
                         />
                     </View>
                     <View style={styles.inputGroup}>

@@ -13,6 +13,26 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
 
+const formatDate = (dateString: string) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit'
+  });
+};
+
+const formatTime = (timeString: string) => {
+  if (!timeString) return '';
+  const date = new Date(timeString);
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+};
+
 const InvoiceScreen: React.FC = () => {
   const { invoiceData } = useGlobalContext();
 
@@ -24,42 +44,90 @@ const InvoiceScreen: React.FC = () => {
     <head>
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
       <style>
-        body { font-family: 'Helvetica'; padding: 20px; }
-        .title { font-size: 24px; font-weight: bold; text-align: center; margin-bottom: 20px; }
-        .row { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .label { font-weight: bold; }
+        body { font-family: 'Helvetica'; padding: 20px; margin: 0; }
+        .title { font-size: 24px; font-weight: bold; text-align: left; margin-bottom: 10px; }
+        .container { background-color: #4994f5; color: white; padding: 10px; margin-bottom: 20px; padding-top: 30px; padding-bottom: 30px }
+        .container-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .company-info { text-align: right; margin-top: 50px }
+        .company-name { font-size: 38px; font-weight: bold; margin-bottom: 10px }
+        .company-address { font-size: 18px; }
+        .booking-date { text-align: right; margin-top: 10px; font-size: 18px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 8px; text-align: left; border: 1px solid #ddd; }
+        th { background-color: #f2f2f2; font-weight: bold; }
+        .page-break { page-break-after: always; }
+        .terms-header { display: flex; flex-direction: column; gap: 50px; margin-bottom: 50px; margin-top: 20px; padding-top: 50px }
+        .terms-title { font-size: 20px; font-weight: bold; margin: 20px 0; }
+        ul { padding-left: 20px; margin: 0; }
+        li { margin-bottom: 5px; }
+        li:last-child { margin-bottom: 0; }
+        .tourist-wheel { color: #83c4f2; font-size: 22px; margin-top: 10px }
+        .tourist-block { height: 50px }
+        @page { size: A4; margin: 0; }
+        @media print { body { width: 210mm; height: 297mm; } }
       </style>
     </head>
     <body>
       <div class="title">Invoice</div>
-      <div class="row"><span class="label">Invoice ID:</span><span>${invoiceData._id}</span></div>
-      <div class="row"><span class="label">Customer Name:</span><span>${invoiceData.customerName}</span></div>
-      <div class="row"><span class="label">Mobile Number:</span><span>${invoiceData.mobileNumber}</span></div>
-      <div class="row"><span class="label">Alternate Number:</span><span>${invoiceData.alternateNumber}</span></div>
-      <div class="row"><span class="label">Vehicle Number:</span><span>${invoiceData.vehicle ? invoiceData.vehicle.number : ""}</span></div>
-      <div class="row"><span class="label">Other Vehicle Number:</span><span>${invoiceData.otherVehicle ? invoiceData.otherVehicle.number : ""}</span></div>
-      <div class="row"><span class="label">KM Starting:</span><span>${invoiceData.kmStarting}</span></div>
-      <div class="row"><span class="label">Rate per KM:</span><span>${invoiceData.perKmRateInINR}</span></div>
-      <div class="row"><span class="label">Advance Amount:</span><span>${invoiceData.advanceAmountInINR}</span></div>
-      <div class="row"><span class="label">Remaining Amount:</span><span>${invoiceData.remainingAmountInINR}</span></div>
-      <div class="row"><span class="label">Advance Place:</span><span>${invoiceData.advancePlace}</span></div>
-      <div class="row"><span class="label">Departure Place:</span><span>${invoiceData.departurePlace}</span></div>
-      <div class="row"><span class="label">Destination Place:</span><span>${invoiceData.destinationPlace}</span></div>
-      <div class="row"><span class="label">Departure Time:</span><span>${invoiceData.departureTime}</span></div>
-      <div class="row"><span class="label">Return Time:</span><span>${invoiceData.returnTime}</span></div>
-      <div class="row"><span class="label">Toll:</span><span>${invoiceData.tollInINR}</span></div>
-      <div class="row"><span class="label">Other State Tax:</span><span>${invoiceData.otherStateTaxInINR}</span></div>
-      <div class="row"><span class="label">Note:</span><span>${invoiceData.note}</span></div>
-      <div class="row"><span class="label">Instructions:</span><span>${invoiceData.instructions}</span></div>
-      <div class="row"><span class="label">Created At:</span><span>${invoiceData.createdAt}</span></div>
-      <div class="row"><span class="label">Updated At:</span><span>${invoiceData.updatedAt}</span></div>
-      <div class="row"><span class="label">Status:</span><span>${invoiceData.status}</span></div>
-      <div class="row"><span class="label">Departure Date:</span><span>${invoiceData.departureDate}</span></div>
-      <div class="row"><span class="label">Return Date:</span><span>${invoiceData.returnDate}</span></div>
+      <div class="container">
+        <div class="container-header">
+          <div>Invoice ID: ${invoiceData._id}</div>
+          <div class="company-info">
+            <div class="company-name">Tusharraj Travel</div>
+            <div class="company-address">
+              8669124213, Opposite to SP office, Osmanabad
+            </div>
+          </div>
+        </div>
+        <div class="booking-date">Booking Date: ${formatDate(invoiceData.updatedAt)}</div>
+      </div>
+      <table>
+        <tr><th>Customer Name</th><td>${invoiceData.customerName}</td></tr>
+        <tr><th>Mobile Number</th><td>${invoiceData.mobileNumber}</td></tr>
+        <tr><th>Alternate Number</th><td>${invoiceData.alternateNumber}</td></tr>
+        <tr><th>Vehicle Number</th><td>${invoiceData.vehicle ? invoiceData.vehicle.number : ""}</td></tr>
+        <tr><th>Other Vehicle Number</th><td>${invoiceData.otherVehicle ? invoiceData.otherVehicle.number : ""}</td></tr>
+        <tr><th>KM Starting</th><td>${invoiceData.kmStarting}</td></tr>
+        <tr><th>Rate per KM</th><td>${invoiceData.perKmRateInINR}</td></tr>
+        <tr><th>Advance Amount</th><td>${invoiceData.advanceAmountInINR}</td></tr>
+        <tr><th>Remaining Amount</th><td>${invoiceData.remainingAmountInINR}</td></tr>
+        <tr><th>Advance Place</th><td>${invoiceData.advancePlace}</td></tr>
+        <tr><th>Departure Place</th><td>${invoiceData.departurePlace}</td></tr>
+        <tr><th>Destination Place</th><td>${invoiceData.destinationPlace}</td></tr>
+        <tr><th>Departure Time</th><td>${formatTime(invoiceData.departureTime)}</td></tr>
+        <tr><th>Return Time</th><td>${formatTime(invoiceData.returnTime)}</td></tr>
+        <tr><th>Toll</th><td>${invoiceData.tollInINR}</td></tr>
+        <tr><th>Other State Tax</th><td>${invoiceData.otherStateTaxInINR}</td></tr>
+        <tr><th>Note</th><td>${invoiceData.instructions}</td></tr>
+        <tr><th>Departure Date</th><td>${formatDate(invoiceData.departureDate)}</td></tr>
+        <tr><th>Return Date</th><td>${formatDate(invoiceData.returnDate)}</td></tr>
+      </table>
+
+      <div class="page-break"></div>
+    
+      <div class="terms-header">
+        <div>Akash Shinde</div>
+        <div>Tusharraj Travel</div>
+      </div>
+
+      <div class="terms-title">Terms and Conditions</div>
+    
+      <ul>
+        <li>The Booking will not be cancelled for any reason and the advance amount paid will not be refunded</li>
+        <li>Full Payment is mandatory before departure for the trip.</li>
+        <li>If you Cause damage to the vehicle, you will have to pay compensation for it.</li>
+        <li>Driver meal will remain with the party.</li>
+        <li>Tap, TV, Sound cannot be guaranteed.</li>
+        <li>In case of emergency, the vehicle route will be change.</li>
+        <li>Vehicle Kilometers will be taken form office to office.</li>
+        <li>Sometimes Problem may arise in the vehicle;passengers will have to be patient.</li>
+        <li>The travel company is not responsible or takes any responsibility for any kind of personal or finacial loss.</li>
+      </ul>
+    
+      <div class="tourist-wheel">Tourist Wheel</div>
     </body>
     </html>
   `;
-
 
     try {
       console.log('Generating PDF...');
@@ -124,7 +192,6 @@ const InvoiceScreen: React.FC = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Invoice</Text>
       <View style={styles.row}>
         <Text style={styles.label}>Invoice ID:</Text>
         <Text style={styles.value}>{invoiceData._id}</Text>
@@ -183,11 +250,11 @@ const InvoiceScreen: React.FC = () => {
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Departure Time:</Text>
-        <Text style={styles.value}>{invoiceData.departureTime}</Text>
+        <Text style={styles.value}>{formatTime(invoiceData.departureTime)}</Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Return Time:</Text>
-        <Text style={styles.value}>{invoiceData.returnTime}</Text>
+        <Text style={styles.value}>{formatTime(invoiceData.returnTime)}</Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Toll:</Text>
@@ -199,19 +266,15 @@ const InvoiceScreen: React.FC = () => {
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Note:</Text>
-        <Text style={styles.value}>{invoiceData.note}</Text>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Instructions:</Text>
         <Text style={styles.value}>{invoiceData.instructions}</Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Created At:</Text>
-        <Text style={styles.value}>{invoiceData.createdAt}</Text>
+        <Text style={styles.value}>{formatDate(invoiceData.createdAt)}</Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Updated At:</Text>
-        <Text style={styles.value}>{invoiceData.updatedAt}</Text>
+        <Text style={styles.value}>{formatDate(invoiceData.updatedAt)}</Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Status:</Text>
@@ -219,11 +282,11 @@ const InvoiceScreen: React.FC = () => {
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Departure Date:</Text>
-        <Text style={styles.value}>{invoiceData.departureDate}</Text>
+        <Text style={styles.value}>{formatDate(invoiceData.departureDate)}</Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Return Date:</Text>
-        <Text style={styles.value}>{invoiceData.returnDate}</Text>
+        <Text style={styles.value}>{formatDate(invoiceData.returnDate)}</Text>
       </View>
       <TouchableOpacity style={styles.downloadButton} onPress={createAndDownloadPDF}>
         <Text style={styles.downloadButtonText}>Download PDF</Text>
@@ -269,6 +332,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 5,
     alignItems: "center",
+    marginBottom: 50
   },
   downloadButtonText: {
     color: "#fff",
