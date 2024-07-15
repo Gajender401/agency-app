@@ -83,7 +83,7 @@ const AddRouteScreen: React.FC = () => {
         }
 
         const newRoute = {
-            vehicleId: findVehicleByNumber(vehicleNumber)?.id,
+            vehicleId: findVehicleByNumber(vehicleNumber)?.id ? findVehicleByNumber(vehicleNumber)?.id : vehicleNumber,
             departurePlace,
             destinationPlace,
             departureTime: departureTime,

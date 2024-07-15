@@ -43,12 +43,12 @@ interface ServiceHistory {
     date: string;
     workDescription: string;
     vehicle: string;
-    bill: string;
+    bill: string[];
 }
 
 const ServiceHistoryScreen: React.FC = () => {
     const [docs, setDocs] = useState<ServiceHistory[]>([])
-    const [selectedBill, setSelectedBill] = React.useState<string | null>(null);
+    const [selectedBill, setSelectedBill] = React.useState<string[] | null>(null);
     const [showBillModal, setShowBillModal] = React.useState(false);
     const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -72,9 +72,9 @@ const ServiceHistoryScreen: React.FC = () => {
         fetchVehiclesDocs();
     }, [refresh]);
 
-    const handleViewBill = (billUrl: string) => {
-        console.log("Bill URL:", billUrl);
-        setSelectedBill(billUrl);
+    const handleViewBill = (billUrls: string[]) => {
+        console.log("Bill URLs:", billUrls);
+        setSelectedBill(billUrls);
         setShowBillModal(true);
     };
 
@@ -143,7 +143,6 @@ const ServiceHistoryScreen: React.FC = () => {
                     ))}
                 </ScrollView>
             )}
-            {/* Bill Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -153,16 +152,18 @@ const ServiceHistoryScreen: React.FC = () => {
                 <BlurOverlay visible={showBillModal} onRequestClose={() => setShowBillModal(false)} />
 
                 <View style={styles.modalContainer}>
-                    {selectedBill ? (
-                        <Image source={{ uri: selectedBill }} style={styles.fullImage} />
-                    ) : (
-                        <Text style={styles.modalText}>No image available</Text>
-                    )}
-
+                    <ScrollView contentContainerStyle={styles.imageScrollView}>
+                        {selectedBill && selectedBill.length > 0 ? (
+                            selectedBill.map((imageUrl, index) => (
+                                <Image key={index} source={{ uri: imageUrl }} style={styles.billImage} />
+                            ))
+                        ) : (
+                            <Text style={styles.modalText}>No images available</Text>
+                        )}
+                    </ScrollView>
                 </View>
             </Modal>
 
-            {/* Delete Confirmation Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -243,7 +244,6 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
     },
-    // Modal Styles
     overlay: {
         flex: 1,
         justifyContent: 'center',
@@ -268,8 +268,11 @@ const styles = StyleSheet.create({
         fontSize: 18,
         textAlign: "center",
     },
-    fullImage: {
-        width: '80%',
+    imageScrollView: {
+        alignItems: 'center',
+    },
+    billImage: {
+        width: 300,
         height: 300,
         borderRadius: 10,
         marginBottom: 10,

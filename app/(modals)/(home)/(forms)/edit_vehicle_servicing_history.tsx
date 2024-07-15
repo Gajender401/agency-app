@@ -17,6 +17,7 @@ import { useGlobalContext } from "@/context/GlobalProvider";
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { GestureHandlerRootView, TextInput } from "react-native-gesture-handler";
 import { router } from "expo-router";
+import { Picker } from '@react-native-picker/picker';
 
 const AddServiceHistoryScreen: React.FC = () => {
     const [garageName, setGarageName] = useState("");
@@ -24,11 +25,20 @@ const AddServiceHistoryScreen: React.FC = () => {
     const [date, setDate] = useState<Date | undefined>(undefined);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [workDescription, setWorkDescription] = useState("");
-    const [vehicleNumber, setVehicleNumber] = useState("");
-    const [billImage, setBillImage] = useState<string | null>(null);
+    const [vehicleId, setVehicleId] = useState("");
+    const [billImages, setBillImages] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [inputHeight, setInputHeight] = useState(100);
+    const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
     const { apiCaller, editData, setRefresh } = useGlobalContext();
+
+    const findVehicleByNumber = (number: string) => {
+        return vehicleNumbers.find(vehicle => vehicle.id === number);
+      };
+
+    useEffect(() => {
+        fetchVehicles();
+    }, []);
 
     useEffect(() => {
         if (editData) {
@@ -36,10 +46,27 @@ const AddServiceHistoryScreen: React.FC = () => {
             setGarageNumber(editData.garageNumber);
             setDate(new Date(editData.date));
             setWorkDescription(editData.workDescription);
-            setVehicleNumber(editData.vehicle);
-            setBillImage(editData.bill);
+            setVehicleId(editData.vehicle);
+            setBillImages(editData.bill || []);
+            
         }
     }, [editData])
+
+    const extractNumbers = (data: any[]): { id: string, number: string }[] => {
+        return data.map(vehicle => ({ id: vehicle._id, number: vehicle.number }));
+    };
+
+    const fetchVehicles = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/vehicle');
+            setVehicleNumbers(extractNumbers(response.data.data));
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const onChangeDate = (event: any, selectedDate?: Date) => {
         setShowDatePicker(false);
@@ -49,8 +76,8 @@ const AddServiceHistoryScreen: React.FC = () => {
     };
 
     const handleAddServiceHistory = async () => {
-        if (!garageName || !garageNumber || !date || !workDescription || !vehicleNumber || !billImage) {
-            Alert.alert("Please fill all fields and provide the bill image.");
+        if (!garageName || !garageNumber || !date || !workDescription || !vehicleId || billImages.length === 0) {
+            Alert.alert("Please fill all fields and provide at least one bill image.");
             return;
         }
 
@@ -59,16 +86,16 @@ const AddServiceHistoryScreen: React.FC = () => {
             garageNumber,
             date: date.toISOString().split('T')[0],
             workDescription,
-            vehicleNumeber: vehicleNumber,
-            bill: billImage,
+            vehicleId: vehicleId,
+            bill: billImages,
         };
 
         setLoading(true);
         try {
             await apiCaller.patch(`/api/service?serviceId=${editData._id}`, newServiceHistory, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
-            setRefresh(prev=>!prev)
-            router.back()
+            setRefresh(prev => !prev);
+            router.back();
             Alert.alert("Success", "Service history updated successfully!");
         } catch (error) {
             console.log(error);
@@ -83,11 +110,17 @@ const AddServiceHistoryScreen: React.FC = () => {
             allowsEditing: false,
             aspect: [4, 3],
             quality: 1,
+            allowsMultipleSelection: true,
         });
 
         if (!result.canceled) {
-            setBillImage(result.assets[0].uri);
+            const newImages = result.assets.map(asset => asset.uri);
+            setBillImages(prevImages => [...prevImages, ...newImages]);
         }
+    };
+
+    const removeImage = (index: number) => {
+        setBillImages(prevImages => prevImages.filter((_, i) => i !== index));
     };
 
     return (
@@ -97,11 +130,18 @@ const AddServiceHistoryScreen: React.FC = () => {
                     <View style={styles.modalContent}>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Vehicle Number</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={vehicleNumber}
-                                editable={false}
-                            />
+                            <View style={styles.pickerContainer}>
+                                <Picker
+                                    selectedValue={vehicleId}
+                                    onValueChange={(itemValue) => setVehicleId(itemValue)}
+                                    style={styles.picker}
+                                >
+                                    <Picker.Item label={findVehicleByNumber(vehicleId)?.number} value={vehicleId} />
+                                    {vehicleNumbers.map((vehicle, index) => (
+                                        <Picker.Item key={index} label={vehicle.number} value={vehicle.id} />
+                                    ))}
+                                </Picker>
+                            </View>
                         </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Garage Name</Text>
@@ -123,7 +163,7 @@ const AddServiceHistoryScreen: React.FC = () => {
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Date</Text>
                             <TouchableOpacity
-                                style={[styles.input,{paddingBottom:-8,paddingTop:8}]}
+                                style={[styles.input, { paddingBottom: -8, paddingTop: 8 }]}
                                 onPress={() => setShowDatePicker(true)}
                             >
                                 <Text>{date ? date.toDateString() : "Select Date"}</Text>
@@ -150,9 +190,16 @@ const AddServiceHistoryScreen: React.FC = () => {
                             />
                         </View>
                         <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
-                            <Text style={styles.imagePickerText}>Select Bill Image</Text>
+                            <Text style={styles.imagePickerText}>Select Bill Images</Text>
                         </TouchableOpacity>
-                        {billImage && <Image source={{ uri: billImage }} style={styles.previewImage} />}
+                        {billImages.map((image, index) => (
+                            <View key={index} style={styles.imageContainer}>
+                                <Image source={{ uri: image }} style={styles.previewImage} />
+                                <TouchableOpacity style={styles.removeButton} onPress={() => removeImage(index)}>
+                                    <Text style={styles.removeButtonText}>Remove</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ))}
 
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
@@ -205,6 +252,18 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         height: 40,
     },
+    pickerContainer: {
+        borderColor: Colors.secondary,
+        borderWidth: 1,
+        borderRadius: 10,
+        overflow: 'hidden',
+    },
+    picker: {
+        height: 40,
+        width: '100%',
+        marginTop: -6,
+        marginBottom: 6
+    },
     imagePicker: {
         backgroundColor: Colors.darkBlue,
         padding: 15,
@@ -216,11 +275,24 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
     },
+    imageContainer: {
+        marginBottom: 15,
+    },
     previewImage: {
         width: "100%",
         height: 200,
         borderRadius: 10,
-        marginBottom: 15,
+    },
+    removeButton: {
+        backgroundColor: 'red',
+        padding: 5,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginTop: 5,
+    },
+    removeButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
     },
     modalButtons: {
         flexDirection: "row",

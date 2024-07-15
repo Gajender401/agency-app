@@ -3,7 +3,6 @@ import {
     View,
     StyleSheet,
     Text,
-    TextInput,
     SafeAreaView,
     ScrollView,
     Platform,
@@ -16,10 +15,10 @@ import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { router } from "expo-router";
-
+import { Picker } from '@react-native-picker/picker';
 
 const EditVehicleDocumentsScreen: React.FC = () => {
-    const [vehicleNumber, setVehicleNumber] = useState("");
+    const [vehicleId, setVehicleId] = useState("");
     const [rcImage, setRcImage] = useState<string | null>(null);
     const [insuranceImage, setInsuranceImage] = useState<string | null>(null);
     const [permitImage, setPermitImage] = useState<string | null>(null);
@@ -27,13 +26,32 @@ const EditVehicleDocumentsScreen: React.FC = () => {
     const [taxImage, setTaxImage] = useState<string | null>(null);
     const [pucImage, setPucImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
     const { apiCaller, editData, setRefresh } = useGlobalContext();
+
+    const extractNumbers = (data: any[]): { id: string, number: string }[] => {
+        return data.map(vehicle => ({ id: vehicle._id, number: vehicle.number }));
+    };
+
+    const fetchVehicles = async () => {
+        try {
+            setLoading(true);
+            const response = await apiCaller.get('/api/vehicle');
+            setVehicleNumbers(extractNumbers(response.data.data));
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchVehicles();
+    }, []);
 
     useEffect(() => {
         if (editData) {
-            console.log(editData);
-            
-            setVehicleNumber(editData.number);
+            setVehicleId(editData._id);
             setRcImage(editData.RC);
             setInsuranceImage(editData.insurance);
             setPermitImage(editData.permit);
@@ -44,27 +62,27 @@ const EditVehicleDocumentsScreen: React.FC = () => {
     }, [editData])
 
     const handleAddVehicleDocuments = async () => {
-        if (!vehicleNumber || !rcImage || !insuranceImage || !permitImage || !fitnessImage || !taxImage || !pucImage) {
+        if (!vehicleId || !rcImage || !insuranceImage || !permitImage || !fitnessImage || !taxImage || !pucImage) {
             Alert.alert("Please fill all fields and upload all documents.");
             return;
         }
 
         const newVehicleDocuments = {
-            RC:rcImage,
-            insurance:insuranceImage,
-            permit:permitImage,
-            fitness:fitnessImage,
-            tax:taxImage,
-            PUC:pucImage,
+            RC: rcImage,
+            insurance: insuranceImage,
+            permit: permitImage,
+            fitness: fitnessImage,
+            tax: taxImage,
+            PUC: pucImage,
         };
 
         setLoading(true);
         try {
-            await apiCaller.patch(`/api/vehicle/addDocuments?vehicleId=${editData._id}`, newVehicleDocuments, {
+            await apiCaller.patch(`/api/vehicle/addDocuments?vehicleId=${vehicleId}`, newVehicleDocuments, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             setLoading(false);
-            setRefresh(prev=>!prev)
+            setRefresh(prev => !prev)
             resetForm();
             Alert.alert("Success", "Vehicle documents added successfully!");
             router.back()
@@ -88,7 +106,7 @@ const EditVehicleDocumentsScreen: React.FC = () => {
     };
 
     const resetForm = () => {
-        setVehicleNumber("");
+        setVehicleId("");
         setRcImage(null);
         setInsuranceImage(null);
         setPermitImage(null);
@@ -103,11 +121,18 @@ const EditVehicleDocumentsScreen: React.FC = () => {
                 <View style={styles.modalContent}>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Vehicle Number</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={vehicleNumber}
-                            editable={false}
-                        />
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={vehicleId}
+                                onValueChange={(itemValue) => setVehicleId(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="Select Vehicle" value="" />
+                                {vehicleNumbers.map((vehicle, index) => (
+                                    <Picker.Item key={index} label={vehicle.number} value={vehicle.id} />
+                                ))}
+                            </Picker>
+                        </View>
                     </View>
 
                     <View style={styles.inputGroup}>
@@ -213,12 +238,17 @@ const styles = StyleSheet.create({
         color: Colors.secondary,
         fontWeight: "500",
     },
-    input: {
+    pickerContainer: {
         borderColor: Colors.secondary,
         borderWidth: 1,
         borderRadius: 10,
-        paddingHorizontal: 10,
+        overflow: 'hidden',
+    },
+    picker: {
         height: 40,
+        width: '100%',
+        marginTop: -6,
+        marginBottom: 6
     },
     imagePicker: {
         backgroundColor: Colors.darkBlue,

@@ -101,9 +101,12 @@ const EditPackageBookingForm: React.FC = () => {
             return;
         }
 
+        console.log(vehicleNumber,otherVehicleNumber);
+        
+
         const updatedBooking = {
-            vehicleId: findVehicleByNumber(vehicleNumber)?.id,
-            otherVehicleId: findVehicleByNumber(otherVehicleNumber)?.id,
+            vehicleId: findVehicleByNumber(vehicleNumber)?.id ? findVehicleByNumber(vehicleNumber)?.id: vehicleNumber ,
+            otherVehicleId: findVehicleByNumber(otherVehicleNumber)?.id ? findVehicleByNumber(otherVehicleNumber)?.id : otherVehicleNumber,
             customerName,
             mobileNumber,
             alternateNumber,
@@ -121,6 +124,7 @@ const EditPackageBookingForm: React.FC = () => {
             otherStateTaxInINR: otherStateTax,
             instructions: addNote,
             advancePlace: entryParking,
+            note:addNote
         };
 
         setLoading(true);
