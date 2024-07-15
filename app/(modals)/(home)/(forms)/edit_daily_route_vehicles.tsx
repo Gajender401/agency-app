@@ -17,6 +17,20 @@ import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have 
 import { GestureHandlerRootView, TextInput } from "react-native-gesture-handler";
 import { router } from "expo-router";
 
+function timestampToTime(timestamp: string): string {
+    const date = new Date(timestamp);
+    let hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+    const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const formattedHours = hours.toString().padStart(2, '0');
+
+    return `${formattedHours}:${minutes}:${seconds} ${ampm}`;
+}
+
 const AddRouteScreen: React.FC = () => {
     const [vehicleNumber, setVehicleNumber] = useState<string>("");
     const [departurePlace, setDeparturePlace] = useState<string>("");
@@ -25,7 +39,12 @@ const AddRouteScreen: React.FC = () => {
     const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
     const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
-    const { apiCaller, setRefresh } = useGlobalContext();
+    const { apiCaller, setRefresh, editData } = useGlobalContext();
+
+
+    const findVehicleByNumber = (number: string) => {
+        return vehicleNumbers.find(vehicle => vehicle.number === number);
+    };
 
     const extractNumbers = (data: Vehicle[]): { id: string, number: string }[] => {
         return data.map(vehicle => ({ id: vehicle._id, number: vehicle.number }));
@@ -47,6 +66,16 @@ const AddRouteScreen: React.FC = () => {
         fetchVehicles();
     }, []);
 
+    useEffect(() => {
+        if (editData) {
+            setVehicleNumber(editData.vehicle.number);
+            setDeparturePlace(editData.departurePlace);
+            setDestinationPlace(editData.destinationPlace);
+            setDepartureTime(new Date(editData.departureTime));
+        }
+    }, [])
+
+
     const handleAddRoute = async () => {
         if (!vehicleNumber || !departurePlace || !destinationPlace || !departureTime) {
             Alert.alert("Please fill all fields.");
@@ -54,24 +83,24 @@ const AddRouteScreen: React.FC = () => {
         }
 
         const newRoute = {
-            vehicleId: vehicleNumber,
+            vehicleId: findVehicleByNumber(vehicleNumber)?.id,
             departurePlace,
             destinationPlace,
-            departureTime: departureTime.toISOString(),
+            departureTime: departureTime,
         };
 
         setLoading(true);
         try {
-            await apiCaller.post('/api/dailyRoute', newRoute, { headers: { 'Content-Type': 'application/json' } });
+            await apiCaller.patch(`/api/dailyRoute?routeId=${editData._id}`, newRoute, { headers: { 'Content-Type': 'application/json' } });
             setLoading(false);
-            setRefresh(prev=>!prev)
+            setRefresh(prev => !prev)
             resetForm();
-            Alert.alert("Success", "Route added successfully!");
+            Alert.alert("Success", "Route updateed successfully!");
             router.back()
         } catch (error) {
             console.log(error);
             setLoading(false);
-            Alert.alert("Error", "Failed to add route. Please try again.");
+            Alert.alert("Error", "Failed to update route. Please try again.");
         }
     };
 
@@ -102,7 +131,7 @@ const AddRouteScreen: React.FC = () => {
                                     onValueChange={(itemValue) => setVehicleNumber(itemValue)}
                                     style={styles.picker}
                                 >
-                                    <Picker.Item label="Select Vehicle Number" value="" />
+                                    <Picker.Item label={vehicleNumber} value={findVehicleByNumber(vehicleNumber)?.id} />
                                     {vehicleNumbers.map((number, index) => (
                                         <Picker.Item key={index} label={number.number} value={number.id} />
                                     ))}

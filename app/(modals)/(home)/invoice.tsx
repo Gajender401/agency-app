@@ -79,7 +79,7 @@ const InvoiceScreen: React.FC = () => {
             </div>
           </div>
         </div>
-        <div class="booking-date">Booking Date: ${formatDate(invoiceData.updatedAt)}</div>
+        <div class="booking-date">Booking Date: ${formatDate(invoiceData.createdAt)}</div>
       </div>
       <table>
         <tr><th>Customer Name</th><td>${invoiceData.customerName}</td></tr>
@@ -94,13 +94,14 @@ const InvoiceScreen: React.FC = () => {
         <tr><th>Advance Place</th><td>${invoiceData.advancePlace}</td></tr>
         <tr><th>Departure Place</th><td>${invoiceData.departurePlace}</td></tr>
         <tr><th>Destination Place</th><td>${invoiceData.destinationPlace}</td></tr>
+        <tr><th>Departure Date</th><td>${formatDate(invoiceData.departureDate)}</td></tr>
         <tr><th>Departure Time</th><td>${formatTime(invoiceData.departureTime)}</td></tr>
+        <tr><th>Return Date</th><td>${formatDate(invoiceData.returnDate)}</td></tr>
         <tr><th>Return Time</th><td>${formatTime(invoiceData.returnTime)}</td></tr>
         <tr><th>Toll</th><td>${invoiceData.tollInINR}</td></tr>
         <tr><th>Other State Tax</th><td>${invoiceData.otherStateTaxInINR}</td></tr>
         <tr><th>Note</th><td>${invoiceData.instructions}</td></tr>
-        <tr><th>Departure Date</th><td>${formatDate(invoiceData.departureDate)}</td></tr>
-        <tr><th>Return Date</th><td>${formatDate(invoiceData.returnDate)}</td></tr>
+        <tr><th>Booked By</th><td>${invoiceData.createdBy}</td></tr>
       </table>
 
       <div class="page-break"></div>

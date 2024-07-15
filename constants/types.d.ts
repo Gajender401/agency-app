@@ -294,6 +294,7 @@ interface Package {
   status: string;
   departureDate:string;
   returnDate:string;
+  createdBy: string;
 }
 
 
@@ -322,7 +323,7 @@ interface Cleaner {
 
 interface DailyRoute {
   _id: string;
-  vehicleNumber: string;
+  vehicle: {number:string};
   departurePlace: string;
   destinationPlace: string;
   primaryDriver: Driver | null;

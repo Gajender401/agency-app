@@ -29,6 +29,7 @@ const ProfileScreen = () => {
             await SecureStore.deleteItemAsync("access_token");
             setIsLogged(false);
             setToken(null);
+            router.push('/')
         } catch (error) {
             console.error("Error during logout:", error);
         } finally {

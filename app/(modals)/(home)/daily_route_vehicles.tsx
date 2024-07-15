@@ -71,6 +71,8 @@ const DailyRouteVehicles: React.FC = () => {
       setLoading(true);
       const response = await apiCaller.get('/api/dailyRoute');
       setDailyRoutes(response.data.data);
+      console.log(response.data.data[0].vehicle.number);
+      
     } catch (err) {
       console.log(err);
     } finally {
@@ -204,7 +206,7 @@ const DailyRouteVehicles: React.FC = () => {
               </View>
 
               <Text style={styles.cardText}>
-                Vehicle Number: <Text style={{ color: "black" }}>{route.vehicleNumber}</Text>
+                Vehicle Number: <Text style={{ color: "black" }}>{route.vehicle.number}</Text>
               </Text>
               <Text style={styles.cardText}>
                 Departure Time: <Text style={{ color: "black" }}>{timestampToTime(route.departureTime)}</Text>

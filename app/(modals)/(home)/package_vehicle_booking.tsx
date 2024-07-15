@@ -67,6 +67,8 @@ const PackageVehicleListScreen: React.FC = () => {
       setLoading(true);
       const response = await apiCaller.get('/api/packageBooking');
       setPackages(response.data.data);
+      console.log(response.data.data[0].returnTime);
+      
     } catch (err) {
       console.log(err);
     } finally {
@@ -232,7 +234,7 @@ const PackageVehicleListScreen: React.FC = () => {
               </View>
 
               <Text style={styles.cardText}>Customer Name: <Text style={styles.textValue}>{pkg.customerName}</Text></Text>
-              <Text style={styles.cardText}>Journey Duration: <Text style={styles.textValue}>{formatDate(pkg.departureTime)} to {formatDate(pkg.returnTime)}</Text></Text>
+              <Text style={styles.cardText}>Journey Duration: <Text style={styles.textValue}>{formatDate(pkg.departureDate)} to {formatDate(pkg.returnDate)}</Text></Text>
               {pkg.vehicle &&
                 <Text style={styles.cardText}>Vehicle Number: <Text style={styles.textValue}>{pkg.vehicle.number}</Text></Text>
               }

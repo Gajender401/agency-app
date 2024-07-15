@@ -100,15 +100,10 @@ const PackageBookingForm: React.FC = () => {
 
     const handleBooking = async () => {
 
-        console.log(vehicleNumber,otherVehicleNumber);
-        
-
         if (!vehicleNumber || !otherVehicleNumber || !customerName || !mobileNumber || !alternateNumber || !kmStarting || !perKmRate || !advancedAmount || !remainingAmount || !departurePlace || !destinationPlace || !departureTime || !returnTime || !departureDate || !returnDate || !toll || !otherStateTax || !instructions || !entryParking) {
             Alert.alert("Please fill all fields.");
             return;
         }
-
-        
 
         const newBooking = {
             vehicleId: vehicleNumber,
@@ -130,11 +125,15 @@ const PackageBookingForm: React.FC = () => {
             otherStateTaxInINR: otherStateTax,
             instructions: instructions,
             advancePlace: entryParking,
+            note: instructions
         };
+
 
         setLoading(true);
         try {
-            await apiCaller.post('/api/packageBooking', newBooking);
+            const res = await apiCaller.post('/api/packageBooking', newBooking);
+            console.log(res.data);
+            
             setLoading(false);
             setRefresh(prev=>!prev)
             resetForm();

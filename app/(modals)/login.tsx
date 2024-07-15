@@ -32,7 +32,7 @@ const LoginScreen = () => {
             'userName': username
         };
         try {
-            const response = await axios.post(`${process.env.EXPO_PUBLIC_URL}/api/user/login`, data);
+            const response = await axios.post(`${process.env.EXPO_PUBLIC_URL}api/user/login`, data);
             await SecureStore.setItemAsync("access_token", response.data.authToken);
             setToken(response.data.authToken)
             setIsLogged(true)
