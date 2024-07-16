@@ -239,7 +239,7 @@ const PackageVehicleListScreen: React.FC = () => {
                 <Text style={styles.cardText}>Vehicle Number: <Text style={styles.textValue}>{pkg.vehicle.number}</Text></Text>
               }
               {pkg.otherVehicle._id &&
-                <Text style={styles.cardText}>Other Vehicle: <Text style={styles.textValue}>{pkg.otherVehicle._id}</Text></Text>
+                <Text style={styles.cardText}>Other Vehicle: <Text style={styles.textValue}>{pkg.otherVehicle.number}</Text></Text>
               }
 
               <TouchableOpacity

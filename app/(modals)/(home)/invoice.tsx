@@ -71,7 +71,7 @@ const InvoiceScreen: React.FC = () => {
       <div class="title">Invoice</div>
       <div class="container">
         <div class="container-header">
-          <div>Invoice ID: ${invoiceData._id}</div>
+          <div>Invoice ID: ${invoiceData.invoiceId}</div>
           <div class="company-info">
             <div class="company-name">Tusharraj Travel</div>
             <div class="company-address">

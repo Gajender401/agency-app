@@ -4,6 +4,8 @@ import { Colors } from '@/constants/Colors'; // Ensure to import your color cons
 import { useLocalSearchParams } from 'expo-router';
 import { useGlobalContext } from '@/context/GlobalProvider';
 
+
+
 function timestampToTime(timestamp: string): string {
   const date = new Date(timestamp);
   const hours = date.getUTCHours().toString().padStart(2, '0');
@@ -25,7 +27,34 @@ const VehicleDetailsScreen: React.FC = () => {
   const { pkgId } = useLocalSearchParams();
   const [vehicleDetails, setVehicleDetails] = useState<Package | null>(null);
   const [loading, setLoading] = useState(true);
+  const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
   const { apiCaller } = useGlobalContext();
+
+  const findVehicleByNumber = (id: string) => {
+    return vehicleNumbers.find(vehicle => vehicle.id === id);
+  };
+  
+
+  const extractNumbers = (data: Vehicle[]): { id: string, number: string }[] => {
+    return data.map(vehicle => ({ id: vehicle._id, number: vehicle.number }));
+};
+
+
+  const fetchVehicles = async () => {
+    try {
+        setLoading(true);
+        const response = await apiCaller.get('/api/vehicle');
+        setVehicleNumbers(extractNumbers(response.data.data));
+    } catch (err) {
+        console.log(err);
+    } finally {
+        setLoading(false);
+    }
+};
+
+useEffect(() => {
+    fetchVehicles();
+}, []);
 
   useEffect(() => {
     const fetchPackageDetails = async () => {
@@ -55,12 +84,12 @@ const VehicleDetailsScreen: React.FC = () => {
       <View style={styles.section}>
         <Text style={styles.label}>Vehicle Number:</Text>
         {/*@ts-ignore*/}
-        <Text style={styles.value}>{vehicleDetails.vehicle}</Text>
+        <Text style={styles.value}>{findVehicleByNumber(vehicleDetails.vehicle)?.number}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Other Vehicle Number:</Text>
         {/*@ts-ignore*/}
-        <Text style={styles.value}>{vehicleDetails.otherVehicle}</Text>
+        <Text style={styles.value}>{findVehicleByNumber(vehicleDetails.otherVehicle)?.number}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Customer Name:</Text>
