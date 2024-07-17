@@ -138,14 +138,14 @@ const AddTempoScreen: React.FC = () => {
               onChangeText={(text) => setVehicleModel(text)}
             />
           </View>
-          <View style={styles.inputGroup}>
+          {/* <View style={styles.inputGroup}>
             <Text style={styles.label}>Body Type</Text>
             <TextInput
               style={styles.input}
               value={bodyType}
               onChangeText={(text) => setBodyType(text)}
             />
-          </View>
+          </View> */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Location</Text>
             <TextInput
@@ -163,14 +163,14 @@ const AddTempoScreen: React.FC = () => {
               keyboardType="phone-pad"
             />
           </View>
-          <View style={styles.inputGroup}>
+          {/* <View style={styles.inputGroup}>
             <Text style={styles.label}>Chassis Number</Text>
             <TextInput
               style={styles.input}
               value={chassisBrand}
               onChangeText={(text) => setChassisBrand(text)}
             />
-          </View>
+          </View> */}
 
           <View style={styles.featuresContainer}>
             <TouchableOpacity style={styles.checkboxContainer} onPress={() => setSelectedForRent(!selectedForRent)}>

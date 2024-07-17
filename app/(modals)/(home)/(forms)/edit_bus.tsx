@@ -198,7 +198,7 @@ const EditBusScreen: React.FC = () => {
               onChangeText={(text) => setChassisBrand(text)}
             />
           </View>
-          <View style={styles.inputGroup}>
+          {/* <View style={styles.inputGroup}>
             <Text style={styles.label}>Number of Tyres</Text>
             <TextInput
               style={styles.input}
@@ -215,7 +215,7 @@ const EditBusScreen: React.FC = () => {
               onChangeText={(text) => setVehicleWeightInKGS(text)}
               keyboardType="numeric"
             />
-          </View>
+          </View> */}
           {/* AC/Non-AC RadioButtonGroup */}
           <View style={styles.featuresContainer}>
             <RadioButtonGroup

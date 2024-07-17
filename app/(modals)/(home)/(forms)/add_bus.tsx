@@ -120,7 +120,7 @@ const AddBusScreen: React.FC = () => {
             <TextInput
               style={styles.input}
               value={vehicleNo}
-              onChangeText={(text) => setVehicleNo(formatVehicleNumber(text))}
+              onChangeText={(text) => setVehicleNo(text)}
               placeholderTextColor={Colors.secondary}
               autoCapitalize="characters"
             />

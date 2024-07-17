@@ -133,14 +133,14 @@ const TechnicianSupport: React.FC = () => {
                 <ScrollView style={styles.techniciansList}>
                     {filteredTechnicians.map((technician) => (
                         <View key={technician._id} style={styles.card}>
-                            <View style={styles.cardHeader}>
+                            {/* <View style={styles.cardHeader}>
                                 <TouchableOpacity onPress={()=>{setEditData(technician);router.push("edit_technician")}} style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity onPress={() => {setShowDeleteModal(true); setIdToDelete(technician._id)}}> 
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
-                            </View>
+                            </View> */}
                             <View style={[styles.cardHeader, { marginBottom: 2, marginTop: 5 }]}>
                                 <TouchableOpacity onPress={() => dialNumber(technician.mobileNumber)}>
                                     <MaterialIcons name="phone-in-talk" size={24} color={Colors.darkBlue} />
@@ -151,6 +151,8 @@ const TechnicianSupport: React.FC = () => {
                             </View>
                             <Text style={styles.cardText}>Technician Name: <Text style={{ color: "black" }}> {technician.name}</Text></Text>
                             <Text style={styles.cardText}>Technician Type: <Text style={{ color: "black" }}> {technician.technicianType}</Text></Text>
+                            <Text style={styles.cardText}>City: <Text style={{ color: "black" }}>{technician.city}</Text></Text>
+                            <Text style={styles.cardText}>State: <Text style={{ color: "black" }}>{technician.state}</Text></Text>
                             <Text style={styles.cardText}>Vehicle Type: <Text style={{ color: "black" }}> {technician.vehicleType}</Text></Text>
                             <Text style={styles.cardText}>City: <Text style={{ color: "black" }}> {technician.city}</Text></Text>
                         </View>
@@ -194,7 +196,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: "#ffffff",
+        backgroundColor: "#F4EFEF",
     },
     searchContainer: {
         flexDirection: "row",

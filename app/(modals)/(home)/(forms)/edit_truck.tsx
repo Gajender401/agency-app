@@ -126,7 +126,7 @@ const AddTruckScreen: React.FC = () => {
               editable={false}
             />
           </View>
-          <View style={styles.inputGroup}>
+          {/* <View style={styles.inputGroup}>
             <Text style={styles.label}>Seating Capacity</Text>
             <TextInput
               style={styles.input}
@@ -134,7 +134,7 @@ const AddTruckScreen: React.FC = () => {
               onChangeText={(text) => setSeatingCapacity(text)}
               keyboardType="numeric"
             />
-          </View>
+          </View> */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Vehicle Model</Text>
             <TextInput
@@ -186,7 +186,7 @@ const AddTruckScreen: React.FC = () => {
             />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Vehicle Weight in KGS</Text>
+            <Text style={styles.label}>Vehicle Weight in Tons</Text>
             <TextInput
               style={styles.input}
               value={vehicleWeightInKGS}
