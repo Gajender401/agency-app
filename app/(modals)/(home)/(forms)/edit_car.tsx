@@ -172,7 +172,7 @@ const AddCarScreen: React.FC = () => {
                             keyboardType="phone-pad"
                         />
                     </View>
-                    <View style={styles.inputGroup}>
+                    {/* <View style={styles.inputGroup}>
                         <Text style={styles.label}>Body Type</Text>
                         <TextInput
                             style={styles.input}
@@ -187,7 +187,7 @@ const AddCarScreen: React.FC = () => {
                             value={chassisBrand}
                             onChangeText={(text) => setChassisBrand(text)}
                         />
-                    </View>
+                    </View> */}
 
                     {/* AC/Non-AC RadioButtonGroup */}
                     <View style={styles.featuresContainer}>

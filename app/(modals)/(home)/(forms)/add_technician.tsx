@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     StyleSheet,
@@ -14,7 +14,14 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { Colors } from "@/constants/Colors"; // Replace with your colors constant
 import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have this hook or context
+import { State, City } from 'country-state-city';
 import { router } from "expo-router";
+
+type CityType = {
+    countryCode: string;
+    name: string;
+    stateCode: string;
+};
 
 const AddTechnicianScreen: React.FC = () => {
     const [name, setName] = useState("");
@@ -23,10 +30,23 @@ const AddTechnicianScreen: React.FC = () => {
     const [technicianType, setTechnicianType] = useState("");
     const [vehicleType, setVehicleType] = useState("");
     const [loading, setLoading] = useState(false);
+    const [city, setCity] = useState("");
+    const [cityList, setCityList] = useState<CityType[]>([]);
+    const [state, setState] = useState("");
     const { apiCaller, setRefresh } = useGlobalContext();
 
+    useEffect(() => {
+        if (state) {
+            const stateData = State.getStatesOfCountry("IN").find(s => s.isoCode === state);
+            if (stateData) {
+                setCityList(City.getCitiesOfState("IN", stateData.isoCode));
+            }
+        }
+    }, [state]);
+
+
     const handleAddTechnician = async () => {
-        if (!name || !mobile || !alternateNumber || !technicianType || !vehicleType) {
+        if (!name || !mobile || !alternateNumber || !technicianType || !vehicleType || !city || !state) {
             Alert.alert("Please fill all fields.");
             return;
         }
@@ -35,6 +55,8 @@ const AddTechnicianScreen: React.FC = () => {
             name,
             mobileNumber: mobile,
             alternateNumber,
+            city,
+            state,
             technicianType,
             vehicleType,
         };
@@ -58,6 +80,8 @@ const AddTechnicianScreen: React.FC = () => {
         setName("");
         setMobile("");
         setAlternateNumber("");
+        setCity("");
+        setState("");
         setTechnicianType("");
         setVehicleType("");
     };
@@ -91,6 +115,37 @@ const AddTechnicianScreen: React.FC = () => {
                             onChangeText={(text) => setAlternateNumber(text)}
                             keyboardType="phone-pad"
                         />
+                    </View>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>State</Text>
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={state}
+                                onValueChange={(itemValue) => setState(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item style={{ color: Colors.secondary }} label="Select State" value="" />
+                                {State.getStatesOfCountry("IN").map((s) => (
+                                    <Picker.Item key={s.isoCode} label={s.name} value={s.isoCode} />
+                                ))}
+                            </Picker>
+                        </View>
+                    </View>
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>City</Text>
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={city}
+                                onValueChange={(itemValue) => setCity(itemValue)}
+                                style={styles.picker}
+                                enabled={!!state}
+                            >
+                                <Picker.Item style={{ color: Colors.secondary }} label="Select City" value="" />
+                                {cityList.map((c) => (
+                                    <Picker.Item key={c.name} label={c.name} value={c.name} />
+                                ))}
+                            </Picker>
+                        </View>
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Technician Type</Text>
