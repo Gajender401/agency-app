@@ -56,7 +56,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         if (res) {
           setIsLogged(true);
           setToken(res);
-          // console.log(res);
+          console.log(res);
           
         } else {
           setToken(token);
