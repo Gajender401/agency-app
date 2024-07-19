@@ -68,6 +68,9 @@ const AddCleanerScreen: React.FC = () => {
             aadharCard: aadharImage,
         };
 
+        console.log(newCleaner);
+        
+
         setLoading(true);
         try {
             await apiCaller.post('/api/cleaner', newCleaner, { headers: { 'Content-Type': 'multipart/form-data' } });
