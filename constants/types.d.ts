@@ -334,6 +334,11 @@ interface DailyRoute {
   cleaner: Cleaner | null;
   departureTime: string;
   instructions: string;
+  status: "STARTED" | "COMPLETED";
+  afterJourneyNote: string;
+  beforeJourneyNote: string;
+  beforeJourneyPhotos: string[];
+  afterJourneyPhotos: string[];
 }
 
 

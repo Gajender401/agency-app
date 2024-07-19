@@ -25,7 +25,6 @@ interface GlobalContextProps {
   setRefresh: React.Dispatch<React.SetStateAction<boolean>>
   photos: Array<string>
   setPhotos: React.Dispatch<React.SetStateAction<Array<string>>>
-
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);

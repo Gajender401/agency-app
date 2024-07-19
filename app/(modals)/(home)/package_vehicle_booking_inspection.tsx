@@ -204,8 +204,8 @@ const PackageVehicleListScreen: React.FC = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Journey Details</Text>
-            <Text style={styles.modalText}>Before Journey Notes: {selectedPackage?.beforeJourneyNotes || ''}</Text>
-            <Text style={styles.modalText}>After Journey Notes: {selectedPackage?.afterJourneyNotes || ''}</Text>
+            <Text style={styles.modalText}>Before Journey Notes: {selectedPackage?.beforeJourneyNote || ''}</Text>
+            <Text style={styles.modalText}>After Journey Notes: {selectedPackage?.afterJourneyNote || ''}</Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
