@@ -23,6 +23,9 @@ interface GlobalContextProps {
   invoiceData: Package | null
   refresh:boolean,
   setRefresh: React.Dispatch<React.SetStateAction<boolean>>
+  photos: Array<string>
+  setPhotos: React.Dispatch<React.SetStateAction<Array<string>>>
+
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -49,6 +52,7 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [editData, setEditData] = useState<any>()
   const [invoiceData, setInvoiceData] = useState<Package | null>(null)
   const [refresh, setRefresh] = useState(false)
+  const [photos, setPhotos] = useState<Array<string>>([])
 
   useEffect(() => {
     SecureStore.getItemAsync("access_token")
@@ -113,7 +117,9 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         invoiceData,
         setInvoiceData,
         refresh,
-        setRefresh
+        setRefresh,
+        photos,
+        setPhotos
       }}
     >
       {children}

@@ -256,8 +256,8 @@ const DailyRouteVehicles: React.FC = () => {
       >
         <BlurOverlay visible={showAddDriverModal} onRequestClose={() => setShowAddDriverModal(false)} />
 
-        <TouchableWithoutFeedback onPress={() => setShowAddDriverModal(false)}>
-          <View style={styles.modalContainer}>
+        <View style={styles.modalContainer}>
+          <TouchableWithoutFeedback>
             <View style={styles.modalContent}>
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Primary Driver</Text>
@@ -315,8 +315,8 @@ const DailyRouteVehicles: React.FC = () => {
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
-        </TouchableWithoutFeedback>
+          </TouchableWithoutFeedback>
+        </View>
       </Modal>
     </SafeAreaView>
   );

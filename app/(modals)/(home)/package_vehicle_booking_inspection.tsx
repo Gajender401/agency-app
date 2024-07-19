@@ -29,10 +29,11 @@ const PackageVehicleListScreen: React.FC = () => {
   const [filteredPackages, setFilteredPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVehicleType, setSelectedVehicleType] = useState("");
-  const { apiCaller, setInvoiceData, refresh } = useGlobalContext();
+  const { apiCaller, setInvoiceData, refresh, setPhotos } = useGlobalContext();
 
   const fetchPackages = async () => {
     try {
@@ -86,6 +87,11 @@ const PackageVehicleListScreen: React.FC = () => {
     }
   };
 
+  const handleShowDetails = (pkg: Package) => {
+    setSelectedPackage(pkg);
+    setShowDetailsModal(true);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.searchContainer}>
@@ -120,6 +126,9 @@ const PackageVehicleListScreen: React.FC = () => {
           {filteredPackages.map((pkg) => (
             <View key={pkg._id} style={styles.card}>
               <View style={styles.cardHeader}>
+                <TouchableOpacity onPress={() => handleShowDetails(pkg)} style={styles.detailsButton}>
+                  <Text style={styles.detailsButtonText}>Details</Text>
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => { setInvoiceData(pkg); router.push("invoice") }} style={styles.editButton}>
                   <Text style={styles.editButtonText}>View Invoice</Text>
                 </TouchableOpacity>
@@ -144,7 +153,7 @@ const PackageVehicleListScreen: React.FC = () => {
                 <Text style={styles.cardText}>Vehicle Number: <Text style={styles.textValue}>{pkg.vehicle.number}</Text></Text>
               }
               {pkg.otherVehicle._id &&
-                <Text style={styles.cardText}>Other Vehicle: <Text style={styles.textValue}>{pkg.otherVehicle._id}</Text></Text>
+                <Text style={styles.cardText}>Other Vehicle: <Text style={styles.textValue}>{pkg.otherVehicle.number}</Text></Text>
               }
 
               <TouchableOpacity
@@ -181,6 +190,41 @@ const PackageVehicleListScreen: React.FC = () => {
                 <Text style={[styles.modalButtonText, { color: "#fff" }]}>Delete</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showDetailsModal}
+        onRequestClose={() => setShowDetailsModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Journey Details</Text>
+            <Text style={styles.modalText}>Before Journey Notes: {selectedPackage?.beforeJourneyNotes || ''}</Text>
+            <Text style={styles.modalText}>After Journey Notes: {selectedPackage?.afterJourneyNotes || ''}</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
+                onPress={() => {setPhotos(selectedPackage?.beforeJourneyPhotos); router.push('before_photos')} }
+              >
+                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Before Journey Photos</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
+                onPress={() => {setPhotos(selectedPackage?.afterJourneyPhotos); router.push('after_photos')} }
+              >
+                <Text style={[styles.modalButtonText, { color: "#fff" }]}>After Journey Photos</Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: "#ccc", marginTop: 10 }]}
+              onPress={() => setShowDetailsModal(false)}
+            >
+              <Text style={styles.modalButtonText}>Close</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -315,6 +359,24 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 5,
     marginBottom:10
+  },
+  detailsButton: {
+    backgroundColor: Colors.secondary,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    paddingVertical: 5,
+    height: 25,
+    marginRight: 5,
+  },
+  detailsButtonText: {
+    color: "#fff",
+    fontWeight: "semibold",
+    fontSize: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
   },
 });
 

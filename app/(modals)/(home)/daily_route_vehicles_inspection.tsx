@@ -15,6 +15,7 @@ import { BlurView } from 'expo-blur';
 import { Colors } from "@/constants/Colors";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { router } from "expo-router";
 
 interface BlurOverlayProps {
   visible: boolean;
@@ -34,13 +35,29 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
   </Modal>
 );
 
+
+function timestampToTime(timestamp: string): string {
+  const date = new Date(timestamp);
+  let hours = date.getUTCHours();
+  const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+  const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  const formattedHours = hours.toString().padStart(2, '0');
+
+  return `${formattedHours}:${minutes}:${seconds} ${ampm}`;
+}
+
 const DailyRouteVehicles: React.FC = () => {
   const [dailyRoutes, setDailyRoutes] = useState<DailyRoute[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<DailyRoute | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const { apiCaller, refresh } = useGlobalContext();
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const { apiCaller, refresh, setPhotos } = useGlobalContext();
 
   const fetchDailyRoutes = async () => {
     try {
@@ -68,6 +85,11 @@ const DailyRouteVehicles: React.FC = () => {
         console.error(err);
       }
     }
+  };
+
+  const handleShowDetails = (pkg: DailyRoute) => {
+    setSelectedRoute(pkg);
+    setShowDetailsModal(true);
   };
 
   const filterDailyRoutes = (routes: DailyRoute[], query: string) => {
@@ -100,6 +122,9 @@ const DailyRouteVehicles: React.FC = () => {
           {filteredRoutes.map((route) => (
             <View key={route._id} style={styles.card}>
               <View style={styles.cardHeader}>
+              <TouchableOpacity onPress={() => handleShowDetails(route)} style={styles.detailsButton}>
+                  <Text style={styles.detailsButtonText}>Details</Text>
+                </TouchableOpacity>
                 <TouchableOpacity onPress={() => { setShowDeleteModal(true); setSelectedRoute(route); }}>
                   <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                 </TouchableOpacity>
@@ -116,19 +141,19 @@ const DailyRouteVehicles: React.FC = () => {
               </View>
 
               <Text style={styles.cardText}>
-                Vehicle Number: <Text style={{ color: "black" }}>{route.vehicleNumber}</Text>
+                Vehicle Number: <Text style={{ color: "black" }}>{route.vehicle.number}</Text>
               </Text>
               <Text style={styles.cardText}>
-                Departure Time: <Text style={{ color: "black" }}>{route.departureTime}</Text>
+                Departure Time: <Text style={{ color: "black" }}>{timestampToTime(route.departureTime)}</Text>
               </Text>
               <Text style={styles.cardText}>
-                Cleaner Name: <Text style={{ color: "black" }}>{route.cleaner ? route.cleaner.name : "N/A"}</Text>
+                Cleaner Name: <Text style={{ color: "black" }}>{route.cleaner ? route.cleaner.name : ""}</Text>
               </Text>
               <Text style={styles.cardText}>
-                Primary Driver : <Text style={{ color: "black" }}>{route.primaryDriver ? route.primaryDriver.name : "N/A"}</Text>
+                Primary Driver : <Text style={{ color: "black" }}>{route.primaryDriver ? route.primaryDriver.name : ""}</Text>
               </Text>
               <Text style={styles.cardText}>
-                Secondary Driver: <Text style={{ color: "black" }}>{route.secondaryDriver ? route.secondaryDriver.name : "N/A"}</Text>
+                Secondary Driver: <Text style={{ color: "black" }}>{route.secondaryDriver ? route.secondaryDriver.name : ""}</Text>
               </Text>
             </View>
           ))}
@@ -158,6 +183,42 @@ const DailyRouteVehicles: React.FC = () => {
         </View>
       </Modal>
 
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showDetailsModal}
+        onRequestClose={() => setShowDetailsModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Journey Details</Text>
+            <Text style={styles.modalText}>Before Journey Notes: {selectedRoute?.beforeJourneyNotes || ''}</Text>
+            <Text style={styles.modalText}>After Journey Notes: {selectedRoute?.afterJourneyNotes || ''}</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
+                onPress={() => {setPhotos(selectedRoute?.beforeJourneyPhotos); router.push('before_photos')} }
+              >
+                <Text style={[styles.modalButtonText, { color: "#fff" }]}>Before Journey Photos</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
+                onPress={() => {setPhotos(selectedRoute?.afterJourneyPhotos); router.push('after_photos')} }
+              >
+                <Text style={[styles.modalButtonText, { color: "#fff" }]}>After Journey Photos</Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: "#ccc", marginTop: 10 }]}
+              onPress={() => setShowDetailsModal(false)}
+            >
+              <Text style={styles.modalButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 };
@@ -167,6 +228,19 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     backgroundColor: "#fff",
+  },
+  detailsButtonText: {
+    color: "#fff",
+    fontWeight: "semibold",
+    fontSize: 10,
+  },
+  detailsButton: {
+    backgroundColor: Colors.darkBlue,
+    paddingHorizontal: 10,
+    borderRadius: 5,
+    paddingVertical: 5,
+    height: 25,
+    marginRight: 5,
   },
   searchContainer: {
     flexDirection: "row",
@@ -255,6 +329,11 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: "center",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
   },
   modalButtons: {
     flexDirection: "row",

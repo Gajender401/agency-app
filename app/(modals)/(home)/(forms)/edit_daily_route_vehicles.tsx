@@ -82,6 +82,9 @@ const AddRouteScreen: React.FC = () => {
             return;
         }
 
+        console.log(departureTime);
+        
+
         const newRoute = {
             vehicleId: findVehicleByNumber(vehicleNumber)?.id ? findVehicleByNumber(vehicleNumber)?.id : vehicleNumber,
             departurePlace,
@@ -114,7 +117,21 @@ const AddRouteScreen: React.FC = () => {
     const onChangeTime = (event: any, selectedTime?: Date) => {
         setShowTimePicker(false);
         if (selectedTime) {
-            setDepartureTime(selectedTime);
+            console.log("Selected time:", selectedTime.toLocaleTimeString());
+            
+            // Create a new Date object with the current date
+            const newDate = new Date();
+            
+            // Get the time components from the selected time
+            const hours = selectedTime.getHours();
+            const minutes = selectedTime.getMinutes();
+            const seconds = selectedTime.getSeconds();
+            
+            // Set the time components on the new date
+            newDate.setHours(hours, minutes, seconds, 0);
+            
+            console.log("New departure time:", newDate.toISOString(), newDate.toLocaleTimeString());
+            setDepartureTime(newDate);
         }
     };
 
@@ -168,6 +185,7 @@ const AddRouteScreen: React.FC = () => {
                                     mode="time"
                                     display="default"
                                     onChange={onChangeTime}
+                                    is24Hour={false}
                                 />
                             )}
                         </View>

@@ -293,9 +293,11 @@ interface Package {
   updatedAt: string;
   invoiceId: string;
   status: string;
-  departureDate:string;
-  returnDate:string;
+  departureDate: string;
+  returnDate: string;
   createdBy: string;
+  beforeJourneyPhotos: string[];
+  afterJourneyPhotos: string[];
 }
 
 
@@ -324,7 +326,7 @@ interface Cleaner {
 
 interface DailyRoute {
   _id: string;
-  vehicle: {number:string};
+  vehicle: { number: string };
   departurePlace: string;
   destinationPlace: string;
   primaryDriver: Driver | null;

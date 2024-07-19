@@ -6,7 +6,6 @@ import {
   SafeAreaView,
   FlatList,
   TouchableOpacity,
-  TouchableHighlight
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import RazorpayCheckout from 'react-native-razorpay';
