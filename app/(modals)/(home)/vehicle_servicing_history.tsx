@@ -55,6 +55,11 @@ const ServiceHistoryScreen: React.FC = () => {
     const [idToDelete, setIdToDelete] = useState<null | string>(null)
     const [searchQuery, setSearchQuery] = useState("");
     const { apiCaller, setEditData, refresh } = useGlobalContext();
+    const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
+
+    const findVehicleByNumber = (id: string) => {
+        return vehicleNumbers.find(vehicle => vehicle.id === id);
+      };
 
     const fetchVehiclesDocs = async () => {
         try {
@@ -67,6 +72,13 @@ const ServiceHistoryScreen: React.FC = () => {
             setLoading(false);
         }
     };
+    function formatDate(dateString: string): string {
+        const date = new Date(dateString);
+        const year = date.getUTCFullYear();
+        const month = date.getUTCMonth() + 1;
+        const day = date.getUTCDate();
+        return `${month}/${day}/${year}`;
+      }
 
     useEffect(() => {
         fetchVehiclesDocs();
@@ -97,6 +109,29 @@ const ServiceHistoryScreen: React.FC = () => {
     };
 
     const filteredServiceHistory = searchQuery ? filterServiceHistory(searchQuery) : docs;
+
+   
+        const extractNumbers = (data: Vehicle[]): { id: string, number: string }[] => {
+            return data.map(vehicle => ({ id: vehicle._id, number: vehicle.number }));
+        };
+
+
+        const fetchVehicles = async () => {
+            try {
+                setLoading(true);
+                const response = await apiCaller.get('/api/vehicle');
+                setVehicleNumbers(extractNumbers(response.data.data));
+            } catch (err) {
+                console.log(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        useEffect(() => {
+            fetchVehicles();
+        }, []);
+
 
     return (
         <SafeAreaView style={styles.container}>
@@ -131,10 +166,13 @@ const ServiceHistoryScreen: React.FC = () => {
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>
-                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{record.vehicle}</Text></Text>
+                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{findVehicleByNumber(record.vehicle)?.number}</Text></Text>
+                            {/* <Text style={styles.cardText}>Vehicle Number:</Text> */}
+                            {/* <Text style={{color: "black"}}>{findVehicleByNumber(record.vehicle)?.number}</Text> */}
+
                             <Text style={styles.cardText}>Garage Number: <Text style={{ color: "black" }}>{record.garageNumber}</Text></Text>
                             <Text style={styles.cardText}>Garage Name: <Text style={{ color: "black" }}>{record.garageName}</Text></Text>
-                            <Text style={styles.cardText}>Date: <Text style={{ color: "black" }}>{record.date}</Text></Text>
+                            <Text style={styles.cardText}>Date: <Text style={{ color: "black" }}>{formatDate(record.date)}</Text></Text>
                             <Text style={styles.cardText}>Work Details: <Text style={{ color: "black" }}>{record.workDescription}</Text></Text>
                             <TouchableOpacity style={styles.viewBillButton} onPress={() => handleViewBill(record.bill)}>
                                 <Text style={styles.viewBillButtonText}>View Bill</Text>

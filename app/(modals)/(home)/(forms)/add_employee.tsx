@@ -184,7 +184,7 @@ const AddEmployeeScreen: React.FC = () => {
                             >
                                 <Picker.Item style={{ color: Colors.secondary }} label="Select Employee Type" value="" />
                                 <Picker.Item label="MANAGER" value="MANAGER" />
-                                <Picker.Item label="CLEANER" value="CLEANER" />
+                                {/* <Picker.Item label="CLEANER" value="CLEANER" /> */}
                                 <Picker.Item label="OFFICE-BOY" value="OFFICE-BOY" />
                                 <Picker.Item label="ACCOUNTANT" value="ACCOUNTANT" />
                                 <Picker.Item label="TELECALLER" value="TELECALLER" />
