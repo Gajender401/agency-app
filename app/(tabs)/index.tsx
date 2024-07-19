@@ -63,7 +63,7 @@ export default function HomeScreen() {
     setShowVideoModal(true);
   };
 
-  if (!loading && !isLogged) return <Redirect href="/(modals)/onbording" />;
+  // if (!loading && !isLogged) return <Redirect href="/(modals)/onbording" />;
 
   if (loading) {
     return (
@@ -79,9 +79,9 @@ export default function HomeScreen() {
         <Text style={{ fontSize: 15, fontWeight: '500' }}>Hi, {userData?.userName}</Text>
       </View>
       <ScrollView>
-      <View style={styles.logoContainer}>
-  <Image source={require('@/assets/images/logo.png')} style={styles.image} />
-</View>
+        <View style={styles.logoContainer}>
+          <Image source={require('@/assets/images/logo.png')} style={styles.image} />
+        </View>
         <View style={styles.carouselContainer}>
           <Carousel
             width={deviceWidth * 0.9}
@@ -158,7 +158,7 @@ export default function HomeScreen() {
             resizeMode="cover"
             shouldPlay={false}
             isLooping
-            style={[styles.cardVideo,{height:200}]}
+            style={[styles.cardVideo, { height: 200 }]}
           />
           <TouchableOpacity style={styles.playPauseButton} onPress={() => handleViewVideo(true)}>
             <AntDesign name={'playcircleo'} size={40} color="#fff" />
@@ -218,26 +218,26 @@ export default function HomeScreen() {
         <BlurOverlay visible={showVideoModal} onRequestClose={() => setShowVideoModal(false)} />
 
         <View style={styles.modalContainer}>
-            <View style={!selectedVideo?styles.modalContentOverdide:styles.modalContent}>
-              <Video
-                ref={videoRef}
-                source={!selectedVideo?require('@/assets/videos/video2.mp4'):require('@/assets/videos/video1.mp4')}
-                rate={1.0}
-                volume={1.0}
-                isMuted={false}
-                shouldPlay={isPlaying}
-                //@ts-ignore
-                resizeMode="cover"
-                isLooping
-                style={[styles.cardVideo,!selectedVideo&&{height:200}]}
-              />
-              <TouchableOpacity style={styles.playPauseButton} onPress={handlePlayPause}>
-                <AntDesign style={isPlaying&&{opacity:0.1}} name={isPlaying ? 'pausecircle' : 'playcircleo'} size={40} color="#fff" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.closeButton} onPress={() => setShowVideoModal(false)}>
-                <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity>
-            </View>
+          <View style={!selectedVideo ? styles.modalContentOverdide : styles.modalContent}>
+            <Video
+              ref={videoRef}
+              source={!selectedVideo ? require('@/assets/videos/video2.mp4') : require('@/assets/videos/video1.mp4')}
+              rate={1.0}
+              volume={1.0}
+              isMuted={false}
+              shouldPlay={isPlaying}
+              //@ts-ignore
+              resizeMode="cover"
+              isLooping
+              style={[styles.cardVideo, !selectedVideo && { height: 200 }]}
+            />
+            <TouchableOpacity style={styles.playPauseButton} onPress={handlePlayPause}>
+              <AntDesign style={isPlaying && { opacity: 0.1 }} name={isPlaying ? 'pausecircle' : 'playcircleo'} size={40} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setShowVideoModal(false)}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
     </GestureHandlerRootView>
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: "90%",
     alignItems: "center",
-    marginVertical:20
+    marginVertical: 20
   },
   modalText: {
     fontSize: 16,
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
-    marginTop:20
+    marginTop: 20
   },
   closeButtonText: {
     color: "#fff",
@@ -444,11 +444,11 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: "90%",
     alignItems: "center",
-    marginVertical:20,
-    height:"70%",
-    justifyContent:"center",
-    paddingTop:50,
-    gap:100
+    marginVertical: 20,
+    height: "70%",
+    justifyContent: "center",
+    paddingTop: 50,
+    gap: 100
   },
   image: {
     width: 300,

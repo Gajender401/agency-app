@@ -45,7 +45,7 @@ const baseURL = process.env.EXPO_PUBLIC_URL as string;
 
 const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [isLogged, setIsLogged] = useState<boolean>(false);
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjhjMTc0YWQ5NTliNjgwNjdjOTdlMzYiLCJyb2xlIjoiQUdFTkNZIiwiaWF0IjoxNzIxMjExMTY3fQ.Yf861s4Qyr2TS-K_J1vkL5eTYEngwmZI5YLhSZ4Lmuk");
   const [loading, setLoading] = useState<boolean>(true);
   const [userData, setUserData] = useState<User | null>(null);
   const [editData, setEditData] = useState<any>()
