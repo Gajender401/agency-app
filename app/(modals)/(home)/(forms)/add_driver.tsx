@@ -220,6 +220,7 @@ const AddDriverScreen: React.FC = () => {
                             inputSearchStyle={styles.inputSearchStyle}
                             iconStyle={styles.iconStyle}
                             data={[
+                                { label: 'ALL', value: 'ALL' },
                                 { label: 'CAR', value: 'CAR' },
                                 { label: 'TRUCK', value: 'TRUCK' },
                                 { label: 'BUS', value: 'BUS' },

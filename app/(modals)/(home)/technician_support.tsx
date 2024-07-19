@@ -109,7 +109,7 @@ const TechnicianSupport: React.FC = () => {
                 />
             </View>
 
-            <View style={styles.filterContainer}>
+            {/* <View style={styles.filterContainer}>
                 <Picker
                     selectedValue={vehicleFilter}
                     style={styles.picker}
@@ -121,7 +121,7 @@ const TechnicianSupport: React.FC = () => {
                     <Picker.Item label="TRUCK" value="TRUCK" />
                     <Picker.Item label="TAMPO" value="TAMPO" />
                 </Picker>
-            </View>
+            </View> */}
 
             <TouchableOpacity onPress={() => router.push("add_technician")} style={styles.addButton}>
                 <Text style={styles.addButtonText}>Add Technician</Text>

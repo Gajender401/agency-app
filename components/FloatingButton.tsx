@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 30, // Adjust this value as needed
     alignSelf: 'center',
-    backgroundColor: Colors.secondary, // Button color
+    backgroundColor: '#5847A2', // Button color
     borderRadius: 50, // Makes the button round
     width: 80, // Button width
     height: 80, // Button height

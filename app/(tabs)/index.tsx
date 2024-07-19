@@ -75,13 +75,16 @@ export default function HomeScreen() {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <View style={{ padding: 20 }}>
+      <View style={{
+         padding: 20, 
+         }}>
         <Text style={{ fontSize: 15, fontWeight: '500' }}>Hi, {userData?.userName}</Text>
       </View>
       <ScrollView>
       <View style={styles.logoContainer}>
-  <Image source={require('@/assets/images/logo.png')} style={styles.image} />
-</View>
+        
+        <Image source={require('@/assets/images/logo_torist-removebg-preview.png')} style={styles.image} />
+      </View>
         <View style={styles.carouselContainer}>
           <Carousel
             width={deviceWidth * 0.9}
@@ -119,7 +122,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('drivers_list')} style={styles.gridItem}>
             <Image source={require('@/assets/images/drivers_list.png')} style={styles.icon} />
-            <Text style={styles.iconText}>Driver’s List</Text>
+            <Text style={styles.iconText}>Emergency Drivers</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('cleaners_list')} style={styles.gridItem}>
             <Image source={require('@/assets/images/cleaners_list.png')} style={styles.icon} />
@@ -275,7 +278,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     paddingHorizontal: 5,
     top: -10,
-    color: Colors.secondary,
+    color: '#00000',
+    fontWeight: '700'
   },
   grid: {
     flexDirection: 'row',
@@ -296,7 +300,7 @@ const styles = StyleSheet.create({
   iconText: {
     marginTop: 5,
     fontSize: 11,
-    color: Colors.secondary,
+    color: '#06518b',
     textAlign: 'center',
     fontWeight: '500',
     width: 80,
@@ -306,6 +310,8 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     marginVertical: 10,
+   
+
   },
   buttonContainer: {
     alignItems: 'center',
@@ -451,7 +457,8 @@ const styles = StyleSheet.create({
     gap:100
   },
   image: {
-    width: 300,
-    height: 180,
+    width: 200,
+    height: 150,
+    resizeMode: 'contain'
   },
 });

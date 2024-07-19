@@ -11,12 +11,14 @@ import {
     SafeAreaView,
     ScrollView,
     ActivityIndicator,
+    Dimensions
 } from "react-native";
 import { BlurView } from 'expo-blur';
 import { Colors } from "@/constants/Colors";
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import * as Sharing from 'expo-sharing';
 
 interface BlurOverlayProps {
     visible: boolean;
@@ -57,6 +59,7 @@ const VehicleListScreen: React.FC = () => {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
     const { apiCaller, setEditData, refresh } = useGlobalContext();
+    const [isFullSize, setIsFullSize] = useState<boolean>(false);
 
     const fetchVehicles = async () => {
         try {
@@ -69,6 +72,18 @@ const VehicleListScreen: React.FC = () => {
         } finally {
             setLoading(false);
         }
+    };
+    
+    const handleDownloadImage = async (imageUri: string) => {
+        if (await Sharing.isAvailableAsync()) {
+            await Sharing.shareAsync(imageUri);
+        } else {
+            alert('Sharing is not available on this device');
+        }
+    };
+    
+    const toggleFullSizeImage = () => {
+        setIsFullSize(!isFullSize);
     };
 
     useEffect(() => {
@@ -168,6 +183,9 @@ const VehicleListScreen: React.FC = () => {
                             <TouchableOpacity style={[styles.modalButton, { backgroundColor: "#ccc" }]} onPress={() => setShowDeleteModal(false)}>
                                 <Text style={styles.modalButtonText}>Cancel</Text>
                             </TouchableOpacity>
+                         <TouchableOpacity style={styles.downloadButton} onPress={() => handleDownloadImage(selectedImage)}>
+                            <Text style={styles.downloadButtonText}>Download</Text>
+                        </TouchableOpacity>
                             <TouchableOpacity style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]} onPress={handleDelete}>
                                 <Text style={[styles.modalButtonText, { color: "#fff" }]}>Delete</Text>
                             </TouchableOpacity>
@@ -187,10 +205,20 @@ const VehicleListScreen: React.FC = () => {
                 <View style={styles.modalContainer}>
                     {selectedImage && 
                     <View style={styles.modalContent}>
-                        <Image source={{ uri: selectedImage }} style={styles.modalImage} />
-                        <TouchableOpacity style={styles.closeButton} onPress={() => setShowImageModal(false)}>
-                            <Text style={styles.closeButtonText}>Close</Text>
+                        {/* <Image source={{ uri: selectedImage }} style={styles.modalImage} /> */}
+
+                        <TouchableOpacity style={styles.imageContainer} onPress={toggleFullSizeImage}>
+                            <Image source={{ uri: selectedImage }} style={isFullSize ? styles.fullSizeImage : styles.modalImage} resizeMode="contain" />
                         </TouchableOpacity>
+
+                        <View style={styles.buttonContainer}>
+                            <TouchableOpacity style={styles.downloadButton} onPress={() => handleDownloadImage(selectedImage)}>
+                                <Text style={styles.downloadButtonText}>Share</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.closeButton} onPress={() => setShowImageModal(false)}>
+                                <Text style={styles.closeButtonText}>Close</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
                     }
                 </View>
@@ -204,6 +232,34 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         backgroundColor: "#ffffff",
+    },
+    imageContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalImage: {
+        width: 300,
+        height: 400,
+    },
+    fullSizeImage: {
+        width: Dimensions.get('window').width,
+        height: Dimensions.get('window').height,
+    },
+    downloadButtonText: {
+        color: '#fff',
+        fontSize: 16,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 20,
+    },
+    downloadButton: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: '#2196F3',
+        borderRadius: 5,
     },
     searchContainer: {
         flexDirection: "row",
@@ -331,10 +387,10 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     closeButton: {
-        backgroundColor: Colors.darkBlue,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
+        padding: 10,
+        backgroundColor: '#f44336',
         borderRadius: 5,
+        marginHorizontal: 5,
     },
     closeButtonText: {
         color: "#fff",

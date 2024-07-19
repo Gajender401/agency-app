@@ -60,6 +60,9 @@ const EmployeeListScreen: React.FC = () => {
     const { apiCaller, setEditData, refresh } = useGlobalContext();
 
     const fetchEmployees = async () => {
+          
+     
+
         try {
             setLoading(true);
             const response = await apiCaller.get('/api/employee');
@@ -100,6 +103,13 @@ const EmployeeListScreen: React.FC = () => {
 
     const filteredEmployees = searchQuery ? filterEmployees(searchQuery) : employees;
 
+    const [isModalVisible, setModalVisible] = useState(false);
+
+    const toggleModal = () => {
+      setModalVisible(!isModalVisible);
+    };
+       
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.searchContainer}>
@@ -125,10 +135,32 @@ const EmployeeListScreen: React.FC = () => {
                 <ScrollView style={styles.employeesList}>
                     {filteredEmployees.map((employee) => (
                         <View key={employee._id} style={styles.card}>
-                            <Image
-                                source={{ uri: employee.photo }}
-                                style={styles.employeeImage}
-                            />
+                            <View style={styles.container}>
+                                <TouchableOpacity onPress={toggleModal}>
+                                    <Image
+                                    source={{ uri: employee.photo }}
+                                    style={styles.employeeImage}
+                                    />
+                                </TouchableOpacity>
+                                
+                                <Modal
+                                    transparent={true}
+                                    visible={isModalVisible}
+                                    onRequestClose={toggleModal}
+                                >
+                                    <View style={styles.modalContainer}>
+                                    <View style={styles.modalContent}>
+                                        <TouchableOpacity onPress={toggleModal} style={styles.closeButton}>
+                                        <Text style={styles.closeButtonText}>Close</Text>
+                                        </TouchableOpacity>
+                                        <Image
+                                        source={{ uri: employee.photo }}
+                                        style={styles.enlargedImage}
+                                        />
+                                    </View>
+                                    </View>
+                                </Modal>
+                                </View>
                             <View style={styles.cardHeader}>
                                 <TouchableOpacity onPress={()=> {setEditData(employee); router.push("edit_employee")}} style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
@@ -207,8 +239,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: "#ffffff",
+        backgroundColor: "#F4F4F4",
     },
+    enlargedImage: {
+        width: 300,
+        height: 300,
+        borderRadius: 10,
+        marginTop: 20,
+      },
     searchContainer: {
         flexDirection: "row",
         alignItems: "center",
