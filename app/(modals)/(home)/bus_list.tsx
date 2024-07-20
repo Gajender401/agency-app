@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: "#ffffff",
+        backgroundColor: "#F4F4F4",
     },
     searchContainer: {
         flexDirection: "row",

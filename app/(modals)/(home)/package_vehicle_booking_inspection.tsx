@@ -104,7 +104,7 @@ const PackageVehicleListScreen: React.FC = () => {
           onChangeText={setSearchQuery}
         />
       </View>
-
+{/* 
       <View style={styles.filterContainer}>
         <Picker
           selectedValue={selectedVehicleType}
@@ -117,7 +117,8 @@ const PackageVehicleListScreen: React.FC = () => {
           <Picker.Item label="TRUCK" value="TRUCK" />
           <Picker.Item label="TAMPO" value="TAMPO" />
         </Picker>
-      </View>
+      </View> */}
+
 
       {loading ? (
         <ActivityIndicator size="large" color={Colors.darkBlue} />
