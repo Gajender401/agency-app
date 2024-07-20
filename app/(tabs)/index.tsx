@@ -63,7 +63,7 @@ export default function HomeScreen() {
     setShowVideoModal(true);
   };
 
-  // if (!loading && !isLogged) return <Redirect href="/(modals)/onbording" />;
+  if (!loading && !isLogged) return <Redirect href="/(modals)/onbording" />;
 
   if (loading) {
     return (

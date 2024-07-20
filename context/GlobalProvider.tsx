@@ -25,6 +25,8 @@ interface GlobalContextProps {
   setRefresh: React.Dispatch<React.SetStateAction<boolean>>
   photos: Array<string>
   setPhotos: React.Dispatch<React.SetStateAction<Array<string>>>
+  mobileNumber: string
+  setMobileNumber: React.Dispatch<React.SetStateAction<string>>
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -45,13 +47,14 @@ const baseURL = process.env.EXPO_PUBLIC_URL as string;
 
 const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
   const [isLogged, setIsLogged] = useState<boolean>(false);
-  const [token, setToken] = useState<string | null>("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjhjMTc0YWQ5NTliNjgwNjdjOTdlMzYiLCJyb2xlIjoiQUdFTkNZIiwiaWF0IjoxNzIxMjExMTY3fQ.Yf861s4Qyr2TS-K_J1vkL5eTYEngwmZI5YLhSZ4Lmuk");
+  const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [userData, setUserData] = useState<User | null>(null);
   const [editData, setEditData] = useState<any>()
   const [invoiceData, setInvoiceData] = useState<Package | null>(null)
   const [refresh, setRefresh] = useState(false)
   const [photos, setPhotos] = useState<Array<string>>([])
+  const [mobileNumber, setMobileNumber] = useState('')
 
   useEffect(() => {
     SecureStore.getItemAsync("access_token")
@@ -118,7 +121,9 @@ const GlobalProvider: React.FC<GlobalProviderProps> = ({ children }) => {
         refresh,
         setRefresh,
         photos,
-        setPhotos
+        setPhotos,
+        mobileNumber,
+        setMobileNumber
       }}
     >
       {children}

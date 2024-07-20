@@ -13,6 +13,9 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
+import axios from 'axios';
+import { useGlobalContext } from '@/context/GlobalProvider';
+import * as SecureStore from "expo-secure-store";
 
 const EnterOTPScreen = () => {
     const [otpInputs, setOTPInputs] = useState(Array(4).fill(""));
@@ -20,71 +23,33 @@ const EnterOTPScreen = () => {
     const [shakeAnimation] = useState(new Animated.Value(0));
     const [isShaking, setIsShaking] = useState(false);
     const [focus, setFocus] = useState(0);
+    const {mobileNumber, setToken, setIsLogged} = useGlobalContext()
 
     const handleVerifyOTP = async () => {
         const otp = otpInputs.join("");
 
         try {
-            if (otp === "200") {
-                console.log("correct otp");
-                router.replace("/(modals)/student/signin");
+            const response = await axios.post(`${process.env.EXPO_PUBLIC_URL}api/user/verify`, {
+                mobileNumber: mobileNumber,
+                otp: otp
+            });
+
+            if (response.data.authToken && response.data.data._id) {
+                await SecureStore.setItemAsync("access_token", response.data.authToken);
+                setToken(response.data.authToken)
+                setIsLogged(true)
+                router.replace("/"); 
             } else {
-                setIsShaking(true);
-                Animated.sequence([
-                    Animated.timing(shakeAnimation, {
-                        toValue: 10,
-                        duration: 50,
-                        useNativeDriver: true,
-                    }),
-                    Animated.timing(shakeAnimation, {
-                        toValue: -10,
-                        duration: 50,
-                        useNativeDriver: true,
-                    }),
-                    Animated.timing(shakeAnimation, {
-                        toValue: 10,
-                        duration: 50,
-                        useNativeDriver: true,
-                    }),
-                    Animated.timing(shakeAnimation, {
-                        toValue: 0,
-                        duration: 50,
-                        useNativeDriver: true,
-                    }),
-                ]).start();
-                Vibration.vibrate([0, 100]);
-                setTimeout(() => {
-                    setIsShaking(false);
-                }, 400);
-                setOTPInputs(Array(4).fill(""));
-                const ref = inputRefs.current[0];
-                if (ref) {
-                    ref.focus();
-                }
+                throw new Error("OTP verification failed");
             }
         } catch (error) {
+            console.error("Error verifying OTP:", error);
             setIsShaking(true);
             Animated.sequence([
-                Animated.timing(shakeAnimation, {
-                    toValue: 10,
-                    duration: 50,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(shakeAnimation, {
-                    toValue: -10,
-                    duration: 50,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(shakeAnimation, {
-                    toValue: 10,
-                    duration: 50,
-                    useNativeDriver: true,
-                }),
-                Animated.timing(shakeAnimation, {
-                    toValue: 0,
-                    duration: 50,
-                    useNativeDriver: true,
-                }),
+                Animated.timing(shakeAnimation, { toValue: 10, duration: 50, useNativeDriver: true }),
+                Animated.timing(shakeAnimation, { toValue: -10, duration: 50, useNativeDriver: true }),
+                Animated.timing(shakeAnimation, { toValue: 10, duration: 50, useNativeDriver: true }),
+                Animated.timing(shakeAnimation, { toValue: 0, duration: 50, useNativeDriver: true }),
             ]).start();
             Vibration.vibrate([0, 100]);
             setTimeout(() => {
@@ -113,12 +78,14 @@ const EnterOTPScreen = () => {
             }
         }
 
-        if (value && index < otpInputs.length) {
+        if (value && index < otpInputs.length - 1) {
             const nextInputRef = inputRefs.current[index + 1];
             if (nextInputRef) {
                 nextInputRef.focus();
             }
         }
+
+
     };
 
     return (
@@ -129,12 +96,11 @@ const EnterOTPScreen = () => {
             <View style={{ marginTop: 150 }} >
                 <Text style={styles.headingText}>Enter</Text>
                 <Text style={styles.headingText}>the OTP</Text>
-
             </View>
 
             <View style={styles.innerContainer} >
                 <Text style={styles.descriptionText} >
-                Enter the OTP we just sent to your Phone number.
+                    Enter the OTP we just sent to your Phone number.
                 </Text>
                 <Animated.View
                     style={[
@@ -192,7 +158,6 @@ const EnterOTPScreen = () => {
         </SafeAreaView>
     );
 };
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
