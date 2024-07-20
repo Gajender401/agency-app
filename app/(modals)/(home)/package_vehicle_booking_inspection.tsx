@@ -39,7 +39,9 @@ const PackageVehicleListScreen: React.FC = () => {
     try {
       setLoading(true);
       const response = await apiCaller.get('/api/packageBooking');
-      const filteredRoutes = response.data.data.filter((route: Package) => route.status !== "COMPLETED");
+      console.log(response.data);
+      
+      const filteredRoutes = response.data.data.filter((route: Package) => route.status === "COMPLETED");
       setPackages(filteredRoutes);
     } catch (err) {
       console.log(err);
@@ -209,13 +211,13 @@ const PackageVehicleListScreen: React.FC = () => {
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
-                onPress={() => {setPhotos(selectedPackage?.beforeJourneyPhotos); router.push('before_photos')} }
+                onPress={() => {setShowDetailsModal(false); setPhotos(selectedPackage?.beforeJourneyPhotos); router.push('before_photos')} }
               >
                 <Text style={[styles.modalButtonText, { color: "#fff" }]}>Before Journey Photos</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
-                onPress={() => {setPhotos(selectedPackage?.afterJourneyPhotos); router.push('after_photos')} }
+                onPress={() => {setShowDetailsModal(false); setPhotos(selectedPackage?.afterJourneyPhotos); router.push('after_photos')} }
               >
                 <Text style={[styles.modalButtonText, { color: "#fff" }]}>After Journey Photos</Text>
               </TouchableOpacity>
@@ -362,7 +364,7 @@ const styles = StyleSheet.create({
     marginBottom:10
   },
   detailsButton: {
-    backgroundColor: Colors.secondary,
+    backgroundColor: Colors.darkBlue,
     paddingHorizontal: 10,
     borderRadius: 5,
     paddingVertical: 5,
