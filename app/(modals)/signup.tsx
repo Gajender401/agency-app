@@ -27,7 +27,7 @@ const SignUpScreen = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const {setToken, setIsLogged} = useGlobalContext()
+    const {setMobileNumber} = useGlobalContext()
 
     const validateInputs = () => {
         if (!ownerName || !companyName || !contact || !whatsapp || !city || !state || !email || !password) {
@@ -64,7 +64,7 @@ const SignUpScreen = () => {
         let data = {
             userName: ownerName,
             companyName: companyName,
-            mobileNumber: contact,
+            mobileNumber: `91${contact}`,
             whatsappNumber: whatsapp,
             state: state,
             city: city,
@@ -75,14 +75,11 @@ const SignUpScreen = () => {
         try {
             const response = await axios.post(`${process.env.EXPO_PUBLIC_URL}api/user/`, data);
             
-            if (response.data.authToken && response.data.data._id) {
-                await SecureStore.setItemAsync("access_token", response.data.authToken);
-                setToken(response.data.authToken)
-                setIsLogged(true)
-                router.push("/");
+            if (response.data.success) {
+                setMobileNumber(data.mobileNumber)
+                router.push("/verify");
             }
             
-            router.push("/");
         } catch (error) {
             console.error(error);
             Alert.alert("Sign Up Failed", "Please check your information and try again.");

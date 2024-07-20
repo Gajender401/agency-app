@@ -36,11 +36,11 @@ const AddRouteScreen: React.FC = () => {
     const [departurePlace, setDeparturePlace] = useState<string>("");
     const [destinationPlace, setDestinationPlace] = useState<string>("");
     const [departureTime, setDepartureTime] = useState<Date | undefined>(undefined);
+    const [instructions, setInstructions] = useState<string>(""); // New state for instructions
     const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
     const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const { apiCaller, setRefresh, editData } = useGlobalContext();
-
 
     const findVehicleByNumber = (number: string) => {
         return vehicleNumbers.find(vehicle => vehicle.number === number);
@@ -72,24 +72,24 @@ const AddRouteScreen: React.FC = () => {
             setDeparturePlace(editData.departurePlace);
             setDestinationPlace(editData.destinationPlace);
             setDepartureTime(new Date(editData.departureTime));
+            setInstructions(editData.instructions || ""); // Set instructions if available
         }
     }, [])
 
-
     const handleAddRoute = async () => {
         if (!vehicleNumber || !departurePlace || !destinationPlace || !departureTime) {
-            Alert.alert("Please fill all fields.");
+            Alert.alert("Please fill all required fields.");
             return;
         }
 
         console.log(departureTime);
-        
 
         const newRoute = {
             vehicleId: findVehicleByNumber(vehicleNumber)?.id ? findVehicleByNumber(vehicleNumber)?.id : vehicleNumber,
             departurePlace,
             destinationPlace,
             departureTime: departureTime,
+            instructions, // Include instructions in the new route object
         };
 
         setLoading(true);
@@ -98,7 +98,7 @@ const AddRouteScreen: React.FC = () => {
             setLoading(false);
             setRefresh(prev => !prev)
             resetForm();
-            Alert.alert("Success", "Route updateed successfully!");
+            Alert.alert("Success", "Route updated successfully!");
             router.back()
         } catch (error) {
             console.log(error);
@@ -112,6 +112,7 @@ const AddRouteScreen: React.FC = () => {
         setDeparturePlace("");
         setDestinationPlace("");
         setDepartureTime(undefined);
+        setInstructions(""); // Reset instructions field
     };
 
     const onChangeTime = (event: any, selectedTime?: Date) => {
@@ -189,6 +190,17 @@ const AddRouteScreen: React.FC = () => {
                                 />
                             )}
                         </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Instructions</Text>
+                            <TextInput
+                                style={[styles.input, styles.textArea]}
+                                value={instructions}
+                                onChangeText={(text) => setInstructions(text)}
+                                multiline
+                                numberOfLines={4}
+                                textAlignVertical="top"
+                            />
+                        </View>
 
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
@@ -242,6 +254,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         height: 40,
         justifyContent: 'center'
+    },
+    textArea: {
+        height: 100,
+        textAlignVertical: 'top',
+        paddingTop: 10,
     },
     pickerContainer: {
         borderColor: Colors.secondary,
