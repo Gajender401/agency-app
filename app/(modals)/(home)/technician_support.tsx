@@ -58,7 +58,7 @@ const TechnicianSupport: React.FC = () => {
     const [filteredTechnicians, setFilteredTechnicians] = useState<Technician[]>([]);
     const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [idToDelete, setIdToDelete] = useState<null|string>(null);
+    const [idToDelete, setIdToDelete] = useState<null | string>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [vehicleFilter, setVehicleFilter] = useState('');
     const [stateFilter, setStateFilter] = useState('');
@@ -86,7 +86,7 @@ const TechnicianSupport: React.FC = () => {
     }, [refresh]);
 
     useEffect(() => {
-        const filtered = technicians.filter(tech => 
+        const filtered = technicians.filter(tech =>
             tech.technicianType.toLowerCase().includes(searchQuery.toLowerCase()) &&
             (vehicleFilter === '' || tech.vehicleType === vehicleFilter) &&
             (stateFilter === '' || tech.state === stateFilter) &&
@@ -95,7 +95,7 @@ const TechnicianSupport: React.FC = () => {
         setFilteredTechnicians(filtered);
     }, [searchQuery, vehicleFilter, stateFilter, cityFilter, technicians]);
 
-    const handleDelete = async() => {
+    const handleDelete = async () => {
         await apiCaller.delete(`/api/technician?technicianId=${idToDelete}`);
         setShowDeleteModal(false);
         fetchTechnicians();
@@ -103,6 +103,32 @@ const TechnicianSupport: React.FC = () => {
 
     const dialNumber = (number: string) => {
         Linking.openURL(`tel:${number}`);
+    };
+
+    const handleVehicleFilterChange = (itemValue: string) => {
+        if (itemValue == 'all') {
+            setVehicleFilter('');
+        } else {
+            setVehicleFilter(itemValue);
+        }
+    };
+
+    const handleStateFilterChange = (itemValue: string) => {
+        if (itemValue == 'all') {
+            setStateFilter('');
+            setCityFilter('');
+        } else {
+            setStateFilter(itemValue);
+            setCityFilter('');
+        }
+    };
+
+    const handleCityFilterChange = (itemValue: string) => {
+        if (itemValue == 'all') {
+            setCityFilter('');
+        } else {
+            setCityFilter(itemValue);
+        }
     };
 
     return (
@@ -123,9 +149,9 @@ const TechnicianSupport: React.FC = () => {
                     <Picker
                         selectedValue={vehicleFilter}
                         style={styles.vehiclePicker}
-                        onValueChange={(itemValue) => setVehicleFilter(itemValue)}
+                        onValueChange={handleVehicleFilterChange}
                     >
-                        <Picker.Item label="All Vehicle Types" value="" />
+                        <Picker.Item label="All Vehicle Types" value="all" />
                         <Picker.Item label="CAR" value="CAR" />
                         <Picker.Item label="BUS" value="BUS" />
                         <Picker.Item label="TRUCK" value="TRUCK" />
@@ -137,12 +163,9 @@ const TechnicianSupport: React.FC = () => {
                     <Picker
                         selectedValue={stateFilter}
                         style={styles.locationPicker}
-                        onValueChange={(itemValue) => {
-                            setStateFilter(itemValue);
-                            setCityFilter('');
-                        }}
+                        onValueChange={handleStateFilterChange}
                     >
-                        <Picker.Item label="All States" value="" />
+                        <Picker.Item label="All States" value="all" />
                         {states.map((state) => (
                             <Picker.Item key={state.isoCode} label={state.name} value={state.isoCode} />
                         ))}
@@ -151,10 +174,10 @@ const TechnicianSupport: React.FC = () => {
                     <Picker
                         selectedValue={cityFilter}
                         style={styles.locationPicker}
-                        onValueChange={(itemValue) => setCityFilter(itemValue)}
+                        onValueChange={handleCityFilterChange}
                         enabled={!!stateFilter}
                     >
-                        <Picker.Item label="All Cities" value="" />
+                        <Picker.Item label="All Cities" value="all" />
                         {cities.map((city) => (
                             <Picker.Item key={city.name} label={city.name} value={city.name} />
                         ))}
