@@ -17,19 +17,6 @@ import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have 
 import { GestureHandlerRootView, TextInput } from "react-native-gesture-handler";
 import { router } from "expo-router";
 
-function timestampToTime(timestamp: string): string {
-    const date = new Date(timestamp);
-    let hours = date.getUTCHours();
-    const minutes = date.getUTCMinutes().toString().padStart(2, '0');
-    const seconds = date.getUTCSeconds().toString().padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    const formattedHours = hours.toString().padStart(2, '0');
-
-    return `${formattedHours}:${minutes}:${seconds} ${ampm}`;
-}
 
 const AddRouteScreen: React.FC = () => {
     const [vehicleNumber, setVehicleNumber] = useState<string>("");
@@ -118,21 +105,7 @@ const AddRouteScreen: React.FC = () => {
     const onChangeTime = (event: any, selectedTime?: Date) => {
         setShowTimePicker(false);
         if (selectedTime) {
-            console.log("Selected time:", selectedTime.toLocaleTimeString());
-            
-            // Create a new Date object with the current date
-            const newDate = new Date();
-            
-            // Get the time components from the selected time
-            const hours = selectedTime.getHours();
-            const minutes = selectedTime.getMinutes();
-            const seconds = selectedTime.getSeconds();
-            
-            // Set the time components on the new date
-            newDate.setHours(hours, minutes, seconds, 0);
-            
-            console.log("New departure time:", newDate.toISOString(), newDate.toLocaleTimeString());
-            setDepartureTime(newDate);
+            setDepartureTime(selectedTime);
         }
     };
 

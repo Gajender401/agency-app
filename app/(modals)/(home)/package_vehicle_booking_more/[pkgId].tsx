@@ -133,7 +133,7 @@ useEffect(() => {
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Departure Time:</Text>
-        <Text style={styles.value}>{timestampToTime(vehicleDetails.departureTime)}</Text>
+        <Text style={styles.value}>{vehicleDetails.departureTime ? new Date(vehicleDetails.departureTime).toLocaleTimeString() : ""}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Return Date:</Text>
@@ -141,7 +141,7 @@ useEffect(() => {
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Return Time:</Text>
-        <Text style={styles.value}>{timestampToTime(vehicleDetails.returnTime)}</Text>
+        <Text style={styles.value}>{vehicleDetails.returnTime ? new Date(vehicleDetails.returnTime).toLocaleTimeString() : ""}</Text>
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Toll:</Text>

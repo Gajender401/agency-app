@@ -209,7 +209,7 @@ const DailyRouteVehicles: React.FC = () => {
                 Vehicle Number: <Text style={{ color: "black" }}>{route.vehicle.number}</Text>
               </Text>
               <Text style={styles.cardText}>
-                Departure Time: <Text style={{ color: "black" }}>{timestampToTime(route.departureTime)}</Text>
+                Departure Time: <Text style={{ color: "black" }}>{route.departureTime ? new Date(route.departureTime).toLocaleTimeString() : ""}</Text>
               </Text>
               <Text style={styles.cardText}>
                 Cleaner Name: <Text style={{ color: "black" }}>{route.cleaner ? route.cleaner.name : ""}</Text>
