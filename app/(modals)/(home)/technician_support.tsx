@@ -19,6 +19,7 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { Picker } from '@react-native-picker/picker';
+import { State, City } from 'country-state-city';
 
 interface BlurOverlayProps {
     visible: boolean;
@@ -43,6 +44,7 @@ interface Technician {
     technicianType: string;
     name: string;
     city: string;
+    state: string;
     mobileNumber: string;
     alternateNumber: string;
     vehicleType: string;
@@ -59,7 +61,12 @@ const TechnicianSupport: React.FC = () => {
     const [idToDelete, setIdToDelete] = useState<null|string>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [vehicleFilter, setVehicleFilter] = useState('');
+    const [stateFilter, setStateFilter] = useState('');
+    const [cityFilter, setCityFilter] = useState('');
     const { apiCaller, setEditData, refresh } = useGlobalContext();
+
+    const states = State.getStatesOfCountry('IN');
+    const cities = City.getCitiesOfState('IN', stateFilter);
 
     const fetchTechnicians = async () => {
         try {
@@ -81,10 +88,12 @@ const TechnicianSupport: React.FC = () => {
     useEffect(() => {
         const filtered = technicians.filter(tech => 
             tech.technicianType.toLowerCase().includes(searchQuery.toLowerCase()) &&
-            (vehicleFilter === '' || tech.vehicleType === vehicleFilter)
+            (vehicleFilter === '' || tech.vehicleType === vehicleFilter) &&
+            (stateFilter === '' || tech.state === stateFilter) &&
+            (cityFilter === '' || tech.city === cityFilter)
         );
         setFilteredTechnicians(filtered);
-    }, [searchQuery, vehicleFilter, technicians]);
+    }, [searchQuery, vehicleFilter, stateFilter, cityFilter, technicians]);
 
     const handleDelete = async() => {
         await apiCaller.delete(`/api/technician?technicianId=${idToDelete}`);
@@ -109,19 +118,49 @@ const TechnicianSupport: React.FC = () => {
                 />
             </View>
 
-            {/* <View style={styles.filterContainer}>
-                <Picker
-                    selectedValue={vehicleFilter}
-                    style={styles.picker}
-                    onValueChange={(itemValue) => setVehicleFilter(itemValue)}
-                >
-                    <Picker.Item label="All Vehicle Types" value="" />
-                    <Picker.Item label="CAR" value="CAR" />
-                    <Picker.Item label="BUS" value="BUS" />
-                    <Picker.Item label="TRUCK" value="TRUCK" />
-                    <Picker.Item label="TAMPO" value="TAMPO" />
-                </Picker>
-            </View> */}
+            <View style={styles.filterContainer}>
+                <View style={styles.vehicleFilterContainer}>
+                    <Picker
+                        selectedValue={vehicleFilter}
+                        style={styles.vehiclePicker}
+                        onValueChange={(itemValue) => setVehicleFilter(itemValue)}
+                    >
+                        <Picker.Item label="All Vehicle Types" value="" />
+                        <Picker.Item label="CAR" value="CAR" />
+                        <Picker.Item label="BUS" value="BUS" />
+                        <Picker.Item label="TRUCK" value="TRUCK" />
+                        <Picker.Item label="TAMPO" value="TAMPO" />
+                    </Picker>
+                </View>
+
+                <View style={styles.locationFilterContainer}>
+                    <Picker
+                        selectedValue={stateFilter}
+                        style={styles.locationPicker}
+                        onValueChange={(itemValue) => {
+                            setStateFilter(itemValue);
+                            setCityFilter('');
+                        }}
+                    >
+                        <Picker.Item label="All States" value="" />
+                        {states.map((state) => (
+                            <Picker.Item key={state.isoCode} label={state.name} value={state.isoCode} />
+                        ))}
+                    </Picker>
+
+                    <Picker
+                        selectedValue={cityFilter}
+                        style={styles.locationPicker}
+                        onValueChange={(itemValue) => setCityFilter(itemValue)}
+                        enabled={!!stateFilter}
+                    >
+                        <Picker.Item label="All Cities" value="" />
+                        {cities.map((city) => (
+                            <Picker.Item key={city.name} label={city.name} value={city.name} />
+                        ))}
+                    </Picker>
+                </View>
+            </View>
 
             <TouchableOpacity onPress={() => router.push("add_technician")} style={styles.addButton}>
                 <Text style={styles.addButtonText}>Add Technician</Text>
@@ -133,14 +172,6 @@ const TechnicianSupport: React.FC = () => {
                 <ScrollView style={styles.techniciansList}>
                     {filteredTechnicians.map((technician) => (
                         <View key={technician._id} style={styles.card}>
-                            {/* <View style={styles.cardHeader}>
-                                <TouchableOpacity onPress={()=>{setEditData(technician);router.push("edit_technician")}} style={styles.editButton}>
-                                    <Text style={styles.editButtonText}>Edit form</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => {setShowDeleteModal(true); setIdToDelete(technician._id)}}> 
-                                    <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
-                                </TouchableOpacity>
-                            </View> */}
                             <View style={[styles.cardHeader, { marginBottom: 2, marginTop: 5 }]}>
                                 <TouchableOpacity onPress={() => dialNumber(technician.mobileNumber)}>
                                     <MaterialIcons name="phone-in-talk" size={24} color={Colors.darkBlue} />
@@ -154,13 +185,11 @@ const TechnicianSupport: React.FC = () => {
                             <Text style={styles.cardText}>City: <Text style={{ color: "black" }}>{technician.city}</Text></Text>
                             <Text style={styles.cardText}>State: <Text style={{ color: "black" }}>{technician.state}</Text></Text>
                             <Text style={styles.cardText}>Vehicle Type: <Text style={{ color: "black" }}> {technician.vehicleType}</Text></Text>
-                            <Text style={styles.cardText}>City: <Text style={{ color: "black" }}> {technician.city}</Text></Text>
                         </View>
                     ))}
                 </ScrollView>
             )}
 
-            {/* Delete Confirmation Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
@@ -191,12 +220,11 @@ const TechnicianSupport: React.FC = () => {
     );
 };
 
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: "#F4EFEF",
+        backgroundColor: "#fff",
     },
     searchContainer: {
         flexDirection: "row",
@@ -214,9 +242,21 @@ const styles = StyleSheet.create({
         color: Colors.secondary,
     },
     filterContainer: {
+        marginBottom: 10,
+    },
+    vehicleFilterContainer: {
+        marginBottom: 10,
+    },
+    locationFilterContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginBottom: 10,
+    },
+    vehiclePicker: {
+        width: '100%',
+    },
+    locationPicker: {
+        flex: 1,
+        marginHorizontal: 5,
     },
     picker: {
         flex: 1,

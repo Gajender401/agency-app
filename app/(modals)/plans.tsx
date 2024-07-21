@@ -16,22 +16,20 @@ const keyFeatures = [
 ];
 
 const plans = [
-  { name: "Monthly Plan", price: "₹ 299 / Month" },
-  { name: "Annual Plan", price: "₹ 999 / Yearly" },
+  { name: "Monthly Plan", price: 299, displayPrice: "₹ 299 / Month" },
+  { name: "Annual Plan", price: 999, displayPrice: "₹ 999 / Yearly" },
 ];
 
-  let razorpayKeyId = "rzp_test_wG7GhVLcZ7CSBf"
-  let razorpayKeySecret = "Wl7e9nI1xJ6WdE5QBTtiW2NB"
+let razorpayKeyId = "rzp_test_wG7GhVLcZ7CSBf"
+let razorpayKeySecret = "Wl7e9nI1xJ6WdE5QBTtiW2NB"
 
-
-  const amount = 100;
-  const currency = "INR";
+const currency = "INR";
 
 const PlansScreen: React.FC = () => {
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
 
-  const handlePlanSelect = (planName: string) => {
-    setSelectedPlan(planName);
+  const handlePlanSelect = (plan: typeof plans[0]) => {
+    setSelectedPlan(plan);
   };
 
   const renderFeature = ({ item }: { item: string }) => (
@@ -40,25 +38,25 @@ const PlansScreen: React.FC = () => {
     </View>
   );
 
-  const renderPlan = ({ item }: { item: { name: string; price: string } }) => (
+  const renderPlan = ({ item }: { item: typeof plans[0] }) => (
     <TouchableOpacity
       style={[
         styles.planItem,
-        selectedPlan === item.name && styles.selectedPlanItem
+        selectedPlan?.name === item.name && styles.selectedPlanItem
       ]}
-      onPress={() => handlePlanSelect(item.name)}
+      onPress={() => handlePlanSelect(item)}
     >
       <Text style={[
         styles.planName,
-        selectedPlan === item.name && styles.selectedPlanText
+        selectedPlan?.name === item.name && styles.selectedPlanText
       ]}>
         {item.name}
       </Text>
       <Text style={[
         styles.planPrice,
-        selectedPlan === item.name && styles.selectedPlanText
+        selectedPlan?.name === item.name && styles.selectedPlanText
       ]}>
-        {item.price}
+        {item.displayPrice}
       </Text>
     </TouchableOpacity>
   );
@@ -87,14 +85,16 @@ const PlansScreen: React.FC = () => {
         ]}
         disabled={!selectedPlan}
         onPress={() => {
+          if (!selectedPlan) return;
+
           var options = {
-            description: 'Buy BMW CAR',
+            description: `${selectedPlan.name} Subscription`,
             image: 'https://i.imgur.com/3g7nmJC.png',
             currency: currency,
             key: razorpayKeyId,
-            amount: amount*100,
-            name: 'test order',
-            order_id: "", //Replace this with an order_id created using Orders API. Learn more at https://razorpay.com/docs/api/orders.
+            amount: selectedPlan.price * 100, // Convert to paise
+            name: `${selectedPlan.name} Subscription`,
+            order_id:"",
             prefill: {
               email: 'xyz@gmail.com',
               contact: '9999999999',
@@ -106,7 +106,6 @@ const PlansScreen: React.FC = () => {
             alert(`Success: ${data.razorpay_payment_id}`);
           }).catch((error) => {
             console.log(error);
-            
             alert(`Error: ${error.code} | ${error.description}`);
           });
         }}
@@ -116,6 +115,7 @@ const PlansScreen: React.FC = () => {
     </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
