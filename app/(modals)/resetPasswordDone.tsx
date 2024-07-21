@@ -22,9 +22,9 @@ const ResetPasswordDoneScreen = () => {
           <Text style={styles.successText}>
             Password Changed Successfully
           </Text>
-          <TouchableOpacity onPress={() => router.push("/(modals)/premiumDone")} style={styles.button}>
+          <TouchableOpacity onPress={() => router.replace("/")} style={styles.button}>
             <Text style={styles.buttonText}>
-              Continue to Login
+              Continue
             </Text>
           </TouchableOpacity>
         </View>

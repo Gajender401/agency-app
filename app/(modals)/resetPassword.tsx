@@ -8,17 +8,46 @@ import {
     TextInput,
     SafeAreaView,
     Image,
+    Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { AntDesign } from '@expo/vector-icons';
+import { useGlobalContext } from '@/context/GlobalProvider';
+import axios from 'axios';
 
-const ResetPasswordScreen = () => {
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+const ResetPasswordScreen: React.FC = () => {
+    const [newPassword, setNewPassword] = useState<string>('');
+    const [confirmPassword, setConfirmPassword] = useState<string>('');
+    const { mobileNumber } = useGlobalContext();
 
-    const handleResetPassword = () => {
-        router.push('/(modals)/resetPasswordDone')
+    const handleResetPassword = async (): Promise<void> => {
+        if (newPassword !== confirmPassword) {
+            Alert.alert("Error", "Passwords do not match. Please try again.");
+            return;
+        }
+
+        if (newPassword.length < 5) {
+            Alert.alert("Error", "Password should be at least 5 characters long.");
+            return;
+        }
+
+        try {
+            const response = await axios.post(`${process.env.EXPO_PUBLIC_URL}api/user/reset/`, {
+                mobileNumber: mobileNumber,
+                newPassword: newPassword
+            });
+
+            if (response.data.success) {
+                Alert.alert("Success", "Password reset successfully!");
+                router.push('/(modals)/resetPasswordDone');
+            } else {
+                Alert.alert("Error", "Failed to reset password. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error resetting password:", error);
+            Alert.alert("Error", "An error occurred. Please try again later.");
+        }
     };
 
     return (
@@ -28,7 +57,7 @@ const ResetPasswordScreen = () => {
 
             <View style={styles.marginTop150}>
                 <Text style={styles.headingText}>Reset</Text>
-                <Text style={styles.headingText}>Password?</Text>
+                <Text style={styles.headingText}>Password</Text>
             </View>
 
             <View style={styles.innerContainer}>
@@ -51,7 +80,7 @@ const ResetPasswordScreen = () => {
                     />
                 </View>
 
-                <View style={styles.sendOTPButton}>
+                <View style={styles.resetButton}>
                     <Text style={styles.resetText}>
                         Reset
                     </Text>
@@ -62,7 +91,6 @@ const ResetPasswordScreen = () => {
                     </TouchableOpacity>
                 </View>
             </View>
-
         </SafeAreaView>
     );
 };
@@ -71,7 +99,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#fff",
-        marginTop: StatusBar.currentHeight,
+        marginTop: StatusBar.currentHeight || 0,
         padding: 20,
     },
     innerContainer: {
@@ -105,7 +133,7 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
         paddingHorizontal: 20,
     },
-    sendOTPButton: {
+    resetButton: {
         flexDirection: "row",
         alignItems: "center",
         marginTop: 20,
