@@ -34,7 +34,7 @@ const ForgotPasswordScreen: React.FC = () => {
     const handleSendOTP = async (): Promise<void> => {
         try {
             const response = await axios.post(`${process.env.EXPO_PUBLIC_URL}api/user/reset/sendOtp`, {
-                mobileNumber: `${91}phoneNumber`
+                mobileNumber: `91${phoneNumber}`
             });
             if (response.data.success) {
                 setOtpSent(true);
@@ -52,11 +52,11 @@ const ForgotPasswordScreen: React.FC = () => {
         const enteredOtp = otp.join('');
         try {
             const response = await axios.post(`${process.env.EXPO_PUBLIC_URL}api/user/reset/verifyOtp`, {
-                mobileNumber: phoneNumber,
+                mobileNumber: `91${phoneNumber}`,
                 otp: enteredOtp
             });
             if (response.data.success) {
-                setMobileNumber(phoneNumber)
+                setMobileNumber(`91${phoneNumber}`)
                 Alert.alert("Success", "OTP verified successfully!");
                 router.push("/(modals)/resetPassword");
             } else {
