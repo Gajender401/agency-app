@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -9,8 +9,6 @@ import {
     SafeAreaView,
     Image,
     Alert,
-    Animated,
-    Vibration,
 } from "react-native";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
@@ -18,18 +16,11 @@ import { AntDesign } from '@expo/vector-icons';
 import axios from 'axios';
 import { useGlobalContext } from '@/context/GlobalProvider';
 
-interface OtpInputRef {
-    focus: () => void;
-}
-
 const ForgotPasswordScreen: React.FC = () => {
     const [phoneNumber, setPhoneNumber] = useState<string>('');
     const [otpSent, setOtpSent] = useState<boolean>(false);
-    const [otp, setOtp] = useState<string[]>(['', '', '', '']);
-    const otpInputs = useRef<OtpInputRef[]>([]);
-    const [shakeAnimation] = useState<Animated.Value>(new Animated.Value(0));
-    const [isShaking, setIsShaking] = useState<boolean>(false);
-    const {setMobileNumber} = useGlobalContext()
+    const [otp, setOtp] = useState<string>('');
+    const { setMobileNumber } = useGlobalContext()
 
     const handleSendOTP = async (): Promise<void> => {
         try {
@@ -49,49 +40,21 @@ const ForgotPasswordScreen: React.FC = () => {
     };
 
     const handleVerifyOTP = async (): Promise<void> => {
-        const enteredOtp = otp.join('');
         try {
             const response = await axios.post(`${process.env.EXPO_PUBLIC_URL}api/user/reset/verifyOtp`, {
                 mobileNumber: `91${phoneNumber}`,
-                otp: enteredOtp
+                otp: otp
             });
             if (response.data.success) {
                 setMobileNumber(`91${phoneNumber}`)
                 Alert.alert("Success", "OTP verified successfully!");
                 router.push("/(modals)/resetPassword");
             } else {
-                triggerShakeAnimation();
                 Alert.alert("Error", "Invalid OTP. Please try again.");
             }
         } catch (error) {
             console.error("Error verifying OTP:", error);
-            triggerShakeAnimation();
             Alert.alert("Error", "An error occurred. Please try again later.");
-        }
-    };
-
-    const triggerShakeAnimation = (): void => {
-        setIsShaking(true);
-        Animated.sequence([
-            Animated.timing(shakeAnimation, { toValue: 10, duration: 50, useNativeDriver: true }),
-            Animated.timing(shakeAnimation, { toValue: -10, duration: 50, useNativeDriver: true }),
-            Animated.timing(shakeAnimation, { toValue: 10, duration: 50, useNativeDriver: true }),
-            Animated.timing(shakeAnimation, { toValue: 0, duration: 50, useNativeDriver: true }),
-        ]).start(() => {
-            setIsShaking(false);
-        });
-        Vibration.vibrate(400);
-        setOtp(['', '', '', '']);
-        otpInputs.current[0]?.focus();
-    };
-
-    const handleOtpChange = (text: string, index: number): void => {
-        const newOtp = [...otp];
-        newOtp[index] = text;
-        setOtp(newOtp);
-
-        if (text.length === 1 && index < 3) {
-            otpInputs.current[index + 1]?.focus();
         }
     };
 
@@ -138,27 +101,17 @@ const ForgotPasswordScreen: React.FC = () => {
                     </>
                 ) : (
                     <>
-                        <Animated.View
-                            style={[
-                                styles.otpContainer,
-                                { transform: [{ translateX: shakeAnimation }] },
-                            ]}
-                        >
-                            {otp.map((digit, index) => (
-                                <TextInput
-                                    key={index}
-                                    style={[
-                                        styles.otpInput,
-                                        isShaking && styles.shakingInput
-                                    ]}
-                                    maxLength={1}
-                                    keyboardType="numeric"
-                                    value={digit}
-                                    onChangeText={(text) => handleOtpChange(text, index)}
-                                    ref={(input: any) => (otpInputs.current[index] = input)}
-                                />
-                            ))}
-                        </Animated.View>
+                        <View style={styles.inputContainer}>
+                            <TextInput
+                                placeholder="Enter OTP"
+                                value={otp}
+                                onChangeText={setOtp}
+                                style={styles.input}
+                                placeholderTextColor="#FFFFFF"
+                                keyboardType="numeric"
+                                maxLength={4}
+                            />
+                        </View>
 
                         <TouchableOpacity onPress={handleVerifyOTP} style={styles.verifyButton}>
                             <Text style={styles.verifyButtonText}>Verify OTP</Text>
@@ -206,6 +159,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#86D0FB",
         color: "#FFFFFF",
         paddingHorizontal: 20,
+        height: 40
     },
     sendOTPButton: {
         flexDirection: "row",
@@ -240,25 +194,6 @@ const styles = StyleSheet.create({
         color: Colors.primary,
         fontSize: 24,
         fontWeight: '700',
-    },
-    otpContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '80%',
-        marginBottom: 30,
-    },
-    otpInput: {
-        width: 50,
-        height: 50,
-        borderWidth: 1,
-        borderColor: Colors.primary,
-        borderRadius: 10,
-        textAlign: 'center',
-        fontSize: 24,
-    },
-    shakingInput: {
-        borderColor: '#f23535',
-        color: '#f23535',
     },
     verifyButton: {
         backgroundColor: Colors.primary,
