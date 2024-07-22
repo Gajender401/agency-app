@@ -101,7 +101,10 @@ const TechnicianSupport: React.FC = () => {
 
     useEffect(() => {
         const filtered = technicians.filter(tech =>
-            tech.technicianType.toLowerCase().includes(searchQuery.toLowerCase()) &&
+            (tech.technicianType.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            tech.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            tech.state.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            tech.city.toLowerCase().includes(searchQuery.toLowerCase())) &&
             (vehicleFilter === '' || tech.vehicleType === vehicleFilter) &&
             (stateFilter === '' || tech.state === stateFilter) &&
             (cityFilter === '' || tech.city === cityFilter)
@@ -297,10 +300,10 @@ const styles = StyleSheet.create({
         color: Colors.secondary,
     },
     filterContainer: {
-        marginBottom: 10,
+        marginBottom: 1,
     },
     vehicleFilterContainer: {
-        marginBottom: 10,
+        marginBottom: -5,
     },
     locationFilterContainer: {
         flexDirection: 'row',
