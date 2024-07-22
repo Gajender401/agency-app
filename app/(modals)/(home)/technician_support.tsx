@@ -103,7 +103,6 @@ const TechnicianSupport: React.FC = () => {
         const filtered = technicians.filter(tech =>
             (tech.technicianType.toLowerCase().includes(searchQuery.toLowerCase()) ||
             tech.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            tech.state.toLowerCase().includes(searchQuery.toLowerCase()) ||
             tech.city.toLowerCase().includes(searchQuery.toLowerCase())) &&
             (vehicleFilter === '' || tech.vehicleType === vehicleFilter) &&
             (stateFilter === '' || tech.state === stateFilter) &&
