@@ -8,7 +8,7 @@ import {
     TouchableWithoutFeedback,
     TextInput,
     SafeAreaView,
-    ScrollView,
+    FlatList,
     ActivityIndicator,
     Linking,
     Platform,
@@ -56,7 +56,7 @@ interface Technician {
 const TechnicianSupport: React.FC = () => {
     const [technicians, setTechnicians] = useState<Technician[]>([]);
     const [filteredTechnicians, setFilteredTechnicians] = useState<Technician[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [idToDelete, setIdToDelete] = useState<null | string>(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -64,16 +64,30 @@ const TechnicianSupport: React.FC = () => {
     const [stateFilter, setStateFilter] = useState('');
     const [cityFilter, setCityFilter] = useState('');
     const { apiCaller, setEditData, refresh } = useGlobalContext();
+    const [currentPage, setCurrentPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
 
     const states = State.getStatesOfCountry('IN');
     const cities = City.getCitiesOfState('IN', stateFilter);
 
-    const fetchTechnicians = async () => {
+    const fetchTechnicians = async (page: number, isLoadMore: boolean = false) => {
+        if (!hasMore && isLoadMore) return;
+
         try {
             setLoading(true);
-            const response = await apiCaller.get('/api/technician');
-            setTechnicians(response.data.data);
-            setFilteredTechnicians(response.data.data);
+            const response = await apiCaller.get(`/api/technician?page=${page}`);
+            const newTechnicians = response.data.data;
+            
+            if (isLoadMore) {
+                setTechnicians(prev => [...prev, ...newTechnicians]);
+                setFilteredTechnicians(prev => [...prev, ...newTechnicians]);
+            } else {
+                setTechnicians(newTechnicians);
+                setFilteredTechnicians(newTechnicians);
+            }
+
+            setHasMore(newTechnicians.length > 0);
+            setCurrentPage(page);
         } catch (err) {
             console.log(err);
         } finally {
@@ -82,7 +96,7 @@ const TechnicianSupport: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchTechnicians();
+        fetchTechnicians(1);
     }, [refresh]);
 
     useEffect(() => {
@@ -98,7 +112,7 @@ const TechnicianSupport: React.FC = () => {
     const handleDelete = async () => {
         await apiCaller.delete(`/api/technician?technicianId=${idToDelete}`);
         setShowDeleteModal(false);
-        fetchTechnicians();
+        fetchTechnicians(1);
     };
 
     const dialNumber = (number: string) => {
@@ -129,6 +143,39 @@ const TechnicianSupport: React.FC = () => {
         } else {
             setCityFilter(itemValue);
         }
+    };
+
+    const renderTechnicianItem = ({ item }: { item: Technician }) => (
+        <View style={styles.card}>
+            <View style={[styles.cardHeader, { marginBottom: 2, marginTop: 5 }]}>
+                <TouchableOpacity onPress={() => dialNumber(item.mobileNumber)}>
+                    <MaterialIcons name="phone-in-talk" size={24} color={Colors.darkBlue} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => dialNumber(item.alternateNumber)}>
+                    <MaterialIcons name="phone-in-talk" size={24} color={Colors.secondary} />
+                </TouchableOpacity>
+            </View>
+            <Text style={styles.cardText}>Technician Name: <Text style={{ color: "black" }}> {item.name}</Text></Text>
+            <Text style={styles.cardText}>Technician Type: <Text style={{ color: "black" }}> {item.technicianType}</Text></Text>
+            <Text style={styles.cardText}>City: <Text style={{ color: "black" }}>{item.city}</Text></Text>
+            <Text style={styles.cardText}>State: <Text style={{ color: "black" }}>{item.state}</Text></Text>
+            <Text style={styles.cardText}>Vehicle Type: <Text style={{ color: "black" }}> {item.vehicleType}</Text></Text>
+        </View>
+    );
+
+    const handleLoadMore = () => {
+        if (!loading && hasMore) {
+            fetchTechnicians(currentPage + 1, true);
+        }
+    };
+
+    const renderFooter = () => {
+        if (!loading) return null;
+        return (
+            <View style={styles.loaderFooter}>
+                <ActivityIndicator size="small" color={Colors.darkBlue} />
+            </View>
+        );
     };
 
     return (
@@ -189,29 +236,14 @@ const TechnicianSupport: React.FC = () => {
                 <Text style={styles.addButtonText}>Add Technician</Text>
             </TouchableOpacity>
 
-            {loading ? (
-                <ActivityIndicator size="large" color={Colors.darkBlue} />
-            ) : (
-                <ScrollView style={styles.techniciansList}>
-                    {filteredTechnicians.map((technician) => (
-                        <View key={technician._id} style={styles.card}>
-                            <View style={[styles.cardHeader, { marginBottom: 2, marginTop: 5 }]}>
-                                <TouchableOpacity onPress={() => dialNumber(technician.mobileNumber)}>
-                                    <MaterialIcons name="phone-in-talk" size={24} color={Colors.darkBlue} />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => dialNumber(technician.alternateNumber)}>
-                                    <MaterialIcons name="phone-in-talk" size={24} color={Colors.secondary} />
-                                </TouchableOpacity>
-                            </View>
-                            <Text style={styles.cardText}>Technician Name: <Text style={{ color: "black" }}> {technician.name}</Text></Text>
-                            <Text style={styles.cardText}>Technician Type: <Text style={{ color: "black" }}> {technician.technicianType}</Text></Text>
-                            <Text style={styles.cardText}>City: <Text style={{ color: "black" }}>{technician.city}</Text></Text>
-                            <Text style={styles.cardText}>State: <Text style={{ color: "black" }}>{technician.state}</Text></Text>
-                            <Text style={styles.cardText}>Vehicle Type: <Text style={{ color: "black" }}> {technician.vehicleType}</Text></Text>
-                        </View>
-                    ))}
-                </ScrollView>
-            )}
+            <FlatList
+                data={filteredTechnicians}
+                renderItem={renderTechnicianItem}
+                keyExtractor={(item) => item._id}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.1}
+                ListFooterComponent={renderFooter}
+            />
 
             <Modal
                 animationType="slide"
@@ -297,9 +329,6 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
     },
-    techniciansList: {
-        flex: 1,
-    },
     card: {
         backgroundColor: "#fff",
         padding: 20,
@@ -319,17 +348,6 @@ const styles = StyleSheet.create({
         gap: 30,
         alignItems: "center",
     },
-    editButton: {
-        backgroundColor: Colors.darkBlue,
-        paddingHorizontal: 10,
-        borderRadius: 5,
-        paddingVertical: 5,
-    },
-    editButtonText: {
-        color: "#fff",
-        fontWeight: "bold",
-        fontSize: 12,
-    },
     cardText: {
         marginBottom: 8,
         color: Colors.secondary,
@@ -347,12 +365,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-    modalScroll: {
-        flex: 1,
-        paddingTop: Platform.OS === 'android' ? 20 : 0,
-        paddingHorizontal: 20,
-        marginVertical: 'auto'
-    },
     modalContent: {
         backgroundColor: "#fff",
         padding: 20,
@@ -365,24 +377,6 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         fontSize: 18,
         textAlign: "center",
-    },
-    inputGroup: {
-        marginBottom: 15,
-        width: '100%'
-    },
-    label: {
-        marginBottom: 5,
-        fontSize: 13,
-        color: Colors.secondary,
-        fontWeight: "500"
-    },
-    input: {
-        borderColor: Colors.secondary,
-        borderWidth: 1,
-        borderRadius: 10,
-        paddingHorizontal: 10,
-        height: 40,
-        width: '100%'
     },
     modalButtons: {
         flexDirection: "row",
@@ -401,6 +395,10 @@ const styles = StyleSheet.create({
     },
     overlay: {
         ...StyleSheet.absoluteFillObject,
+    },
+    loaderFooter: {
+        paddingVertical: 20,
+        alignItems: 'center',
     },
 });
 
