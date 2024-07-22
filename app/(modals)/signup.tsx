@@ -74,7 +74,6 @@ const SignUpScreen = () => {
         };
         try {
             const response = await axios.post(`${process.env.EXPO_PUBLIC_URL}api/user/`, data);
-            
             if (response.data.success) {
                 setMobileNumber(data.mobileNumber)
                 router.push("/verify");

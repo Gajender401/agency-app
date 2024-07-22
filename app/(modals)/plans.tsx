@@ -6,9 +6,11 @@ import {
   SafeAreaView,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import RazorpayCheckout from 'react-native-razorpay';
+import { useGlobalContext } from "@/context/GlobalProvider";
 
 const keyFeatures = [
   "Priority Support & Technician Assistance",
@@ -16,17 +18,17 @@ const keyFeatures = [
 ];
 
 const plans = [
-  { name: "Monthly Plan", price: 299, displayPrice: "₹ 299 / Month" },
-  { name: "Annual Plan", price: 999, displayPrice: "₹ 999 / Yearly" },
+  { name: "Monthly Plan", price: 299, displayPrice: "₹ 299 / Month", planType: "MONTHLY" },
+  { name: "Annual Plan", price: 999, displayPrice: "₹ 999 / Yearly", planType: "YEARLY" },
 ];
 
 let razorpayKeyId = "rzp_test_wG7GhVLcZ7CSBf"
-let razorpayKeySecret = "Wl7e9nI1xJ6WdE5QBTtiW2NB"
 
 const currency = "INR";
 
 const PlansScreen: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
+  const { apiCaller } = useGlobalContext();
 
   const handlePlanSelect = (plan: typeof plans[0]) => {
     setSelectedPlan(plan);
@@ -61,6 +63,66 @@ const PlansScreen: React.FC = () => {
     </TouchableOpacity>
   );
 
+  const handleSubscription = async () => {
+    if (!selectedPlan) return;
+
+    try {
+      // Call subscription API
+      const subscriptionResponse = await apiCaller.post('/api/subscription/', {
+        plan: selectedPlan.planType
+      });
+
+      // Call createOrder API
+      const orderResponse = await apiCaller.post('/api/subscription/createOrder', {
+        amount: selectedPlan.price.toString(),
+        currency: currency,
+        receipt: 'receipt#1'
+      });
+
+      const { id: orderId } = orderResponse.data.data;
+
+      var options = {
+        description: `${selectedPlan.name} Subscription`,
+        image: 'https://i.imgur.com/3g7nmJC.png',
+        currency: currency,
+        key: razorpayKeyId,
+        amount: selectedPlan.price * 100,
+        name: `${selectedPlan.name} Subscription`,
+        order_id: orderId,
+        prefill: {
+          email: 'xyz@gmail.com',
+          contact: '9999999999',
+          name: 'User 1'
+        },
+        theme: { color: '#F37254' }
+      }
+
+      const razorpayResult = await RazorpayCheckout.open(options);
+
+      RazorpayCheckout.open(options).then(async (data) => {
+        alert(`Success: ${data.razorpay_payment_id}`);
+        const verificationResponse = await apiCaller.post('/api/subscription/verify', {
+          razorpay_order_id: razorpayResult.razorpay_order_id,
+          razorpay_payment_id: razorpayResult.razorpay_payment_id,
+          razorpay_signature: razorpayResult.razorpay_signature
+        });
+
+        if (verificationResponse.data.success) {
+          Alert.alert("Success", "Payment successful and verified!");
+        } else {
+          Alert.alert("Error", "Payment verification failed.");
+        }
+      }).catch((error) => {
+        // handle failure
+        alert(`Error: ${error.code} | ${error.description}`);
+      });
+
+    } catch (error) {
+      console.error("Error in subscription process:", error);
+      Alert.alert("Error", "An error occurred during the subscription process. Please try again.");
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.featuresContainer}>
@@ -84,38 +146,13 @@ const PlansScreen: React.FC = () => {
           selectedPlan ? styles.activeButton : styles.disabledButton
         ]}
         disabled={!selectedPlan}
-        onPress={() => {
-          if (!selectedPlan) return;
-
-          var options = {
-            description: `${selectedPlan.name} Subscription`,
-            image: 'https://i.imgur.com/3g7nmJC.png',
-            currency: currency,
-            key: razorpayKeyId,
-            amount: selectedPlan.price * 100, // Convert to paise
-            name: `${selectedPlan.name} Subscription`,
-            order_id:"",
-            prefill: {
-              email: 'xyz@gmail.com',
-              contact: '9999999999',
-              name: 'User 1'
-            },
-            theme: { color: '#F37254' }
-          }
-          RazorpayCheckout.open(options).then((data) => {
-            alert(`Success: ${data.razorpay_payment_id}`);
-          }).catch((error) => {
-            console.log(error);
-            alert(`Error: ${error.code} | ${error.description}`);
-          });
-        }}
+        onPress={handleSubscription}
       >
         <Text style={styles.continueButtonText}>Continue</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
