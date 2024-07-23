@@ -72,7 +72,7 @@ const DailyRouteVehicles: React.FC = () => {
       const response = await apiCaller.get('/api/dailyRoute');
       setDailyRoutes(response.data.data);
       console.log(response.data.data[0].vehicle.number);
-      
+
     } catch (err) {
       console.log(err);
     } finally {
@@ -127,14 +127,14 @@ const DailyRouteVehicles: React.FC = () => {
       Alert.alert("Please fill at least one field.");
       return;
     }
-  
+
     const newDriverData = {
       primaryDriverId: selectedPrimaryDriver || null,
       secondaryDriverId: selectedSecondaryDriver || null,
       cleanerId: selectedCleaner || null,
       instructions: instruction || ""
     };
-  
+
     try {
       setLoading(true);
       await apiCaller.patch(`/api/dailyRoute/finalize?routeId=${selectedRoute?._id}`, newDriverData);
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     height: 40,
     justifyContent: 'center'
-},
+  },
 });
 
 export default DailyRouteVehicles;

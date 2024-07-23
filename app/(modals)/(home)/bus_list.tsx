@@ -157,7 +157,7 @@ const BusListScreen: React.FC = () => {
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>
-                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{bus.number}</Text></Text>
+                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{bus.number.toUpperCase()}</Text></Text>
                             <Text style={styles.cardText}>Seating Capacity: <Text style={{ color: "black" }}>{bus.seatingCapacity}</Text></Text>
                             <Text style={styles.cardText}>Vehicle Model: <Text style={{ color: "black" }}>{bus.model}</Text></Text>
                             <Text style={styles.cardText}>Body Type: <Text style={{ color: "black" }}>{bus.bodyType}</Text></Text>

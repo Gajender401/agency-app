@@ -123,7 +123,7 @@ const DailyRouteVehicles: React.FC = () => {
           {filteredRoutes.map((route) => (
             <View key={route._id} style={styles.card}>
               <View style={styles.cardHeader}>
-              <TouchableOpacity onPress={() => handleShowDetails(route)} style={styles.detailsButton}>
+                <TouchableOpacity onPress={() => handleShowDetails(route)} style={styles.detailsButton}>
                   <Text style={styles.detailsButtonText}>Details</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => { setShowDeleteModal(true); setSelectedRoute(route); }}>
@@ -194,18 +194,20 @@ const DailyRouteVehicles: React.FC = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Journey Details</Text>
-            <Text style={styles.modalText}>Before Journey Notes: {selectedRoute?.beforeJourneyNote || ''}</Text>
-            <Text style={styles.modalText}>After Journey Notes: {selectedRoute?.afterJourneyNote || ''}</Text>
+            <Text style={styles.modalText}>Before Journey Notes:</Text>
+            <Text style={styles.modalNoteText}>{selectedRoute?.beforeJourneyNote || 'No notes available'}</Text>
+            <Text style={styles.modalText}>After Journey Notes:</Text>
+            <Text style={styles.modalNoteText}>{selectedRoute?.afterJourneyNote || 'No notes available'}</Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
-                onPress={() => {setShowDetailsModal(false); setPhotos(selectedRoute.beforeJourneyPhotos); router.push('before_photos')} }
+                onPress={() => { setShowDetailsModal(false); setPhotos(selectedRoute.beforeJourneyPhotos); router.push('before_photos') }}
               >
                 <Text style={[styles.modalButtonText, { color: "#fff" }]}>Before Journey Photos</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
-                onPress={() => {setShowDetailsModal(false); setPhotos(selectedRoute.afterJourneyPhotos); router.push('after_photos')} }
+                onPress={() => { setShowDetailsModal(false); setPhotos(selectedRoute.afterJourneyPhotos); router.push('after_photos') }}
               >
                 <Text style={[styles.modalButtonText, { color: "#fff" }]}>After Journey Photos</Text>
               </TouchableOpacity>
@@ -219,7 +221,6 @@ const DailyRouteVehicles: React.FC = () => {
           </View>
         </View>
       </Modal>
-
     </SafeAreaView>
   );
 };
@@ -328,8 +329,15 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   modalText: {
+    marginBottom: 5,
+    textAlign: "left",
+    fontWeight: "bold",
+    alignSelf: "flex-start",
+  },
+  modalNoteText: {
     marginBottom: 15,
-    textAlign: "center",
+    textAlign: "left",
+    alignSelf: "flex-start",
   },
   modalTitle: {
     fontSize: 18,
@@ -378,7 +386,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     height: 40,
     justifyContent: 'center'
-},
+  },
+
 });
 
 export default DailyRouteVehicles;

@@ -124,7 +124,7 @@ const SellVehicleScreen: React.FC = () => {
                                     />
                                 ))}
                             </View>
-                            <Text style={styles.cardText}>Vehicle No: <Text style={{ color: "black" }}>{vehicle.number}</Text></Text>
+                            <Text style={styles.cardText}>Vehicle No: <Text style={{ color: "black" }}>{vehicle.number.toUpperCase()}</Text></Text>
                             <Text style={styles.cardText}>Model: <Text style={{ color: "black" }}>{vehicle.model}</Text></Text>
                             <Text style={styles.cardText}>Contact No: <Text style={{ color: "black" }}>{vehicle.contactNumber}</Text></Text>
                             <Text style={styles.cardText}>Location: <Text style={{ color: "black" }}>{vehicle.location}</Text></Text>

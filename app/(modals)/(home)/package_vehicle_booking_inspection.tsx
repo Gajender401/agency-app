@@ -14,7 +14,6 @@ import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
-import { Picker } from '@react-native-picker/picker';
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -106,21 +105,6 @@ const PackageVehicleListScreen: React.FC = () => {
           onChangeText={setSearchQuery}
         />
       </View>
-{/* 
-      <View style={styles.filterContainer}>
-        <Picker
-          selectedValue={selectedVehicleType}
-          onValueChange={(itemValue) => setSelectedVehicleType(itemValue)}
-          style={styles.filterPicker}
-        >
-          <Picker.Item label="All Vehicle Types" value="" />
-          <Picker.Item label="CAR" value="CAR" />
-          <Picker.Item label="BUS" value="BUS" />
-          <Picker.Item label="TRUCK" value="TRUCK" />
-          <Picker.Item label="TAMPO" value="TAMPO" />
-        </Picker>
-      </View> */}
-
 
       {loading ? (
         <ActivityIndicator size="large" color={Colors.darkBlue} />
@@ -151,7 +135,7 @@ const PackageVehicleListScreen: React.FC = () => {
               </View>
 
               <Text style={styles.cardText}>Customer Name: <Text style={styles.textValue}>{pkg.customerName}</Text></Text>
-              <Text style={styles.cardText}>Journey Duration: <Text style={styles.textValue}>{formatDate(pkg.departureTime)} to {formatDate(pkg.returnTime)}</Text></Text>
+              <Text style={styles.cardText}>Journey Duration: <Text style={styles.textValue}>{formatDate(pkg.departureDate)} to {formatDate(pkg.returnDate)}</Text></Text>
               {pkg.vehicle &&
                 <Text style={styles.cardText}>Vehicle Number: <Text style={styles.textValue}>{pkg.vehicle.number}</Text></Text>
               }
@@ -206,8 +190,10 @@ const PackageVehicleListScreen: React.FC = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Journey Details</Text>
-            <Text style={styles.modalText}>Before Journey Notes: {selectedPackage?.beforeJourneyNote || ''}</Text>
-            <Text style={styles.modalText}>After Journey Notes: {selectedPackage?.afterJourneyNote || ''}</Text>
+            <Text style={styles.modalText}>Before Journey Notes:</Text>
+            <Text style={styles.modalNoteText}>{selectedPackage?.beforeJourneyNote || 'No notes available'}</Text>
+            <Text style={styles.modalText}>After Journey Notes:</Text>
+            <Text style={styles.modalNoteText}>{selectedPackage?.afterJourneyNote || 'No notes available'}</Text>
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
@@ -333,8 +319,15 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   modalText: {
+    marginBottom: 5,
+    textAlign: "left",
+    fontWeight: "bold",
+    alignSelf: "flex-start",
+  },
+  modalNoteText: {
     marginBottom: 15,
-    textAlign: "center",
+    textAlign: "left",
+    alignSelf: "flex-start",
   },
   modalButtons: {
     flexDirection: "row",
@@ -352,16 +345,6 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: "white",
     fontWeight: "bold",
-  },
-  filterContainer: {
-    marginBottom: 10,
-    marginTop:-10
-  },
-  filterPicker: {
-    height: 40,
-    width: '100%',
-    borderRadius: 5,
-    marginBottom:10
   },
   detailsButton: {
     backgroundColor: Colors.darkBlue,

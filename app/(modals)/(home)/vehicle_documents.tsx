@@ -142,7 +142,7 @@ const VehicleListScreen: React.FC = () => {
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>
-                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{vehicle.number}</Text></Text>
+                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{vehicle.number.toUpperCase()}</Text></Text>
                             <View style={styles.documentContainer}>
                                 <TouchableOpacity style={styles.viewDocumentButton} onPress={() => handleViewImage(vehicle.RC)}>
                                     <Text style={styles.viewDocumentButtonText}>View RC</Text>

@@ -141,7 +141,7 @@ const TempoListScreen: React.FC = () => {
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>
-                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{tempo.number}</Text></Text>
+                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{tempo.number.toUpperCase()}</Text></Text>
                             <Text style={styles.cardText}>Seating Capacity: <Text style={{ color: "black" }}>{tempo.seatingCapacity}</Text></Text>
                             <Text style={styles.cardText}>Vehicle Model: <Text style={{ color: "black" }}>{tempo.model}</Text></Text>
                             <Text style={styles.cardText}>Location: <Text style={{ color: "black" }}>{tempo.location}</Text></Text>

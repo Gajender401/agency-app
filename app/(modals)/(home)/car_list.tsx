@@ -143,7 +143,7 @@ const CarListScreen: React.FC = () => {
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>
-                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{car.number}</Text></Text>
+                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{car.number.toUpperCase()}</Text></Text>
                             <Text style={styles.cardText}>Seating Capacity: <Text style={{ color: "black" }}>{car.seatingCapacity}</Text></Text>
                             <Text style={styles.cardText}>Vehicle Model: <Text style={{ color: "black" }}>{car.model}</Text></Text>
                             <Text style={styles.cardText}>Location: <Text style={{ color: "black" }}>{car.location}</Text></Text>

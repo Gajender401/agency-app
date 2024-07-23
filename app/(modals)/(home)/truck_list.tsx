@@ -142,7 +142,7 @@ const TruckListScreen: React.FC = () => {
                                 </TouchableOpacity>
                             </View>
                             <Text style={styles.cardText}>
-                                Vehicle Number: <Text style={{ color: "black" }}>{truck.number}</Text>
+                                Vehicle Number: <Text style={{ color: "black" }}>{truck.number.toUpperCase()}</Text>
                             </Text>
                             <Text style={styles.cardText}>
                                 Number of Tyres: <Text style={{ color: "black" }}>{truck.noOfTyres}</Text>

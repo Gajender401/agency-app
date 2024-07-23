@@ -166,7 +166,7 @@ const ServiceHistoryScreen: React.FC = () => {
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>
-                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{findVehicleByNumber(record.vehicle)?.number}</Text></Text>
+                            <Text style={styles.cardText}>Vehicle Number: <Text style={{ color: "black" }}>{findVehicleByNumber(record.vehicle)?.number.toUpperCase()}</Text></Text>
                             {/* <Text style={styles.cardText}>Vehicle Number:</Text> */}
                             {/* <Text style={{color: "black"}}>{findVehicleByNumber(record.vehicle)?.number}</Text> */}
 

@@ -61,6 +61,7 @@ const PackageVehicleListScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVehicleType, setSelectedVehicleType] = useState("");
   const { apiCaller, setEditData, setInvoiceData, refresh } = useGlobalContext();
+  const [inputHeight, setInputHeight] = useState(50);
 
   const fetchPackages = async () => {
     try {
@@ -68,7 +69,7 @@ const PackageVehicleListScreen: React.FC = () => {
       const response = await apiCaller.get('/api/packageBooking');
       setPackages(response.data.data);
       console.log(response.data.data[0].returnTime);
-      
+
     } catch (err) {
       console.log(err);
     } finally {
@@ -114,7 +115,7 @@ const PackageVehicleListScreen: React.FC = () => {
     let filtered = packages;
 
     if (searchQuery) {
-      filtered = filtered.filter(pkg => 
+      filtered = filtered.filter(pkg =>
         pkg.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         pkg.departurePlace.toLowerCase().includes(searchQuery.toLowerCase()) ||
         pkg.destinationPlace.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -180,7 +181,7 @@ const PackageVehicleListScreen: React.FC = () => {
           onChangeText={setSearchQuery}
         />
       </View>
-
+{/* 
       <View style={styles.filterContainer}>
         <Picker
           selectedValue={selectedVehicleType}
@@ -193,7 +194,7 @@ const PackageVehicleListScreen: React.FC = () => {
           <Picker.Item label="TRUCK" value="TRUCK" />
           <Picker.Item label="TAMPO" value="TAMPO" />
         </Picker>
-      </View>
+      </View> */}
 
       <TouchableOpacity onPress={() => router.push("add_package_vehicle_booking")} style={styles.addButton}>
         <Text style={styles.addButtonText}>Create Customer Invoice</Text>
@@ -288,7 +289,7 @@ const PackageVehicleListScreen: React.FC = () => {
       >
         <BlurOverlay visible={showAddDriverModal} onRequestClose={() => setShowAddDriverModal(false)} />
 
-        <TouchableWithoutFeedback onPress={() => setShowAddDriverModal(false)}>
+        <TouchableWithoutFeedback >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <View style={styles.inputGroup}>
@@ -333,9 +334,13 @@ const PackageVehicleListScreen: React.FC = () => {
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Instructions</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, styles.textarea, { height: Math.max(50, inputHeight) }]}
                   value={instruction}
                   onChangeText={(text) => setInstruction(text)}
+                  multiline={true}
+                  onContentSizeChange={(event) => {
+                    setInputHeight(event.nativeEvent.contentSize.height);
+                  }}
                 />
               </View>
               <View style={styles.modalButtons}>
@@ -527,15 +532,21 @@ const styles = StyleSheet.create({
     borderColor: Colors.secondary,
     borderRadius: 5,
   },
-    filterContainer: {
+  filterContainer: {
     marginBottom: 10,
-    marginTop:-10
+    marginTop: -10
   },
   filterPicker: {
     height: 40,
     width: '100%',
     borderRadius: 5,
-    marginBottom:10
+    marginBottom: 10
+  },
+  textarea: {
+    minHeight: 50,
+    maxHeight: 300,
+    textAlignVertical: 'top',
+    paddingTop: 10,
   },
 });
 
