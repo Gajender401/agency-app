@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     StyleSheet,
     SafeAreaView,
@@ -11,21 +11,40 @@ import {
 } from 'react-native';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
-
-const images = [
-    'https://c2.staticflickr.com/9/8817/28973449265_07e3aa5d2e_b.jpg',
-    'https://c2.staticflickr.com/9/8356/28897120681_3b2c0f43e0_b.jpg',
-    'https://c4.staticflickr.com/9/8887/28897124891_98c4fdd82b_b.jpg'
-];
+import axios from 'axios';
+import { useGlobalContext } from '@/context/GlobalProvider';
 
 const numColumns = 2;
 const imageSize = Dimensions.get('window').width / numColumns;
 
+interface Photo {
+    _id: string;
+    photos: string[];
+}
+
 const GalleryGridScreen: React.FC = () => {
+    const [photos, setPhotos] = useState<string[]>([]);
     const [selectedImages, setSelectedImages] = useState<string[]>([]);
+    const { apiCaller } = useGlobalContext()
+
+    useEffect(() => {
+        fetchPhotos();
+    }, []);
+
+    const fetchPhotos = async () => {
+        try {
+            const response = await apiCaller.get('/api/vehicle/all/photos');
+            if (response.data.success) {
+                const allPhotos = response.data.data.flatMap((item: Photo) => item.photos);
+                setPhotos(allPhotos);
+            }
+        } catch (error) {
+            console.error('Error fetching photos:', error);
+        }
+    };
 
     const toggleImageSelection = (image: string) => {
-        setSelectedImages(prev => 
+        setSelectedImages(prev =>
             prev.includes(image)
                 ? prev.filter(img => img !== image)
                 : [...prev, image]
@@ -42,7 +61,10 @@ const GalleryGridScreen: React.FC = () => {
             selectedImages.map(async (imageUrl, index) => {
                 const fileName = `image_${index}.jpg`;
                 const filePath = `${FileSystem.cacheDirectory}${fileName}`;
-                await FileSystem.downloadAsync(imageUrl, filePath);
+                await FileSystem.copyAsync({
+                    from: imageUrl,
+                    to: filePath
+                });
                 return filePath;
             })
         );
@@ -61,7 +83,7 @@ const GalleryGridScreen: React.FC = () => {
     };
 
     const renderItem = ({ item }: { item: string }) => (
-        <TouchableOpacity 
+        <TouchableOpacity
             style={styles.imageContainer}
             onPress={() => toggleImageSelection(item)}
         >
@@ -79,12 +101,12 @@ const GalleryGridScreen: React.FC = () => {
     return (
         <SafeAreaView style={styles.container}>
             <FlatList
-                data={images}
+                data={photos}
                 renderItem={renderItem}
                 keyExtractor={(item, index) => index.toString()}
                 numColumns={numColumns}
             />
-            <Button 
+            <Button
                 title={`Share (${selectedImages.length})`}
                 onPress={shareImages}
                 disabled={selectedImages.length === 0}

@@ -86,7 +86,7 @@ const BusListScreen: React.FC = () => {
         try {
             setLoading(true);
             const response = await apiCaller.get('/api/vehicle');
-            const filteredData = filterByType(response.data.data, 'BUS')
+            const filteredData = filterByType(response.data.data.vehicles, 'BUS')
             setBuses(filteredData);
         } catch (err) {
             console.log(err);
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: "#F4F4F4",
+        backgroundColor: "#fff",
     },
     searchContainer: {
         flexDirection: "row",

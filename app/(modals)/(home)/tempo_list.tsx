@@ -70,7 +70,7 @@ const TempoListScreen: React.FC = () => {
         try {
             setLoading(true);
             const response = await apiCaller.get('/api/vehicle');
-            const filteredData = filterByType(response.data.data, 'TAMPO');
+            const filteredData = filterByType(response.data.data.vehicles, 'TAMPO');
             setTempos(filteredData);
         } catch (err) {
             console.log(err);

@@ -70,7 +70,9 @@ const CarListScreen: React.FC = () => {
         try {
             setLoading(true);
             const response = await apiCaller.get('/api/vehicle');
-            const filteredData = filterByType(response.data.data, 'CAR')
+            
+            const filteredData = filterByType(response.data.data.vehicles, 'CAR')
+            console.log(filteredData);
             setCars(filteredData);
         } catch (err) {
             console.log(err);

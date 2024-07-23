@@ -107,7 +107,7 @@ const InvoiceScreen: React.FC = () => {
       <div class="page-break"></div>
     
       <div class="terms-header">
-        <div>Akash Shinde</div>
+        <div>${invoiceData.customerName}</div>
         <div>Tusharraj Travel</div>
       </div>
 
@@ -195,7 +195,7 @@ const InvoiceScreen: React.FC = () => {
     <ScrollView style={styles.container}>
       <View style={styles.row}>
         <Text style={styles.label}>Invoice ID:</Text>
-        <Text style={styles.value}>{invoiceData._id}</Text>
+        <Text style={styles.value}>{invoiceData.invoiceId}</Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Customer Name:</Text>
