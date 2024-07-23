@@ -123,7 +123,6 @@ const AddTruckScreen: React.FC = () => {
               style={styles.input}
               value={vehicleNo}
               onChangeText={(text) => setVehicleNo(text)}
-              editable={false}
             />
           </View>
           {/* <View style={styles.inputGroup}>

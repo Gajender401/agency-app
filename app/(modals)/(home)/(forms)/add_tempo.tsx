@@ -15,8 +15,6 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider"; // Importing useGlobalContext
-//@ts-ignore
-import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { router } from "expo-router";
 
 const AddTempoScreen: React.FC = () => {

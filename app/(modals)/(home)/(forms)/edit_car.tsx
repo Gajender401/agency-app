@@ -126,7 +126,6 @@ const AddCarScreen: React.FC = () => {
                             style={styles.input}
                             value={vehicleNo}
                             onChangeText={(text) => setVehicleNo(text)}
-                            editable={false}
                         />
                         <Text style={styles.vehicleNumberLabel}>“If your vehicle is to be sold to other vehicle owners or is to be given on rent, then you will have to fill the option given below.”</Text>
                     </View>
