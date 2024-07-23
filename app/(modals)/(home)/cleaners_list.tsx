@@ -112,10 +112,14 @@ const CleanerListScreen: React.FC = () => {
                 <ScrollView style={styles.cleanersList}>
                     {filteredCleaners.map((cleaner) => (
                         <View key={cleaner._id} style={styles.card}>
-                            <Image
-                                source={{ uri: cleaner.photo }}
-                                style={styles.cleanerImage}
-                            />
+                            <View style={styles.imageContainer}>
+                                <TouchableOpacity onPress={() => handleViewImage(cleaner.photo)} >
+                                    <Image
+                                        source={{ uri: cleaner.photo }}
+                                        style={styles.driverImage}
+                                    />
+                                </TouchableOpacity>
+                            </View>
                             <View style={styles.cardHeader}>
                                 <TouchableOpacity onPress={()=> {setEditData(cleaner); router.push("edit_cleaner")}} style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
@@ -222,6 +226,16 @@ const styles = StyleSheet.create({
     },
     cleanersList: {
         flex: 1,
+    },
+    imageContainer: {
+        position: "absolute",
+        right: 30,
+        top: 70,
+    },
+    driverImage: {
+        width: 70,
+        height: 70,
+        borderRadius: 35,
     },
     card: {
         backgroundColor: "#fff",

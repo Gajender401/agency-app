@@ -42,7 +42,7 @@ const DriverListScreen: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    const [idToDelete, setIdToDelete] = useState<null|string>(null);
+    const [idToDelete, setIdToDelete] = useState<null | string>(null);
     const [searchQuery, setSearchQuery] = useState("");
     const { apiCaller, setEditData, refresh } = useGlobalContext();
 
@@ -62,7 +62,7 @@ const DriverListScreen: React.FC = () => {
         fetchDrivers();
     }, [refresh]);
 
-    const handleDelete = async() => {
+    const handleDelete = async () => {
         await apiCaller.delete(`/api/driver?driverId=${idToDelete}`);
         setShowDeleteModal(false);
         fetchDrivers();
@@ -112,15 +112,19 @@ const DriverListScreen: React.FC = () => {
                 <ScrollView style={styles.driversList}>
                     {filteredDrivers.map((driver) => (
                         <View key={driver._id} style={styles.card}>
-                            <Image
-                                source={{ uri: driver.photo }}
-                                style={styles.driverImage}
-                            />
+                            <View style={styles.imageContainer}>
+                                <TouchableOpacity onPress={() => handleViewImage(driver.photo)} >
+                                    <Image
+                                        source={{ uri: driver.photo }}
+                                        style={styles.driverImage}
+                                    />
+                                </TouchableOpacity>
+                            </View>
                             <View style={styles.cardHeader}>
-                                <TouchableOpacity onPress={()=> {setEditData(driver); router.push("edit_driver")}} style={styles.editButton}>
+                                <TouchableOpacity onPress={() => { setEditData(driver); router.push("edit_driver") }} style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => {setShowDeleteModal(true); setIdToDelete(driver._id)}}>
+                                <TouchableOpacity onPress={() => { setShowDeleteModal(true); setIdToDelete(driver._id) }}>
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>
@@ -188,13 +192,13 @@ const DriverListScreen: React.FC = () => {
                 <BlurOverlay visible={showImageModal} onRequestClose={() => setShowImageModal(false)} />
 
                 <View style={styles.modalContainer}>
-                    {selectedImage && 
-                    <View style={styles.modalContent}>
-                        <Image source={{ uri: selectedImage }} style={styles.modalImage} />
-                        <TouchableOpacity style={styles.closeButton} onPress={() => setShowImageModal(false)}>
-                            <Text style={styles.closeButtonText}>Close</Text>
-                        </TouchableOpacity>
-                    </View>
+                    {selectedImage &&
+                        <View style={styles.modalContent}>
+                            <Image source={{ uri: selectedImage }} style={styles.modalImage} />
+                            <TouchableOpacity style={styles.closeButton} onPress={() => setShowImageModal(false)}>
+                                <Text style={styles.closeButtonText}>Close</Text>
+                            </TouchableOpacity>
+                        </View>
                     }
                 </View>
             </Modal>
@@ -250,13 +254,15 @@ const styles = StyleSheet.create({
         shadowRadius: 5,
         position: "relative",
     },
+    imageContainer: {
+        position: "absolute",
+        right: 30,
+        top: 70,
+    },
     driverImage: {
         width: 70,
         height: 70,
         borderRadius: 35,
-        position: "absolute",
-        right: 30,
-        top: 70,
     },
     cardHeader: {
         flexDirection: "row",

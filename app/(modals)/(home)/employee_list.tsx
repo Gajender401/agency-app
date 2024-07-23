@@ -55,13 +55,13 @@ const EmployeeListScreen: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [showImageModal, setShowImageModal] = useState(false);
-    const [idToDelete, setIdToDelete] = useState<null|string>(null);
+    const [idToDelete, setIdToDelete] = useState<null | string>(null);
     const [searchQuery, setSearchQuery] = useState("");
     const { apiCaller, setEditData, refresh } = useGlobalContext();
 
     const fetchEmployees = async () => {
-          
-     
+
+
 
         try {
             setLoading(true);
@@ -78,7 +78,7 @@ const EmployeeListScreen: React.FC = () => {
         fetchEmployees();
     }, [refresh]);
 
-    const handleDelete = async() => {
+    const handleDelete = async () => {
         await apiCaller.delete(`/api/employee?employeeId=${idToDelete}`);
         setShowDeleteModal(false);
         fetchEmployees();
@@ -106,9 +106,9 @@ const EmployeeListScreen: React.FC = () => {
     const [isModalVisible, setModalVisible] = useState(false);
 
     const toggleModal = () => {
-      setModalVisible(!isModalVisible);
+        setModalVisible(!isModalVisible);
     };
-       
+
 
     return (
         <SafeAreaView style={styles.container}>
@@ -135,37 +135,19 @@ const EmployeeListScreen: React.FC = () => {
                 <ScrollView style={styles.employeesList}>
                     {filteredEmployees.map((employee) => (
                         <View key={employee._id} style={styles.card}>
-                            <View style={styles.container}>
-                                <TouchableOpacity onPress={toggleModal}>
+                            <View style={styles.imageContainer}>
+                                <TouchableOpacity onPress={() => handleViewImage(employee.photo)} >
                                     <Image
-                                    source={{ uri: employee.photo }}
-                                    style={styles.employeeImage}
+                                        source={{ uri: employee.photo }}
+                                        style={styles.driverImage}
                                     />
                                 </TouchableOpacity>
-                                
-                                <Modal
-                                    transparent={true}
-                                    visible={isModalVisible}
-                                    onRequestClose={toggleModal}
-                                >
-                                    <View style={styles.modalContainer}>
-                                    <View style={styles.modalContent}>
-                                        <TouchableOpacity onPress={toggleModal} style={styles.closeButton}>
-                                        <Text style={styles.closeButtonText}>Close</Text>
-                                        </TouchableOpacity>
-                                        <Image
-                                        source={{ uri: employee.photo }}
-                                        style={styles.enlargedImage}
-                                        />
-                                    </View>
-                                    </View>
-                                </Modal>
-                                </View>
+                            </View>
                             <View style={styles.cardHeader}>
-                                <TouchableOpacity onPress={()=> {setEditData(employee); router.push("edit_employee")}} style={styles.editButton}>
+                                <TouchableOpacity onPress={() => { setEditData(employee); router.push("edit_employee") }} style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => {setShowDeleteModal(true); setIdToDelete(employee._id)}}>
+                                <TouchableOpacity onPress={() => { setShowDeleteModal(true); setIdToDelete(employee._id) }}>
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>
@@ -221,13 +203,13 @@ const EmployeeListScreen: React.FC = () => {
                 <BlurOverlay visible={showImageModal} onRequestClose={() => setShowImageModal(false)} />
 
                 <View style={styles.modalContainer}>
-                    {selectedImage && 
-                    <View style={styles.modalContent}>
-                        <Image source={{ uri: selectedImage }} style={styles.modalImage} />
-                        <TouchableOpacity style={styles.closeButton} onPress={() => setShowImageModal(false)}>
-                            <Text style={styles.closeButtonText}>Close</Text>
-                        </TouchableOpacity>
-                    </View>
+                    {selectedImage &&
+                        <View style={styles.modalContent}>
+                            <Image source={{ uri: selectedImage }} style={styles.modalImage} />
+                            <TouchableOpacity style={styles.closeButton} onPress={() => setShowImageModal(false)}>
+                                <Text style={styles.closeButtonText}>Close</Text>
+                            </TouchableOpacity>
+                        </View>
                     }
                 </View>
             </Modal>
@@ -239,14 +221,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: "#F4F4F4",
+        backgroundColor: "#fff",
     },
     enlargedImage: {
         width: 300,
         height: 300,
         borderRadius: 10,
         marginTop: 20,
-      },
+    },
     searchContainer: {
         flexDirection: "row",
         alignItems: "center",
@@ -277,6 +259,16 @@ const styles = StyleSheet.create({
     employeesList: {
         flex: 1,
     },
+    imageContainer: {
+        position: "absolute",
+        right: 30,
+        top: 70,
+    },
+    driverImage: {
+        width: 70,
+        height: 70,
+        borderRadius: 35,
+    },
     card: {
         backgroundColor: "#fff",
         padding: 20,
@@ -291,7 +283,7 @@ const styles = StyleSheet.create({
         shadowRadius: 3.84,
         elevation: 5,
         position: "relative",
-        marginHorizontal:5
+        marginHorizontal: 5
     },
     employeeImage: {
         width: 70,
