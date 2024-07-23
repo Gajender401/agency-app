@@ -41,7 +41,7 @@ const AddRouteScreen: React.FC = () => {
         try {
             setLoading(true);
             const response = await apiCaller.get('/api/vehicle');
-            setVehicleNumbers(extractNumbers(response.data.data));
+            setVehicleNumbers(extractNumbers(response.data.data.vehicles));
         } catch (err) {
             console.log(err);
         } finally {
