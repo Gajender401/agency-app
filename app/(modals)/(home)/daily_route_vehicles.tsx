@@ -65,6 +65,7 @@ const DailyRouteVehicles: React.FC = () => {
   const [instruction, setInstruction] = useState("")
   const [searchQuery, setSearchQuery] = useState("");
   const { apiCaller, setEditData, refresh } = useGlobalContext();
+  const [inputHeight, setInputHeight] = useState(50);
 
   const fetchDailyRoutes = async () => {
     try {
@@ -206,7 +207,7 @@ const DailyRouteVehicles: React.FC = () => {
               </View>
 
               <Text style={styles.cardText}>
-                Vehicle Number: <Text style={{ color: "black" }}>{route.vehicle.number}</Text>
+                Vehicle Number: <Text style={{ color: "black" }}>{route.vehicle.number.toUpperCase()}</Text>
               </Text>
               <Text style={styles.cardText}>
                 Departure Time: <Text style={{ color: "black" }}>{route.departureTime ? new Date(route.departureTime).toLocaleTimeString() : ""}</Text>
@@ -301,9 +302,13 @@ const DailyRouteVehicles: React.FC = () => {
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Instructions</Text>
                 <TextInput
-                  style={styles.input}
                   value={instruction}
+                  style={[styles.input, styles.textarea, { height: Math.max(50, inputHeight) }]}
                   onChangeText={(text) => setInstruction(text)}
+                  multiline={true}
+                  onContentSizeChange={(event) => {
+                    setInputHeight(event.nativeEvent.contentSize.height);
+                  }}
                 />
               </View>
               <View style={styles.modalButtons}>
@@ -458,6 +463,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     height: 40,
     justifyContent: 'center'
+  },
+  textarea: {
+    minHeight: 50,
+    maxHeight: 300,
+    textAlignVertical: 'top',
+    paddingTop: 10,
   },
 });
 

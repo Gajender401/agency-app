@@ -105,9 +105,10 @@ const TechnicianSupport: React.FC = () => {
             tech.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             tech.city.toLowerCase().includes(searchQuery.toLowerCase())) &&
             (vehicleFilter === '' || tech.vehicleType === vehicleFilter) ||
-            (stateFilter === '' || tech.state === stateFilter) &&
-            (cityFilter === '' || tech.city === cityFilter.toLocaleLowerCase())
+            (stateFilter === '' || tech.state === stateFilter) ||
+            (cityFilter === '' || tech.city === cityFilter)
         );
+        
         setFilteredTechnicians(filtered);
     }, [searchQuery, vehicleFilter, stateFilter, cityFilter, technicians]);
 

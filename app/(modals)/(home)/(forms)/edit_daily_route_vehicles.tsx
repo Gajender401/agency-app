@@ -23,7 +23,6 @@ const AddRouteScreen: React.FC = () => {
     const [departurePlace, setDeparturePlace] = useState<string>("");
     const [destinationPlace, setDestinationPlace] = useState<string>("");
     const [departureTime, setDepartureTime] = useState<Date | undefined>(undefined);
-    const [instructions, setInstructions] = useState<string>(""); // New state for instructions
     const [showTimePicker, setShowTimePicker] = useState<boolean>(false);
     const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
@@ -59,7 +58,6 @@ const AddRouteScreen: React.FC = () => {
             setDeparturePlace(editData.departurePlace);
             setDestinationPlace(editData.destinationPlace);
             setDepartureTime(new Date(editData.departureTime));
-            setInstructions(editData.instructions || ""); // Set instructions if available
         }
     }, [])
 
@@ -76,7 +74,6 @@ const AddRouteScreen: React.FC = () => {
             departurePlace,
             destinationPlace,
             departureTime: departureTime,
-            instructions, // Include instructions in the new route object
         };
 
         setLoading(true);
@@ -99,7 +96,6 @@ const AddRouteScreen: React.FC = () => {
         setDeparturePlace("");
         setDestinationPlace("");
         setDepartureTime(undefined);
-        setInstructions(""); // Reset instructions field
     };
 
     const onChangeTime = (event: any, selectedTime?: Date) => {
@@ -162,17 +158,6 @@ const AddRouteScreen: React.FC = () => {
                                     is24Hour={false}
                                 />
                             )}
-                        </View>
-                        <View style={styles.inputGroup}>
-                            <Text style={styles.label}>Instructions</Text>
-                            <TextInput
-                                style={[styles.input, styles.textArea]}
-                                value={instructions}
-                                onChangeText={(text) => setInstructions(text)}
-                                multiline
-                                numberOfLines={4}
-                                textAlignVertical="top"
-                            />
                         </View>
 
                         <View style={styles.modalButtons}>
