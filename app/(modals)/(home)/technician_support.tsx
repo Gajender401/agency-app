@@ -100,17 +100,27 @@ const TechnicianSupport: React.FC = () => {
     }, [refresh]);
 
     useEffect(() => {
-        const filtered = technicians.filter(tech =>
-            (tech.technicianType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            tech.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            tech.city.toLowerCase().includes(searchQuery.toLowerCase())) &&
-            (vehicleFilter === '' || tech.vehicleType === vehicleFilter) ||
-            (stateFilter === '' || tech.state === stateFilter) ||
-            (cityFilter === '' || tech.city === cityFilter)
-        );
+        const filtered = technicians.filter(tech => {
+            const matchesSearch = 
+                tech.technicianType.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                tech.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                tech.city.toLowerCase().includes(searchQuery.toLowerCase());
+
+            const matchesVehicle = vehicleFilter === '' || tech.vehicleType === vehicleFilter;
+            const matchesCity = cityFilter === '' || tech.city === cityFilter.toLowerCase();
+
+            // If no filters are applied, show all technicians that match the search query
+            if (vehicleFilter === '' && stateFilter === '' && cityFilter === '') {
+                return matchesSearch;
+            }
+
+            // If any filter is applied, technician must match the search query and all applied filters
+            return matchesSearch && matchesVehicle && matchesCity;
+        });
         
         setFilteredTechnicians(filtered);
     }, [searchQuery, vehicleFilter, stateFilter, cityFilter, technicians]);
+    
 
     const handleDelete = async () => {
         await apiCaller.delete(`/api/technician?technicianId=${idToDelete}`);
