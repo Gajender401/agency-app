@@ -109,18 +109,15 @@ const TechnicianSupport: React.FC = () => {
             const matchesVehicle = vehicleFilter === '' || tech.vehicleType === vehicleFilter;
             const matchesCity = cityFilter === '' || tech.city === cityFilter.toLowerCase();
 
-            // If no filters are applied, show all technicians that match the search query
             if (vehicleFilter === '' && stateFilter === '' && cityFilter === '') {
                 return matchesSearch;
             }
 
-            // If any filter is applied, technician must match the search query and all applied filters
             return matchesSearch && matchesVehicle && matchesCity;
         });
         
         setFilteredTechnicians(filtered);
     }, [searchQuery, vehicleFilter, stateFilter, cityFilter, technicians]);
-    
 
     const handleDelete = async () => {
         await apiCaller.delete(`/api/technician?technicianId=${idToDelete}`);
@@ -191,6 +188,37 @@ const TechnicianSupport: React.FC = () => {
         );
     };
 
+    const renderContent = () => {
+        if (loading && currentPage === 1) {
+            return (
+                <View style={styles.centerContainer}>
+                    <ActivityIndicator size="large" color={Colors.darkBlue} />
+                </View>
+            );
+        }
+
+        if (filteredTechnicians.length === 0) {
+            return (
+                <View style={styles.centerContainer}>
+                    <Text style={styles.noTechnicianText}>
+                        Currently not available any technicians for this location, but don't worry we very soon adding technician on this location
+                    </Text>
+                </View>
+            );
+        }
+
+        return (
+            <FlatList
+                data={filteredTechnicians}
+                renderItem={renderTechnicianItem}
+                keyExtractor={(item) => item._id}
+                onEndReached={handleLoadMore}
+                onEndReachedThreshold={0.1}
+                ListFooterComponent={renderFooter}
+            />
+        );
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.searchContainer}>
@@ -249,14 +277,7 @@ const TechnicianSupport: React.FC = () => {
                 <Text style={styles.addButtonText}>Add Technician</Text>
             </TouchableOpacity>
 
-            <FlatList
-                data={filteredTechnicians}
-                renderItem={renderTechnicianItem}
-                keyExtractor={(item) => item._id}
-                onEndReached={handleLoadMore}
-                onEndReachedThreshold={0.1}
-                ListFooterComponent={renderFooter}
-            />
+            {renderContent()}
 
             <Modal
                 animationType="slide"
@@ -270,7 +291,7 @@ const TechnicianSupport: React.FC = () => {
                     <View style={styles.modalOverlay}>
                         <View style={styles.modalContainer}>
                             <View style={styles.modalContent}>
-                                <Text style={styles.modalText}>Are you sure you want to delete this technician?</Text>
+                                <Text style={styles.modalText}>Currently not available any technician for this location, but don't worry will add technicians on this location very soon</Text>
                                 <View style={styles.modalButtons}>
                                     <TouchableOpacity style={[styles.modalButton, { backgroundColor: "#ccc" }]} onPress={() => setShowDeleteModal(false)}>
                                         <Text style={styles.modalButtonText}>Cancel</Text>
@@ -412,6 +433,17 @@ const styles = StyleSheet.create({
     loaderFooter: {
         paddingVertical: 20,
         alignItems: 'center',
+    },
+    centerContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    noTechnicianText: {
+        textAlign: 'center',
+        fontSize: 16,
+        color: Colors.secondary,
+        paddingHorizontal: 20,
     },
 });
 
