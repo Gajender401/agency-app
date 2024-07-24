@@ -50,7 +50,6 @@ interface VehicleDocuments {
 }
 
 const VehicleListScreen: React.FC = () => {
-    const [vehicles, setVehicles] = useState<VehicleDocuments[]>([]);
     const [filteredVehicles, setFilteredVehicles] = useState<VehicleDocuments[]>([]);
     const [loading, setLoading] = useState(true);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -65,8 +64,7 @@ const VehicleListScreen: React.FC = () => {
         try {
             setLoading(true);
             const response = await apiCaller.get('/api/vehicle');
-            setVehicles(response.data.data);
-            setFilteredVehicles(response.data.data);
+            setFilteredVehicles(response.data.data.vehicles);
         } catch (err) {
             console.log(err);
         } finally {
@@ -212,10 +210,7 @@ const VehicleListScreen: React.FC = () => {
                         </TouchableOpacity>
 
                         <View style={styles.buttonContainer}>
-                            <TouchableOpacity style={styles.downloadButton} onPress={() => handleDownloadImage(selectedImage)}>
-                                <Text style={styles.downloadButtonText}>Share</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.closeButton} onPress={() => setShowImageModal(false)}>
+                            <TouchableOpacity style={styles.closeButton} onPress={() => {setShowImageModal(false); toggleFullSizeImage()}}>
                                 <Text style={styles.closeButtonText}>Close</Text>
                             </TouchableOpacity>
                         </View>
