@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "driver-project",
-    "slug": "driver-project",
+    "name": "Agency - Tourist Junction",
+    "slug": "Agency - Tourist Junction",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -14,14 +14,14 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.touristwheel.agency"
+      "bundleIdentifier": "com.touristjunction.agency"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.gajender.driverproject"
+      "package": "com.touristjunction.agency"
     },
     "web": {
       "bundler": "metro",

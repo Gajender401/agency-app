@@ -205,7 +205,6 @@ const DailyRouteVehicles: React.FC = () => {
                 <MaterialIcons name="keyboard-double-arrow-right" size={24} color={Colors.darkBlue} />
                 <Text style={{ fontWeight: "bold", fontSize: 18 }} >{route.destinationPlace}</Text>
               </View>
-
               <Text style={styles.cardText}>
                 Vehicle Number: <Text style={{ color: "black" }}>{route.vehicle.number.toUpperCase()}</Text>
               </Text>
