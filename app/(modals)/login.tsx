@@ -10,6 +10,7 @@ import {
     Image,
     Alert,
     ActivityIndicator,
+    Switch,
 } from "react-native";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
@@ -19,7 +20,8 @@ import * as SecureStore from "expo-secure-store";
 import { useGlobalContext } from '@/context/GlobalProvider';
 
 const LoginScreen = () => {
-    const [username, setUsername] = useState('');
+    const [isManager, setIsManager] = useState(false);
+    const [usernameOrMobile, setUsernameOrMobile] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -29,7 +31,7 @@ const LoginScreen = () => {
         setIsLoading(true);
         let data = {
             'password': password,
-            'userName': username
+            [isManager ? 'mobileNumber' : 'userName']: usernameOrMobile
         };
         try {
             const response = await axios.post(`${process.env.EXPO_PUBLIC_URL}api/user/login`, data);
@@ -57,12 +59,23 @@ const LoginScreen = () => {
 
             <View style={styles.innerContainer} >
                 <View style={styles.inputContainer}>
+                    <View style={styles.toggleContainer}>
+                        <Text>Acency</Text>
+                        <Switch
+                            value={isManager}
+                            onValueChange={setIsManager}
+                            trackColor={{ false: "#767577", true: Colors.darkBlue }}
+                            thumbColor={isManager ? Colors.secondary : "#f4f3f4"}
+                        />
+                        <Text>Manager</Text>
+                    </View>
                     <TextInput
-                        placeholder="Username"
-                        value={username}
-                        onChangeText={setUsername}
+                        placeholder={isManager ? "Mobile Number" : "Username"}
+                        value={usernameOrMobile}
+                        onChangeText={setUsernameOrMobile}
                         style={styles.input}
                         placeholderTextColor="#FFFFFF"
+                        keyboardType={isManager ? "phone-pad" : "default"}
                     />
                     <TextInput
                         placeholder="Password"
@@ -164,44 +177,11 @@ const styles = StyleSheet.create({
         fontSize: 21,
         color: Colors.primary,
     },
-    dividerContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        width: "100%",
-        marginVertical: 20,
-    },
-    divider: {
-        flex: 1,
-        height: 1,
-        backgroundColor: "#ccc",
-    },
-    dividerText: {
-        marginHorizontal: 10,
-        color: "#888",
-    },
-    socialContainer: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        width: "100%",
-    },
-    socialButton: {
-        borderWidth: 1,
-        borderColor: "#ccc",
-        borderRadius: 5,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-        alignItems: "center",
-    },
-    socialButtonText: {
-        fontSize: 16,
-    },
-    signUpContainer: {
-        marginTop: 20,
-        flexDirection: "row",
-    },
-    signUpText: {
-        color: Colors.primary,
-        fontSize: 14,
+    toggleContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20,
     },
 });
 

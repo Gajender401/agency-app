@@ -86,7 +86,7 @@ const AddEmployeeScreen: React.FC = () => {
 
         setLoading(true);
         try {
-            await apiCaller.patch(`/api/employee?technicianId=${editData._id}`, newEmployee, { headers: { 'Content-Type': 'multipart/form-data' } });
+            await apiCaller.patch(`/api/employee?employeeId=${editData._id}`, newEmployee, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
             setRefresh(prev=>!prev)
             resetForm();

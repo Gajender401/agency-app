@@ -16,6 +16,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { router } from "expo-router";
+
 const AddTempoScreen: React.FC = () => {
   const [vehicleNo, setVehicleNo] = useState("");
   const [seatingCapacity, setSeatingCapacity] = useState("");
@@ -33,7 +34,7 @@ const AddTempoScreen: React.FC = () => {
   useEffect(() => {
       if (editData) {
           setVehicleNo(editData.number);
-          setSeatingCapacity(editData.seatingCapacity);
+          setSeatingCapacity(editData.seatingCapacity ? editData.seatingCapacity.toString() : "");
           setVehicleModel(editData.model);
           setLocation(editData.location);
           setContactNo(editData.contactNumber);
@@ -46,10 +47,6 @@ const AddTempoScreen: React.FC = () => {
   }, [editData])
 
   const handleAddTempo = async () => {
-    if (!vehicleNo || !seatingCapacity || !vehicleModel || !bodyType || !location || !contactNo || !chassisBrand || tempoImages.length === 0) {
-      Alert.alert("Please fill all fields and upload tempo images.");
-      return;
-    }
 
     const newTempo = {
       number: vehicleNo,

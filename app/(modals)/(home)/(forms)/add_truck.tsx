@@ -47,7 +47,7 @@ const AddTruckScreen: React.FC = () => {
       contactNumber: contactNo,
       noOfTyres,
       vehicleWeightInKGS,
-      isAC: false, // isAC is set to false by default
+      isAC: false, 
       isForRent: selectedForRent,
       isForSell: selectedForSell,
       photos: truckImages,

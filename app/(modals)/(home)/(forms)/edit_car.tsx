@@ -38,7 +38,7 @@ const AddCarScreen: React.FC = () => {
     useEffect(() => {
         if (editData) {
             setVehicleNo(editData.number);
-            setSeatingCapacity(editData.seatingCapacity);
+            setSeatingCapacity(editData.seatingCapacity ? editData.seatingCapacity.toString() : "");
             setVehicleModel(editData.model);
             setLocation(editData.location);
             setCarName(editData.name);
@@ -53,10 +53,6 @@ const AddCarScreen: React.FC = () => {
     }, [editData])
 
     const handleAddCar = async () => {
-        if (!vehicleNo || !seatingCapacity || !vehicleModel || !location || !carName || !contactNo || carImages.length === 0) {
-            Alert.alert("Please fill all fields and upload car images.");
-            return;
-        }
 
         const newCar = {
             number: vehicleNo,

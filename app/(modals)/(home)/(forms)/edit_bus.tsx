@@ -39,7 +39,7 @@ const EditBusScreen: React.FC = () => {
   useEffect(() => {
     if (editData) {
       setVehicleNo(editData.number);
-      setSeatingCapacity(editData.seatingCapacity);
+      setSeatingCapacity(editData.seatingCapacity ? editData.seatingCapacity.toString() : "");
       setVehicleModel(editData.model);
       setLocation(editData.location);
       setContactNo(editData.contactNumber);
@@ -54,21 +54,8 @@ const EditBusScreen: React.FC = () => {
     }
   }, [editData]);
 
-  const handleAddCar = async () => {
-    if (
-      !vehicleNo ||
-      !seatingCapacity ||
-      !vehicleModel ||
-      !location ||
-      !contactNo ||
-      busImages.length === 0 ||
-      !noOfTyres ||
-      !vehicleWeightInKGS
-    ) {
-      Alert.alert("Please fill all fields and upload car images.");
-      return;
-    }
 
+  const handleAddCar = async () => {
     const newCar = {
       number: vehicleNo,
       seatingCapacity,

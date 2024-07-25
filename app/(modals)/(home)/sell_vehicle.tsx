@@ -10,11 +10,13 @@ import {
     Dimensions,
     ActivityIndicator,
     TouchableOpacity,
+    Modal,
 } from "react-native";
 import PagerView from "react-native-pager-view";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import { useGlobalContext } from "@/context/GlobalProvider";
+import { BlurView } from 'expo-blur';
 
 const { width: viewportWidth } = Dimensions.get("window");
 
@@ -34,18 +36,38 @@ interface Vehicle {
     type: string;
 }
 
+interface BlurOverlayProps {
+    visible: boolean;
+    onRequestClose: () => void;
+}
+
+const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) => (
+    <Modal
+        animationType="fade"
+        transparent={true}
+        visible={visible}
+        onRequestClose={onRequestClose}
+    >
+        <TouchableOpacity activeOpacity={1} onPress={onRequestClose} style={styles.overlay}>
+            <BlurView intensity={90} tint="light" style={StyleSheet.absoluteFill} />
+        </TouchableOpacity>
+    </Modal>
+);
+
 const SellVehicleScreen: React.FC = () => {
     const [activeSlide, setActiveSlide] = useState(0);
     const [loading, setLoading] = useState(true);
     const { apiCaller, token } = useGlobalContext();
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const [showImageModal, setShowImageModal] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     const renderPagerItem = (item: string, index: number) => {
         return (
-            <View style={styles.carouselItem} key={index}>
+            <TouchableOpacity activeOpacity={1} style={styles.carouselItem} key={index} onPress={() => handleViewImage(item)}>
                 <Image source={{ uri: item }} style={styles.carouselImage} />
-            </View>
+            </TouchableOpacity>
         );
     };
 
@@ -80,6 +102,11 @@ const SellVehicleScreen: React.FC = () => {
 
     const handleSearch = () => {
         setSearchQuery(searchQuery);
+    };
+
+    const handleViewImage = (imageUri: string) => {
+        setSelectedImage(imageUri);
+        setShowImageModal(true);
     };
 
     const filteredVehicles = searchQuery ? filterVehicles(searchQuery) : vehicles;
@@ -132,6 +159,26 @@ const SellVehicleScreen: React.FC = () => {
                     ))
                 )}
             </ScrollView>
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={showImageModal}
+                onRequestClose={() => setShowImageModal(false)}
+            >
+                <BlurOverlay visible={showImageModal} onRequestClose={() => setShowImageModal(false)} />
+
+                <View style={styles.modalContainer}>
+                    {selectedImage &&
+                        <View style={styles.modalContent}>
+                            <Image source={{ uri: selectedImage }} style={styles.modalImage} />
+                            <TouchableOpacity style={styles.closeButton} onPress={() => setShowImageModal(false)}>
+                                <Text style={styles.closeButtonText}>Close</Text>
+                            </TouchableOpacity>
+                        </View>
+                    }
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 };
@@ -199,6 +246,41 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         backgroundColor: Colors.darkBlue,
         marginHorizontal: 4,
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginHorizontal: 5,
+    },
+    modalContent: {
+        backgroundColor: "#fff",
+        padding: 20,
+        borderRadius: 10,
+        alignItems: "center",
+        elevation: 5,
+        minWidth: 300,
+    },
+    modalImage: {
+        width: 300,
+        height: 400,
+        resizeMode: 'contain',
+        marginBottom: 20,
+    },
+    closeButton: {
+        backgroundColor: Colors.darkBlue,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 5,
+    },
+    closeButtonText: {
+        color: "#fff",
+        fontWeight: "bold",
+        fontSize: 16,
+    },
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
 });
 

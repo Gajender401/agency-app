@@ -77,8 +77,9 @@ export default function HomeScreen() {
     <GestureHandlerRootView style={styles.container}>
       <View style={{
          padding: 20, 
+         backgroundColor:Colors.secondary,
          }}>
-        <Text style={{ fontSize: 15, fontWeight: '500' }}>Hi, {userData?.userName}</Text>
+        <Text style={{ fontSize: 15, fontWeight: '500', color:"white" }}>Hi, {userData?.userName}</Text>
       </View>
       <ScrollView>
         <View style={styles.logoContainer}>

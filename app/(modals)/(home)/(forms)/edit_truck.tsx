@@ -36,7 +36,6 @@ const AddTruckScreen: React.FC = () => {
   useEffect(() => {
       if (editData) {
           setVehicleNo(editData.number);
-          setSeatingCapacity(editData.seatingCapacity);
           setVehicleModel(editData.model);
           setLocation(editData.location);
           setContactNo(editData.contactNumber);
@@ -45,14 +44,12 @@ const AddTruckScreen: React.FC = () => {
           setSelectedForRent(editData.isForRent);
           setSelectedForSell(editData.isForSell);
           setTruckImages(editData.photos);
+          setNoOfTyres(editData.noOfTyres ? editData.noOfTyres.toString() : "");
+          setVehicleWeightInKGS(editData.vehicleWeightInKGS ? editData.vehicleWeightInKGS.toString() : "");
       }
   }, [editData])
 
   const handleAddTruck = async () => {
-    if (!vehicleNo || !seatingCapacity || !vehicleModel || !location || !contactNo || !noOfTyres || !vehicleWeightInKGS || truckImages.length === 0) {
-      Alert.alert("Please fill all fields and upload truck images.");
-      return;
-    }
 
     const newTruck = {
       number: vehicleNo,
