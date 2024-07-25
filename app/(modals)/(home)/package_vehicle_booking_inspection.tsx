@@ -33,6 +33,8 @@ const PackageVehicleListScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVehicleType, setSelectedVehicleType] = useState("");
   const { apiCaller, setInvoiceData, refresh, setPhotos } = useGlobalContext();
+  const [showFullBeforeNote, setShowFullBeforeNote] = useState(false);
+  const [showFullAfterNote, setShowFullAfterNote] = useState(false);
 
   const fetchPackages = async () => {
     try {
@@ -91,6 +93,40 @@ const PackageVehicleListScreen: React.FC = () => {
   const handleShowDetails = (pkg: Package) => {
     setSelectedPackage(pkg);
     setShowDetailsModal(true);
+  };
+
+  const renderNote = (note: string, isFullNote: boolean, setFullNote: React.Dispatch<React.SetStateAction<boolean>>) => {
+    const maxLength = 100;
+    if (note.length <= maxLength) {
+      return <Text style={styles.modalNoteText}>{note}</Text>;
+    }
+
+    if (isFullNote) {
+      return (
+        <View>
+          <TextInput
+            style={styles.fullNoteText}
+            multiline
+            editable={false}
+            value={note}
+          />
+          <TouchableOpacity onPress={() => setFullNote(false)}>
+            <Text style={styles.readMoreLess}>Show Less</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return (
+      <View>
+        <Text style={styles.modalNoteText}>
+          {`${note.substring(0, maxLength)}...`}
+        </Text>
+        <TouchableOpacity onPress={() => setFullNote(true)}>
+          <Text style={styles.readMoreLess}>Read More</Text>
+        </TouchableOpacity>
+      </View>
+    );
   };
 
   return (
@@ -191,19 +227,19 @@ const PackageVehicleListScreen: React.FC = () => {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Journey Details</Text>
             <Text style={styles.modalText}>Before Journey Notes:</Text>
-            <Text style={styles.modalNoteText}>{selectedPackage?.beforeJourneyNote || 'No notes available'}</Text>
+            {renderNote('sjfhdsjk hfjkdshfjkdshfg kjdfhjkgh dsjhgdsjkfghdsjhhfgjkads ghfjs dfgdshf gsdjhgfjhag fhjdsagf hdskg fhdsgf gshjgf hjdgfhjdsg fajhg hjgdsfhgds fhdgshjfk skahjfsda fksg f', showFullBeforeNote, setShowFullBeforeNote)}
             <Text style={styles.modalText}>After Journey Notes:</Text>
-            <Text style={styles.modalNoteText}>{selectedPackage?.afterJourneyNote || 'No notes available'}</Text>
+            {renderNote(selectedPackage?.afterJourneyNote || 'No notes available', showFullAfterNote, setShowFullAfterNote)}
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
-                onPress={() => {setShowDetailsModal(false); setPhotos(selectedPackage?.beforeJourneyPhotos); router.push('before_photos')} }
+                onPress={() => {setShowDetailsModal(false); setPhotos(selectedPackage?.beforeJourneyPhotos); router.push('before_photos')}}
               >
                 <Text style={[styles.modalButtonText, { color: "#fff" }]}>Before Journey Photos</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
-                onPress={() => {setShowDetailsModal(false); setPhotos(selectedPackage?.afterJourneyPhotos); router.push('after_photos')} }
+                onPress={() => {setShowDetailsModal(false); setPhotos(selectedPackage?.afterJourneyPhotos); router.push('after_photos')}}
               >
                 <Text style={[styles.modalButtonText, { color: "#fff" }]}>After Journey Photos</Text>
               </TouchableOpacity>
@@ -217,7 +253,6 @@ const PackageVehicleListScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
-
     </SafeAreaView>
   );
 };
@@ -364,6 +399,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
   },
+  fullNoteText: {
+    marginBottom: 10,
+    textAlign: "left",
+    alignSelf: "stretch",
+    maxHeight: 200,
+    borderColor: Colors.secondary,
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+  },
+  readMoreLess: {
+    color: Colors.darkBlue,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
 });
 
-export default PackageVehicleListScreen;
+export default PackageVehicleListScreen

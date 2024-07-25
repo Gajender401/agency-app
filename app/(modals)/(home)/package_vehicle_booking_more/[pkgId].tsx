@@ -116,6 +116,10 @@ const VehicleDetailsScreen: React.FC = () => {
         <Text style={styles.label}>Add Note:</Text>
         <Text style={styles.value}>{vehicleDetails.note}</Text>
       </View>
+      <View style={styles.section}>
+        <Text style={styles.label}>Pick Up Point:</Text>
+        <Text style={styles.value}>{vehicleDetails.pickupPoint}</Text>
+      </View>
     </ScrollView>
   );
 };

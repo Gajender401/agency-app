@@ -35,7 +35,6 @@ const BlurOverlay: React.FC<BlurOverlayProps> = ({ visible, onRequestClose }) =>
   </Modal>
 );
 
-
 function timestampToTime(timestamp: string): string {
   const date = new Date(timestamp);
   let hours = date.getUTCHours();
@@ -58,6 +57,8 @@ const DailyRouteVehicles: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const { apiCaller, refresh, setPhotos } = useGlobalContext();
+  const [showFullBeforeNote, setShowFullBeforeNote] = useState(false);
+  const [showFullAfterNote, setShowFullAfterNote] = useState(false);
 
   const fetchDailyRoutes = async () => {
     try {
@@ -102,6 +103,40 @@ const DailyRouteVehicles: React.FC = () => {
   };
 
   const filteredRoutes = filterDailyRoutes(dailyRoutes, searchQuery);
+
+  const renderNote = (note: string, isFullNote: boolean, setFullNote: React.Dispatch<React.SetStateAction<boolean>>) => {
+    const maxLength = 100;
+    if (note.length <= maxLength) {
+      return <Text style={styles.modalNoteText}>{note}</Text>;
+    }
+
+    if (isFullNote) {
+      return (
+        <View>
+          <TextInput
+            style={styles.fullNoteText}
+            multiline
+            editable={false}
+            value={note}
+          />
+          <TouchableOpacity onPress={() => setFullNote(false)}>
+            <Text style={styles.readMoreLess}>Show Less</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    return (
+      <View>
+        <Text style={styles.modalNoteText}>
+          {`${note.substring(0, maxLength)}...`}
+        </Text>
+        <TouchableOpacity onPress={() => setFullNote(true)}>
+          <Text style={styles.readMoreLess}>Read More</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -184,7 +219,6 @@ const DailyRouteVehicles: React.FC = () => {
         </View>
       </Modal>
 
-
       <Modal
         animationType="slide"
         transparent={true}
@@ -195,9 +229,9 @@ const DailyRouteVehicles: React.FC = () => {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Journey Details</Text>
             <Text style={styles.modalText}>Before Journey Notes:</Text>
-            <Text style={styles.modalNoteText}>{selectedRoute?.beforeJourneyNote || 'No notes available'}</Text>
+            {renderNote(selectedRoute?.beforeJourneyNote || 'No notes available', showFullBeforeNote, setShowFullBeforeNote)}
             <Text style={styles.modalText}>After Journey Notes:</Text>
-            <Text style={styles.modalNoteText}>{selectedRoute?.afterJourneyNote || 'No notes available'}</Text>
+            {renderNote(selectedRoute?.afterJourneyNote || 'No notes available', showFullAfterNote, setShowFullAfterNote)}
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: Colors.darkBlue }]}
@@ -259,19 +293,6 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     color: Colors.secondary,
   },
-  addButton: {
-    backgroundColor: Colors.darkBlue,
-    borderRadius: 8,
-    padding: 8,
-    alignItems: "center",
-    marginBottom: 10,
-    width: 120
-  },
-  addButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
   routesList: {
     flex: 1,
   },
@@ -292,15 +313,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     alignItems: "center",
     gap: 5,
-  },
-  editButton: {
-    backgroundColor: Colors.darkBlue,
-    borderRadius: 5,
-    padding: 5,
-  },
-  editButtonText: {
-    color: "#fff",
-    fontSize: 12,
   },
   cardText: {
     marginBottom: 6,
@@ -364,30 +376,21 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
   },
-  inputGroup: {
-    marginBottom: 15,
-    width: "100%"
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  picker: {
-    width: "100%",
-    height: 50,
-    borderWidth: 1,
+  fullNoteText: {
+    marginBottom: 10,
+    textAlign: "left",
+    alignSelf: "stretch",
+    maxHeight: 200,
     borderColor: Colors.secondary,
+    borderWidth: 1,
     borderRadius: 5,
+    padding: 10,
   },
-  input: {
-    borderColor: Colors.secondary,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    height: 40,
-    justifyContent: 'center'
+  readMoreLess: {
+    color: Colors.darkBlue,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
-
 });
 
 export default DailyRouteVehicles;

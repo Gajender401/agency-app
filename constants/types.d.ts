@@ -298,6 +298,7 @@ interface Package {
   createdBy: string;
   beforeJourneyPhotos: string[];
   afterJourneyPhotos: string[];
+  pickupPoint: string
 }
 
 

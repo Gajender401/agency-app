@@ -41,6 +41,7 @@ const EditPackageBookingForm: React.FC = () => {
     const [otherStateTax, setOtherStateTax] = useState("");
     const [addNote, setAddNote] = useState("");
     const [entryParking, setEntryParking] = useState("");
+    const [pickUpPoint, setPickUpPoint] = useState("");
     const [loading, setLoading] = useState(false);
     const { apiCaller, editData, setRefresh } = useGlobalContext();
     const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
@@ -92,6 +93,7 @@ const EditPackageBookingForm: React.FC = () => {
             setOtherStateTax(editData.otherStateTaxInINR);
             setAddNote(editData.note);
             setEntryParking(editData.advancePlace);
+            setPickUpPoint(editData.pickupPoint)
         }
     }, [editData])
 
@@ -123,7 +125,8 @@ const EditPackageBookingForm: React.FC = () => {
             tollInINR: toll,
             otherStateTaxInINR: otherStateTax,
             advancePlace: entryParking,
-            note:addNote
+            note:addNote,
+            pickupPoint: pickUpPoint
         };
 
         setLoading(true);
@@ -385,6 +388,15 @@ const EditPackageBookingForm: React.FC = () => {
                             style={styles.input}
                             value={entryParking}
                             onChangeText={(text) => setEntryParking(text)}
+                        />
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Pick up point</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={pickUpPoint}
+                            onChangeText={(text) => setPickUpPoint(text)}
                         />
                     </View>
 

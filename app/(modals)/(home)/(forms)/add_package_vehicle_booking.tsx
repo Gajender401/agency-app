@@ -37,6 +37,7 @@ const PackageBookingForm: React.FC = () => {
     const [otherStateTax, setOtherStateTax] = useState("");
     const [instructions, setInstructions] = useState("");
     const [entryParking, setEntryParking] = useState("");
+    const [pickUpPoint, setPickUpPoint] = useState("");
     const [loading, setLoading] = useState(false);
     const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
     const { apiCaller, setRefresh } = useGlobalContext();
@@ -100,7 +101,7 @@ const PackageBookingForm: React.FC = () => {
 
     const handleBooking = async () => {
 
-        if (!vehicleNumber || !otherVehicleNumber || !customerName || !mobileNumber || !alternateNumber || !kmStarting || !perKmRate || !advancedAmount || !remainingAmount || !departurePlace || !destinationPlace || !departureTime || !returnTime || !departureDate || !returnDate || !toll || !otherStateTax || !instructions || !entryParking) {
+        if (!vehicleNumber || !otherVehicleNumber || !customerName || !mobileNumber || !alternateNumber || !kmStarting || !perKmRate || !advancedAmount || !remainingAmount || !departurePlace || !destinationPlace || !departureTime || !returnTime || !departureDate || !returnDate || !toll || !otherStateTax || !instructions || !entryParking || !pickUpPoint) {
             Alert.alert("Please fill all fields.");
             return;
         }
@@ -124,15 +125,15 @@ const PackageBookingForm: React.FC = () => {
             tollInINR: toll,
             otherStateTaxInINR: otherStateTax,
             advancePlace: entryParking,
-            note: instructions
+            note: instructions,
+            pickupPoint: pickUpPoint
+            
         };
 
 
         setLoading(true);
         try {
-            const res = await apiCaller.post('/api/packageBooking', newBooking);
-            console.log(res.data);
-            
+            await apiCaller.post('/api/packageBooking', newBooking);
             setLoading(false);
             setRefresh(prev=>!prev)
             resetForm();
@@ -165,6 +166,7 @@ const PackageBookingForm: React.FC = () => {
         setOtherStateTax("");
         setInstructions("");
         setEntryParking("");
+        setPickUpPoint("")
     };
 
     return (
@@ -375,6 +377,15 @@ const PackageBookingForm: React.FC = () => {
                             style={styles.input}
                             value={entryParking}
                             onChangeText={(text) => setEntryParking(text)}
+                        />
+                    </View>
+
+                    <View style={styles.inputGroup}>
+                        <Text style={styles.label}>Pick up point</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={pickUpPoint}
+                            onChangeText={(text) => setPickUpPoint(text)}
                         />
                     </View>
 
