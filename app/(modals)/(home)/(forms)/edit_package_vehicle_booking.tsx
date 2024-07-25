@@ -90,7 +90,7 @@ const EditPackageBookingForm: React.FC = () => {
             setReturnTime(new Date(editData.returnTime));
             setToll(editData.tollInINR);
             setOtherStateTax(editData.otherStateTaxInINR);
-            setAddNote(editData.instructions);
+            setAddNote(editData.note);
             setEntryParking(editData.advancePlace);
         }
     }, [editData])
@@ -122,7 +122,6 @@ const EditPackageBookingForm: React.FC = () => {
             returnTime: returnTime,
             tollInINR: toll,
             otherStateTaxInINR: otherStateTax,
-            instructions: addNote,
             advancePlace: entryParking,
             note:addNote
         };

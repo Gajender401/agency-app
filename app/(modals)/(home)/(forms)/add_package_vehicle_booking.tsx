@@ -123,7 +123,6 @@ const PackageBookingForm: React.FC = () => {
             returnDate: returnDate,
             tollInINR: toll,
             otherStateTaxInINR: otherStateTax,
-            instructions: instructions,
             advancePlace: entryParking,
             note: instructions
         };

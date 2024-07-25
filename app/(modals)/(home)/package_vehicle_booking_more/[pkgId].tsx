@@ -114,7 +114,7 @@ const VehicleDetailsScreen: React.FC = () => {
       </View>
       <View style={styles.section}>
         <Text style={styles.label}>Add Note:</Text>
-        <Text style={styles.value}>{vehicleDetails.instructions}</Text>
+        <Text style={styles.value}>{vehicleDetails.note}</Text>
       </View>
     </ScrollView>
   );
