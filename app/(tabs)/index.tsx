@@ -10,6 +10,7 @@ import { GestureHandlerRootView, TouchableWithoutFeedback } from 'react-native-g
 import { AntDesign } from '@expo/vector-icons';
 import * as Linking from 'expo-linking';
 import { BlurView } from 'expo-blur';
+import { Path, Rect, Svg } from 'react-native-svg';
 
 const carouselImages = [
   require('@/assets/images/carousel1.png'),
@@ -76,10 +77,10 @@ export default function HomeScreen() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={{
-         padding: 20, 
-         backgroundColor:Colors.secondary,
-         }}>
-        <Text style={{ fontSize: 15, fontWeight: '500', color:"white" }}>Hi, {userData?.userName}</Text>
+        padding: 20,
+        backgroundColor: Colors.darkBlue,
+      }}>
+        <Text style={{ fontSize: 15, fontWeight: '500', color: "white" }}>Hi, {userData?.userName}</Text>
       </View>
       <ScrollView>
         <View style={styles.logoContainer}>
@@ -120,9 +121,20 @@ export default function HomeScreen() {
             <Image source={require('@/assets/images/staff_details.png')} style={styles.icon} />
             <Text style={styles.iconText}>Employee Details</Text>
           </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('drivers_all')} style={styles.gridItem}>
+            <Svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke={Colors.darkBlue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <Path d="m21 8-2 2-1.5-3.7A2 2 0 0 0 15.646 5H8.4a2 2 0 0 0-1.903 1.257L5 10 3 8" />
+              <Path d="M7 14h.01" />
+              <Path d="M17 14h.01" />
+              <Rect width="18" height="8" x="3" y="10" rx="2" />
+              <Path d="M5 18v2" />
+              <Path d="M19 18v2" />
+            </Svg>
+            <Text style={styles.iconText}>Emergency Drivers</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('drivers_list')} style={styles.gridItem}>
             <Image source={require('@/assets/images/drivers_list.png')} style={styles.icon} />
-            <Text style={styles.iconText}>Emergency Drivers</Text>
+            <Text style={styles.iconText}>My Driver</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('cleaners_list')} style={styles.gridItem}>
             <Image source={require('@/assets/images/cleaners_list.png')} style={styles.icon} />
@@ -300,7 +312,7 @@ const styles = StyleSheet.create({
   iconText: {
     marginTop: 5,
     fontSize: 11,
-    color: '#06518b',
+    color: Colors.primary,
     textAlign: 'center',
     fontWeight: '500',
     width: 80,
@@ -310,7 +322,7 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     marginVertical: 10,
-   
+
 
   },
   buttonContainer: {
