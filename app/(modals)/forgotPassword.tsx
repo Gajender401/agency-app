@@ -126,7 +126,7 @@ const ForgotPasswordScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
+        backgroundColor: "#FAF9F6",
         marginTop: StatusBar.currentHeight || 0,
         padding: 20,
     },
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#86D0FB",
         color: "#FFFFFF",
         paddingHorizontal: 20,
-        height: 40
+        height: 50
     },
     sendOTPButton: {
         flexDirection: "row",

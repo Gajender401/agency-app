@@ -157,7 +157,7 @@ const PlansScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#FAF9F6",
     padding: 16,
   },
   header: {

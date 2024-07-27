@@ -225,7 +225,7 @@ const TechnicianSupport: React.FC = () => {
                 <FontAwesome5 name="search" size={18} color={Colors.secondary} />
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Search technician category..."
+                    placeholder="Search technician, city"
                     placeholderTextColor={Colors.secondary}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
@@ -246,7 +246,7 @@ const TechnicianSupport: React.FC = () => {
                         <Picker.Item label="TAMPO" value="TAMPO" />
                     </Picker>
                 </View>
-
+{/* 
                 <View style={styles.locationFilterContainer}>
                     <Picker
                         selectedValue={stateFilter}
@@ -270,7 +270,7 @@ const TechnicianSupport: React.FC = () => {
                             <Picker.Item key={city.name} label={city.name} value={city.name} />
                         ))}
                     </Picker>
-                </View>
+                </View> */}
             </View>
 
             <TouchableOpacity onPress={() => router.push("add_technician")} style={styles.addButton}>

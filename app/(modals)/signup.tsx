@@ -181,11 +181,11 @@ const SignUpScreen = () => {
         </View>
     );
 };
-
+ 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
+        backgroundColor: "#FAF9F6",
         paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
     },
     headerContainer: {
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     loginLinkText: {
         fontWeight: "800",
         color: Colors.primary,
-        fontSize: 14,
+        fontSize: 20,
     },
 });
 

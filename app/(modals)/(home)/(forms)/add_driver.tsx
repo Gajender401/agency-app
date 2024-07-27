@@ -104,7 +104,7 @@ const AddDriverScreen: React.FC = () => {
         } catch (error) {
             console.log(error);
             setLoading(false);
-            Alert.alert("Error", "Failed to add driver. Please try again.");
+            Alert.alert("Error", "Driver with this number already exist.");
         }
     };
 

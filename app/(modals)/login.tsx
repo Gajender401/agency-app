@@ -48,7 +48,7 @@ const LoginScreen = () => {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <StatusBar barStyle="dark-content" />
             <Image style={styles.wave_image} source={require('@/assets/images/wave.png')} />
 
@@ -66,6 +66,7 @@ const LoginScreen = () => {
                             onValueChange={setIsManager}
                             trackColor={{ false: "#767577", true: Colors.darkBlue }}
                             thumbColor={isManager ? Colors.secondary : "#f4f3f4"}
+                            style={styles.switch}
                         />
                         <Text>Manager</Text>
                     </View>
@@ -87,11 +88,6 @@ const LoginScreen = () => {
                     />
                     <View style={styles.optionsContainer}>
                         <View style={styles.rememberMeContainer}>
-                            <Checkbox
-                                value={rememberMe}
-                                onValueChange={setRememberMe}
-                            />
-                            <Text style={styles.rememberMeText}>Remember Me</Text>
                         </View>
                         <TouchableOpacity onPress={() => router.push("/(modals)/forgotPassword")} >
                             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
@@ -108,14 +104,14 @@ const LoginScreen = () => {
                 </TouchableOpacity>
             </View>
 
-        </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
+        backgroundColor: "#FAF9F6",
         marginTop: StatusBar.currentHeight,
         padding: 20,
     },
@@ -163,6 +159,7 @@ const styles = StyleSheet.create({
     },
     forgotPasswordText: {
         color: Colors.primary,
+        fontSize:20
     },
     button: {
         borderRadius: 30,
@@ -182,6 +179,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 20,
+        gap:10
+    },
+    switch: {
+        transform: [{ scaleX: 1.5 }, { scaleY: 1.5 }],
     },
 });
 

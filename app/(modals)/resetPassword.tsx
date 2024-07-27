@@ -98,7 +98,7 @@ const ResetPasswordScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
+        backgroundColor: "#FAF9F6",
         marginTop: StatusBar.currentHeight || 0,
         padding: 20,
     },
