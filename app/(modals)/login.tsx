@@ -11,6 +11,7 @@ import {
     Alert,
     ActivityIndicator,
     Switch,
+    ScrollView
 } from "react-native";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
@@ -48,7 +49,7 @@ const LoginScreen = () => {
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container}>
             <StatusBar barStyle="dark-content" />
             <Image style={styles.wave_image} source={require('@/assets/images/wave.png')} />
 
@@ -104,7 +105,7 @@ const LoginScreen = () => {
                 </TouchableOpacity>
             </View>
 
-        </View>
+        </ScrollView>
     );
 };
 
@@ -169,6 +170,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 50,
         borderColor: Colors.primary,
         minWidth: 150,
+        marginTop:20
     },
     buttonText: {
         fontSize: 21,
