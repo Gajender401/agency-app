@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     loginLinkText: {
         fontWeight: "800",
         color: Colors.primary,
-        fontSize: 20,
+        fontSize: 40,
     },
 });
 

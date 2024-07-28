@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     },
     forgotPasswordText: {
         color: Colors.primary,
-        fontSize:20
+        fontSize:40
     },
     button: {
         borderRadius: 30,
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
         gap:10
     },
     switch: {
-        transform: [{ scaleX: 1.5 }, { scaleY: 1.5 }],
+        transform: [{ scaleX: 2 }, { scaleY: 2 }],
     },
 });
 
