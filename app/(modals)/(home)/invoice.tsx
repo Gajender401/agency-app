@@ -100,7 +100,7 @@ const InvoiceScreen: React.FC = () => {
         <tr><th>Return Time</th><td>${formatTime(invoiceData.returnTime)}</td></tr>
         <tr><th>Toll</th><td>${invoiceData.tollInINR}</td></tr>
         <tr><th>Other State Tax</th><td>${invoiceData.otherStateTaxInINR}</td></tr>
-        <tr><th>Note</th><td>${invoiceData.instructions}</td></tr>
+        <tr><th>Note</th><td>${invoiceData.note}</td></tr>
         <tr><th>Booked By</th><td>${invoiceData.createdBy}</td></tr>
       </table>
 
@@ -267,7 +267,7 @@ const InvoiceScreen: React.FC = () => {
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Note:</Text>
-        <Text style={styles.value}>{invoiceData.instructions}</Text>
+        <Text style={styles.value}>{invoiceData.note}</Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>Created At:</Text>

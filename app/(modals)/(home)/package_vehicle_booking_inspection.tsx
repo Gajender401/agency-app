@@ -227,7 +227,7 @@ const PackageVehicleListScreen: React.FC = () => {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Journey Details</Text>
             <Text style={styles.modalText}>Before Journey Notes:</Text>
-            {renderNote('sjfhdsjk hfjkdshfjkdshfg kjdfhjkgh dsjhgdsjkfghdsjhhfgjkads ghfjs dfgdshf gsdjhgfjhag fhjdsagf hdskg fhdsgf gshjgf hjdgfhjdsg fajhg hjgdsfhgds fhdgshjfk skahjfsda fksg f', showFullBeforeNote, setShowFullBeforeNote)}
+            {renderNote(selectedPackage?.beforeJourneyNote, showFullBeforeNote, setShowFullBeforeNote)}
             <Text style={styles.modalText}>After Journey Notes:</Text>
             {renderNote(selectedPackage?.afterJourneyNote || 'No notes available', showFullAfterNote, setShowFullAfterNote)}
             <View style={styles.modalButtons}>
