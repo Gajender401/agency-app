@@ -97,7 +97,7 @@ const PackageVehicleListScreen: React.FC = () => {
 
   const renderNote = (note: string, isFullNote: boolean, setFullNote: React.Dispatch<React.SetStateAction<boolean>>) => {
     const maxLength = 100;
-    if (note.length <= maxLength) {
+    if (note && note.length <= maxLength) {
       return <Text style={styles.modalNoteText}>{note}</Text>;
     }
 
@@ -120,7 +120,7 @@ const PackageVehicleListScreen: React.FC = () => {
     return (
       <View>
         <Text style={styles.modalNoteText}>
-          {`${note.substring(0, maxLength)}...`}
+          {`${note ?note.substring(0, maxLength):''}...`}
         </Text>
         <TouchableOpacity onPress={() => setFullNote(true)}>
           <Text style={styles.readMoreLess}>Read More</Text>
