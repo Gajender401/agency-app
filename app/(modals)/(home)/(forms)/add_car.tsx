@@ -27,9 +27,9 @@ const AddCarScreen: React.FC = () => {
     const [carName, setCarName] = useState("");
     const [contactNo, setContactNo] = useState("");
     const [selectedAC, setSelectedAC] = useState<string | null>(null);
-    const [selectedForRent, setSelectedForRent] = useState<boolean>(false); 
-    const [selectedForSell, setSelectedForSell] = useState<boolean>(false); 
-    const [carImages, setCarImages] = useState<string[]>([]);
+    const [selectedForRent, setSelectedForRent] = useState<boolean>(false);
+    const [selectedForSell, setSelectedForSell] = useState<boolean>(false);
+    const [carImages, setCarImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
     const [loading, setLoading] = useState(false);
     const { apiCaller, setRefresh } = useGlobalContext();
 
@@ -39,31 +39,38 @@ const AddCarScreen: React.FC = () => {
             return;
         }
 
-        const newCar = {
-            number: vehicleNo,
-            seatingCapacity,
-            model: vehicleModel,
-            location,
-            contactNumber: contactNo,
-            isAC: selectedAC === "AC",
-            isForRent: selectedForRent,
-            isForSell: selectedForSell,
-            photos: carImages,
-            type: "CAR",
-            name:carName
-        };
+        const formData = new FormData();
+        formData.append('number', vehicleNo);
+        formData.append('seatingCapacity', seatingCapacity);
+        formData.append('model', vehicleModel);
+        formData.append('location', location);
+        formData.append('contactNumber', contactNo);
+        formData.append('isAC', selectedAC === "AC" ? 'true' : 'false');
+        formData.append('isForRent', selectedForRent ? 'true' : 'false');
+        formData.append('isForSell', selectedForSell ? 'true' : 'false');
+        formData.append('type', "CAR");
+        formData.append('name', carName);
 
-        console.log(newCar.photos);
-        
+        carImages.forEach((image, index) => {
+            formData.append('photos', {
+                uri: image.uri,
+                type: 'image/jpeg',
+                name: `photo${index}.jpg`
+            } as any);
+        });
 
         setLoading(true);
         try {
-            await apiCaller.post('/api/vehicle', newCar, { headers: { 'Content-Type': 'multipart/form-data' } });
+            await apiCaller.post('/api/vehicle', formData, { 
+                headers: { 
+                    'Content-Type': 'multipart/form-data'
+                } 
+            });
             setLoading(false);
-            setRefresh(prev=>!prev)
+            setRefresh(prev => !prev);
             resetForm();
             Alert.alert("Success", "Car added successfully!");
-            router.back()
+            router.back();
         } catch (error) {
             console.log(error);
             setLoading(false);
@@ -79,7 +86,7 @@ const AddCarScreen: React.FC = () => {
         });
 
         if (!result.canceled) {
-            setCarImages(result.assets.map(asset => asset.uri));
+            setCarImages(result.assets);
         }
     };
 
@@ -107,7 +114,7 @@ const AddCarScreen: React.FC = () => {
                             value={vehicleNo}
                             onChangeText={(text) => setVehicleNo(text)}
                         />
-                        <Text style={styles.vehicleNumberLabel}>“If your vehicle is to be sold to other vehicle owners or is to be given on rent, then you will have to fill the option given below.”</Text>
+                        <Text style={styles.vehicleNumberLabel}>"If your vehicle is to be sold to other vehicle owners or is to be given on rent, then you will have to fill the option given below."</Text>
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Seating Capacity</Text>
@@ -185,8 +192,8 @@ const AddCarScreen: React.FC = () => {
                         <Text style={styles.imagePickerText}>Upload Car Images (Max 5)</Text>
                     </TouchableOpacity>
                     <View style={styles.imagePreviewContainer}>
-                        {carImages.map((uri, index) => (
-                            <Image key={index} source={{ uri }} style={styles.previewImage} />
+                        {carImages.map((image, index) => (
+                            <Image key={index} source={{ uri: image.uri }} style={styles.previewImage} />
                         ))}
                     </View>
 
