@@ -53,6 +53,9 @@ const AddCarScreen: React.FC = () => {
             name:carName
         };
 
+        console.log(newCar.photos);
+        
+
         setLoading(true);
         try {
             await apiCaller.post('/api/vehicle', newCar, { headers: { 'Content-Type': 'multipart/form-data' } });

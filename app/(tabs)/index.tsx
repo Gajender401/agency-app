@@ -21,7 +21,7 @@ const carouselImages = [
   require('@/assets/images/carousel6.png')
 ];
 
-const { width: deviceWidth } = Dimensions.get('window');
+const { width: deviceWidth, height: deviceHeight } = Dimensions.get('window');
 
 interface BlurOverlayProps {
   visible: boolean;
@@ -57,7 +57,6 @@ export default function HomeScreen() {
     }
     setIsPlaying(!isPlaying);
   };
-
 
   const handleViewVideo = (isVideo1: boolean) => {
     setSelectedVideo(isVideo1);
@@ -107,19 +106,19 @@ export default function HomeScreen() {
         <View style={styles.grid}>
           <TouchableOpacity onPress={() => router.push('daily_route_vehicles')} style={styles.gridItem}>
             <Image source={require('@/assets/images/route.png')} style={styles.icon} />
-            <Text style={styles.iconText}>Daily Route Vehicles</Text>
+            <Text style={styles.iconText} numberOfLines={2} ellipsizeMode="tail">Daily Route Vehicles</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('package_vehicle_booking')} style={styles.gridItem}>
             <Image source={require('@/assets/images/package.png')} style={styles.icon} />
-            <Text style={styles.iconText}>Package Vehicle Booking</Text>
+            <Text style={styles.iconText} numberOfLines={2} ellipsizeMode="tail">Package Vehicle Booking</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('vehicle_servicing_history')} style={styles.gridItem}>
             <Image source={require('@/assets/images/vehicle_servicing_history.png')} style={styles.icon} />
-            <Text style={styles.iconText}>Vehicle Servicing History</Text>
+            <Text style={styles.iconText} numberOfLines={2} ellipsizeMode="tail">Vehicle Servicing History</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('employee_list')} style={styles.gridItem}>
             <Image source={require('@/assets/images/staff_details.png')} style={styles.icon} />
-            <Text style={styles.iconText}>Employee Details</Text>
+            <Text style={styles.iconText} numberOfLines={2} ellipsizeMode="tail">Employee Details</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('drivers_all')} style={styles.gridItem}>
             <Svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke={Colors.darkBlue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -130,27 +129,27 @@ export default function HomeScreen() {
               <Path d="M5 18v2" />
               <Path d="M19 18v2" />
             </Svg>
-            <Text style={styles.iconText}>Emergency Drivers</Text>
+            <Text style={styles.iconText} numberOfLines={2} ellipsizeMode="tail">Emergency Drivers</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('drivers_list')} style={styles.gridItem}>
             <Image source={require('@/assets/images/drivers_list.png')} style={styles.icon} />
-            <Text style={styles.iconText}>My Driver</Text>
+            <Text style={styles.iconText} numberOfLines={2} ellipsizeMode="tail">My Driver</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('cleaners_list')} style={styles.gridItem}>
             <Image source={require('@/assets/images/cleaners_list.png')} style={styles.icon} />
-            <Text style={styles.iconText}>Cleaner’s List</Text>
+            <Text style={styles.iconText} numberOfLines={2} ellipsizeMode="tail">Cleaner's List</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('vehicle_documents')} style={styles.gridItem}>
             <Image source={require('@/assets/images/vehicle_documents.png')} style={styles.icon} />
-            <Text style={styles.iconText}>Vehicle Documents</Text>
+            <Text style={styles.iconText} numberOfLines={2} ellipsizeMode="tail">Vehicle Documents</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('all_vehicle_list')} style={styles.gridItem}>
             <Image source={require('@/assets/images/vehicle_management.png')} style={styles.icon} />
-            <Text style={styles.iconText}>All Vehicle List</Text>
+            <Text style={styles.iconText} numberOfLines={2} ellipsizeMode="tail">All Vehicle List</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('technician_support')} style={styles.gridItem}>
             <Image source={require('@/assets/images/technician_support.png')} style={styles.icon} />
-            <Text style={styles.iconText}>Technician Support</Text>
+            <Text style={styles.iconText} numberOfLines={2} ellipsizeMode="tail">Technician Support</Text>
           </TouchableOpacity>
         </View>
 
@@ -303,6 +302,7 @@ const styles = StyleSheet.create({
     width: '33.33%',
     alignItems: 'center',
     marginVertical: 10,
+    paddingHorizontal: 5,
   },
   icon: {
     width: 50,
@@ -311,19 +311,15 @@ const styles = StyleSheet.create({
   },
   iconText: {
     marginTop: 5,
-    fontSize: 11,
+    fontSize: Math.min(11, deviceHeight * 0.015),
     color: Colors.primary,
     textAlign: 'center',
     fontWeight: '500',
-    width: 80,
-    height: 30,
-    lineHeight: 15,
+    width: '100%',
   },
   logoContainer: {
     alignItems: 'center',
     marginVertical: 10,
-
-
   },
   buttonContainer: {
     alignItems: 'center',
