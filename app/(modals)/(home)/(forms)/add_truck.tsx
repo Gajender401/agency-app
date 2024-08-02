@@ -28,46 +28,56 @@ const AddTruckScreen: React.FC = () => {
   const [vehicleWeightInKGS, setVehicleWeightInKGS] = useState("");
   const [selectedForRent, setSelectedForRent] = useState<boolean>(false); 
   const [selectedForSell, setSelectedForSell] = useState<boolean>(false); 
-  const [truckImages, setTruckImages] = useState<string[]>([]);
+  const [truckImages, setTruckImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
   const [loading, setLoading] = useState(false);
   const { apiCaller, setRefresh } = useGlobalContext(); 
 
   const handleAddTruck = async () => {
     if (!vehicleNo || !vehicleModel || !location || !contactNo || !noOfTyres || !vehicleWeightInKGS || truckImages.length === 0) {
-      Alert.alert("Please fill all fields and upload truck images.");
-      return;
+        Alert.alert("Please fill all fields and upload truck images.");
+        return;
     }
 
-    const newTruck = {
-      number: vehicleNo,
-      model: vehicleModel,
-      location,
-      bodyType,
-      chassisBrand,
-      contactNumber: contactNo,
-      noOfTyres,
-      vehicleWeightInKGS,
-      isAC: false, 
-      isForRent: selectedForRent,
-      isForSell: selectedForSell,
-      photos: truckImages,
-      type: "TRUCK"
-    };
+    const formData = new FormData();
+    formData.append('number', vehicleNo);
+    formData.append('model', vehicleModel);
+    formData.append('location', location);
+    formData.append('bodyType', bodyType);
+    formData.append('chassisBrand', chassisBrand);
+    formData.append('contactNumber', contactNo);
+    formData.append('noOfTyres', noOfTyres);
+    formData.append('vehicleWeightInKGS', vehicleWeightInKGS);
+    formData.append('isAC', 'false');
+    formData.append('isForRent', selectedForRent ? 'true' : 'false');
+    formData.append('isForSell', selectedForSell ? 'true' : 'false');
+    formData.append('type', "TRUCK");
+
+    truckImages.forEach((image, index) => {
+        formData.append('photos', {
+            uri: image.uri,
+            type: 'image/jpeg',
+            name: `photo${index}.jpg`
+        } as any);
+    });
 
     setLoading(true);
     try {
-      await apiCaller.post('/api/vehicle', newTruck, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setLoading(false);
-      setRefresh(prev=>!prev)
-      resetForm();
-      Alert.alert("Success", "Truck added successfully!");
-      router.back()
+        await apiCaller.post('/api/vehicle', formData, { 
+            headers: { 
+                'Content-Type': 'multipart/form-data'
+            } 
+        });
+        setLoading(false);
+        setRefresh(prev => !prev);
+        resetForm();
+        Alert.alert("Success", "Truck added successfully!");
+        router.back();
     } catch (error) {
-      console.log(error);
-      setLoading(false);
-      Alert.alert("Error", "Failed to add truck. Please try again.");
+        console.log(error);
+        setLoading(false);
+        Alert.alert("Error", "Failed to add truck. Please try again.");
     }
-  };
+};
 
   const handleImagePicker = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -77,7 +87,7 @@ const AddTruckScreen: React.FC = () => {
     });
 
     if (!result.canceled) {
-      setTruckImages(result.assets.map(asset => asset.uri));
+      setTruckImages(result.assets);
     }
   };
 
@@ -187,8 +197,8 @@ const AddTruckScreen: React.FC = () => {
             <Text style={styles.imagePickerText}>Upload Truck Images (Max 5)</Text>
           </TouchableOpacity>
           <View style={styles.imagePreviewContainer}>
-            {truckImages.map((uri, index) => (
-              <Image key={index} source={{ uri }} style={styles.previewImage} />
+            {truckImages.map((image, index) => (
+              <Image key={index} source={{ uri: image.uri }} style={styles.previewImage} />
             ))}
           </View>
 

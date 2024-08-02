@@ -37,8 +37,8 @@ const AddCleanerScreen: React.FC = () => {
     const [city, setCity] = useState("");
     const [state, setState] = useState("");
     const [password, setPassword] = useState("");
-    const [cleanerImage, setCleanerImage] = useState<string | null>(null);
-    const [aadharImage, setAadharImage] = useState<string | null>(null);
+    const [cleanerImage, setCleanerImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+    const [aadharImage, setAadharImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
     const [loading, setLoading] = useState(false);
     const [cityList, setCityList] = useState<CityType[]>([]);
     const { apiCaller, setRefresh } = useGlobalContext(); 
@@ -58,22 +58,35 @@ const AddCleanerScreen: React.FC = () => {
             return;
         }
 
-        const newCleaner = {
-            name,
-            mobileNumber: mobile,
-            city,
-            state,
-            password,
-            photo: cleanerImage,
-            aadharCard: aadharImage,
-        };
-
-        console.log(newCleaner);
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('mobileNumber', mobile);
+        formData.append('city', city);
+        formData.append('state', state);
+        formData.append('password', password);
+    
+        if (cleanerImage) {
+            formData.append('photo', {
+                uri: cleanerImage.uri,
+                type: 'image/jpeg',
+                name: `cleaner.jpg`
+            } as any);
+        }
+    
+        if (aadharImage) {
+            formData.append('aadharCard', {
+                uri: aadharImage.uri,
+                type: 'image/jpeg',
+                name: `aadhar.jpg`
+            } as any);
+        }
+    
+        console.log(formData);
         
 
         setLoading(true);
         try {
-            await apiCaller.post('/api/cleaner', newCleaner, { headers: { 'Content-Type': 'multipart/form-data' } });
+            await apiCaller.post('/api/cleaner', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
             setRefresh(prev=>!prev)
             resetForm();
@@ -96,9 +109,9 @@ const AddCleanerScreen: React.FC = () => {
 
         if (!result.canceled) {
             if (type === "cleaner") {
-                setCleanerImage(result.assets[0].uri);
+                setCleanerImage(result.assets[0]);
             } else {
-                setAadharImage(result.assets[0].uri);
+                setAadharImage(result.assets[0]);
             }
         }
     };
@@ -177,12 +190,12 @@ const AddCleanerScreen: React.FC = () => {
                     <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("cleaner")}>
                         <Text style={styles.imagePickerText}>Select Cleaner Image</Text>
                     </TouchableOpacity>
-                    {cleanerImage && <Image source={{ uri: cleanerImage }} style={styles.previewImage} />}
+                    {cleanerImage && <Image source={{ uri: cleanerImage.uri }} style={styles.previewImage} />}
 
                     <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("aadhar")}>
                         <Text style={styles.imagePickerText}>Select Aadhar Card Image</Text>
                     </TouchableOpacity>
-                    {aadharImage && <Image source={{ uri: aadharImage }} style={styles.previewImage} />}
+                    {aadharImage && <Image source={{ uri: aadharImage.uri }} style={styles.previewImage} />}
 
                     <View style={styles.modalButtons}>
                         <TouchableOpacity

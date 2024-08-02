@@ -27,12 +27,10 @@ const EditBusScreen: React.FC = () => {
   const [contactNo, setContactNo] = useState("");
   const [bodyType, setBodyType] = useState("");
   const [chassisBrand, setChassisBrand] = useState("");
-  const [noOfTyres, setNoOfTyres] = useState("");
-  const [vehicleWeightInKGS, setVehicleWeightInKGS] = useState("");
   const [selectedAC, setSelectedAC] = useState<string | null>(null); // State for AC/Non-AC selection
   const [selectedForRent, setSelectedForRent] = useState<boolean>(false); // State for For Rent selection
   const [selectedForSell, setSelectedForSell] = useState<boolean>(false); // State for For Sell selection
-  const [busImages, setBusImages] = useState<string[]>([]);
+  const [busImages, setBusImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
   const [loading, setLoading] = useState(false);
   const { apiCaller, editData, setRefresh } = useGlobalContext();
 
@@ -45,8 +43,6 @@ const EditBusScreen: React.FC = () => {
       setContactNo(editData.contactNumber);
       setBodyType(editData.bodyType);
       setChassisBrand(editData.chassisBrand);
-      setNoOfTyres(editData.noOfTyres);
-      setVehicleWeightInKGS(editData.vehicleWeightInKGS);
       setSelectedAC(editData.isAC?"AC":"NonAC");
       setSelectedForRent(editData.isForRent);
       setSelectedForSell(editData.isForSell);
@@ -56,26 +52,30 @@ const EditBusScreen: React.FC = () => {
 
 
   const handleAddCar = async () => {
-    const newCar = {
-      number: vehicleNo,
-      seatingCapacity,
-      model: vehicleModel,
-      location,
-      bodyType,
-      chassisBrand,
-      noOfTyres,
-      vehicleWeightInKGS,
-      contactNumber: contactNo,
-      isAC: selectedAC === "AC",
-      isForRent: selectedForRent,
-      isForSell: selectedForSell,
-      photos: busImages,
-      type: "CAR",
-    };
+    const formData = new FormData();
+    formData.append('number', vehicleNo);
+    formData.append('seatingCapacity', seatingCapacity);
+    formData.append('model', vehicleModel);
+    formData.append('location', location);
+    formData.append('bodyType', bodyType);
+    formData.append('chassisBrand', chassisBrand);
+    formData.append('contactNumber', contactNo);
+    formData.append('isAC', selectedAC === "AC" ? 'true' : 'false');
+    formData.append('isForRent', selectedForRent ? 'true' : 'false');
+    formData.append('isForSell', selectedForSell ? 'true' : 'false');
+    formData.append('type', "BUS");
+
+    busImages.forEach((image, index) => {
+        formData.append('photos', {
+            uri: image.uri,
+            type: 'image/jpeg',
+            name: `photo${index}.jpg`
+        } as any);
+    });
 
     setLoading(true);
     try {
-      await apiCaller.patch(`/api/vehicle?vehicleId=${editData._id}`, newCar, {
+      await apiCaller.patch(`/api/vehicle?vehicleId=${editData._id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setLoading(false);
@@ -98,7 +98,7 @@ const EditBusScreen: React.FC = () => {
     });
 
     if (!result.canceled) {
-      setBusImages(result.assets.map((asset) => asset.uri));
+      setBusImages(result.assets);
     }
   };
 
@@ -110,8 +110,6 @@ const EditBusScreen: React.FC = () => {
     setContactNo("");
     setBodyType("");
     setChassisBrand("");
-    setNoOfTyres("");
-    setVehicleWeightInKGS("");
     setSelectedAC(null);
     setSelectedForRent(false);
     setSelectedForSell(false);
@@ -265,8 +263,8 @@ const EditBusScreen: React.FC = () => {
             <Text style={styles.imagePickerText}>Upload Car Images (Max 5)</Text>
           </TouchableOpacity>
           <View style={styles.imagePreviewContainer}>
-            {busImages.map((uri, index) => (
-              <Image key={index} source={{ uri }} style={styles.previewImage} />
+            {busImages.map((image, index) => (
+              <Image key={index} source={{ uri: image.uri }} style={styles.previewImage} />
             ))}
           </View>
 

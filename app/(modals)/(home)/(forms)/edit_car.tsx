@@ -31,7 +31,7 @@ const AddCarScreen: React.FC = () => {
     const [selectedAC, setSelectedAC] = useState<string | null>(null); // State for AC/Non-AC selection
     const [selectedForRent, setSelectedForRent] = useState<boolean>(false); // State for For Rent selection
     const [selectedForSell, setSelectedForSell] = useState<boolean>(false); // State for For Sell selection
-    const [carImages, setCarImages] = useState<string[]>([]);
+    const [carImages, setCarImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
     const [loading, setLoading] = useState(false);
     const { apiCaller, editData, setRefresh } = useGlobalContext();
 
@@ -53,35 +53,44 @@ const AddCarScreen: React.FC = () => {
     }, [editData])
 
     const handleAddCar = async () => {
+        if (!vehicleNo || !seatingCapacity || !vehicleModel || !location || !carName || !contactNo || carImages.length === 0) {
+            Alert.alert("Please fill all fields and upload car images.");
+            return;
+        }
 
-        const newCar = {
-            number: vehicleNo,
-            seatingCapacity,
-            model: vehicleModel,
-            location,
-            bodyType,
-            chassisBrand,
-            contactNumber: contactNo,
-            isAC: selectedAC === "AC",
-            isForRent: selectedForRent,
-            isForSell: selectedForSell,
-            photos: carImages,
-            type: "CAR",
-            name: carName
-        };
+        const formData = new FormData();
+        formData.append('number', vehicleNo);
+        formData.append('seatingCapacity', seatingCapacity);
+        formData.append('model', vehicleModel);
+        formData.append('location', location);
+        formData.append('contactNumber', contactNo);
+        formData.append('isAC', selectedAC === "AC" ? 'true' : 'false');
+        formData.append('isForRent', selectedForRent ? 'true' : 'false');
+        formData.append('isForSell', selectedForSell ? 'true' : 'false');
+        formData.append('type', "CAR");
+        formData.append('name', carName);
+
+        carImages.forEach((image, index) => {
+            formData.append('photos', {
+                uri: image.uri,
+                type: 'image/jpeg',
+                name: `photo${index}.jpg`
+            } as any);
+        });
 
         setLoading(true);
         try {
-            await apiCaller.patch(`/api/vehicle?vehicleId=${editData._id}`, newCar, { headers: { 'Content-Type': 'multipart/form-data' } });
+            await apiCaller.patch(`/api/vehicle?vehicleId=${editData._id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+
             setLoading(false);
-            setRefresh(prev=>!prev)
+            setRefresh(prev => !prev);
             resetForm();
-            Alert.alert("Success", "Car updated successfully!");
-            router.back()
+            Alert.alert("Success", "Car added successfully!");
+            router.back();
         } catch (error) {
             console.log(error);
             setLoading(false);
-            Alert.alert("Error", "Failed to update car. Please try again.");
+            Alert.alert("Error", "Failed to add car. Please try again.");
         }
     };
 
@@ -93,7 +102,7 @@ const AddCarScreen: React.FC = () => {
         });
 
         if (!result.canceled) {
-            setCarImages(result.assets.map(asset => asset.uri));
+            setCarImages(result.assets);
         }
     };
 
@@ -217,8 +226,8 @@ const AddCarScreen: React.FC = () => {
                         <Text style={styles.imagePickerText}>Upload Car Images (Max 5)</Text>
                     </TouchableOpacity>
                     <View style={styles.imagePreviewContainer}>
-                        {carImages.map((uri, index) => (
-                            <Image key={index} source={{ uri }} style={styles.previewImage} />
+                        {carImages.map((image, index) => (
+                            <Image key={index} source={{ uri: image.uri }} style={styles.previewImage} />
                         ))}
                     </View>
 

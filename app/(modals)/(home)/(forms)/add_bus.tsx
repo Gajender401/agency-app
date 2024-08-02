@@ -19,20 +19,6 @@ import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { router } from "expo-router";
 
-  
-const formatVehicleNumber = (input: string) => {
-  const cleanInput = input.replace(/\s/g, '').toUpperCase();
-  
-  let formatted = '';
-  for (let i = 0; i < cleanInput.length; i++) {
-    if (i === 2 || i === 4 || i === 5) {
-      formatted += ' ';
-    }
-    formatted += cleanInput[i];
-  }
-  
-  return formatted.trim();
-};
 
 const AddBusScreen: React.FC = () => {
   const [vehicleNo, setVehicleNo] = useState("");
@@ -45,45 +31,55 @@ const AddBusScreen: React.FC = () => {
   const [selectedAC, setSelectedAC] = useState<string | null>(null);
   const [selectedForRent, setSelectedForRent] = useState<boolean>(false);
   const [selectedForSell, setSelectedForSell] = useState<boolean>(false);
-  const [busImages, setBusImages] = useState<string[]>([]);
+  const [busImages, setBusImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
   const [loading, setLoading] = useState(false);
   const { apiCaller, setRefresh } = useGlobalContext();
 
   const handleAddBus = async () => {
     if (!vehicleNo || !seatingCapacity || !vehicleModel || !bodyType || !chassisBrand || !location || !contactNo || busImages.length === 0) {
-      Alert.alert("Please fill all fields and upload bus images.");
-      return;
+        Alert.alert("Please fill all fields and upload bus images.");
+        return;
     }
 
-    const newBus = {
-      number: vehicleNo,
-      seatingCapacity,
-      model: vehicleModel,
-      location,
-      bodyType,
-      chassisBrand,
-      contactNumber: contactNo,
-      isAC: selectedAC === "AC",
-      isForRent: selectedForRent,
-      isForSell: selectedForSell,
-      photos: busImages,
-      type: "BUS"
-    };
+    const formData = new FormData();
+    formData.append('number', vehicleNo);
+    formData.append('seatingCapacity', seatingCapacity);
+    formData.append('model', vehicleModel);
+    formData.append('location', location);
+    formData.append('bodyType', bodyType);
+    formData.append('chassisBrand', chassisBrand);
+    formData.append('contactNumber', contactNo);
+    formData.append('isAC', selectedAC === "AC" ? 'true' : 'false');
+    formData.append('isForRent', selectedForRent ? 'true' : 'false');
+    formData.append('isForSell', selectedForSell ? 'true' : 'false');
+    formData.append('type', "BUS");
+
+    busImages.forEach((image, index) => {
+        formData.append('photos', {
+            uri: image.uri,
+            type: 'image/jpeg',
+            name: `photo${index}.jpg`
+        } as any);
+    });
 
     setLoading(true);
     try {
-      await apiCaller.post('/api/vehicle', newBus, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setLoading(false);
-      setRefresh(prev=>!prev)
-      resetForm();
-      Alert.alert("Success", "Bus added successfully!");
-      router.back()
+        await apiCaller.post('/api/vehicle', formData, { 
+            headers: { 
+                'Content-Type': 'multipart/form-data'
+            } 
+        });
+        setLoading(false);
+        setRefresh(prev => !prev);
+        resetForm();
+        Alert.alert("Success", "Bus added successfully!");
+        router.back();
     } catch (error) {
-      console.log(error);
-      setLoading(false);
-      Alert.alert("Error", "Failed to add bus. Please try again.");
+        console.log(error);
+        setLoading(false);
+        Alert.alert("Error", "Failed to add bus. Please try again.");
     }
-  };
+};
 
   const handleImagePicker = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -93,7 +89,7 @@ const AddBusScreen: React.FC = () => {
     });
 
     if (!result.canceled) {
-      setBusImages(result.assets.map(asset => asset.uri));
+      setBusImages(result.assets);
     }
   };
 
@@ -202,8 +198,8 @@ const AddBusScreen: React.FC = () => {
             <Text style={styles.imagePickerText}>Upload Bus Images (Max 5)</Text>
           </TouchableOpacity>
           <View style={styles.imagePreviewContainer}>
-            {busImages.map((uri, index) => (
-              <Image key={index} source={{ uri }} style={styles.previewImage} />
+            {busImages.map((image, index) => (
+              <Image key={index} source={{ uri: image.uri }} style={styles.previewImage} />
             ))}
           </View>
 

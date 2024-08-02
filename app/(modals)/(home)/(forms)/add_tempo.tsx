@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
-import { useGlobalContext } from "@/context/GlobalProvider"; // Importing useGlobalContext
+import { useGlobalContext } from "@/context/GlobalProvider";
 import { router } from "expo-router";
 
 const AddTempoScreen: React.FC = () => {
@@ -25,43 +25,53 @@ const AddTempoScreen: React.FC = () => {
   const [contactNo, setContactNo] = useState("");
   const [selectedForRent, setSelectedForRent] = useState<boolean>(false);
   const [selectedForSell, setSelectedForSell] = useState<boolean>(false);
-  const [tempoImages, setTempoImages] = useState<string[]>([]);
+  const [tempoImages, setTempoImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
   const [loading, setLoading] = useState(false);
   const { apiCaller, setRefresh } = useGlobalContext(); 
 
   const handleAddTempo = async () => {
-    if (!vehicleNo || !seatingCapacity || !vehicleModel || !location || !contactNo ||  tempoImages.length === 0) {
-      Alert.alert("Please fill all fields and upload tempo images.");
-      return;
+    if (!vehicleNo || !seatingCapacity || !vehicleModel || !location || !contactNo || tempoImages.length === 0) {
+        Alert.alert("Please fill all fields and upload tempo images.");
+        return;
     }
 
-    const newTempo = {
-      number: vehicleNo,
-      seatingCapacity,
-      model: vehicleModel,
-      location,
-      contactNumber: contactNo,
-      isAC: false,
-      isForRent: selectedForRent,
-      isForSell: selectedForSell,
-      photos: tempoImages,
-      type: "TAMPO"
-    };
+    const formData = new FormData();
+    formData.append('number', vehicleNo);
+    formData.append('seatingCapacity', seatingCapacity);
+    formData.append('model', vehicleModel);
+    formData.append('location', location);
+    formData.append('contactNumber', contactNo);
+    formData.append('isAC', 'false');
+    formData.append('isForRent', selectedForRent ? 'true' : 'false');
+    formData.append('isForSell', selectedForSell ? 'true' : 'false');
+    formData.append('type', "TAMPO");
+
+    tempoImages.forEach((image, index) => {
+        formData.append('photos', {
+            uri: image.uri,
+            type: 'image/jpeg',
+            name: `photo${index}.jpg`
+        } as any);
+    });
 
     setLoading(true);
     try {
-      await apiCaller.post('/api/vehicle', newTempo, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setLoading(false);
-      setRefresh(prev=>!prev)
-      resetForm();
-      Alert.alert("Success", "Tempo added successfully!");
-      router.back()
+        await apiCaller.post('/api/vehicle', formData, { 
+            headers: { 
+                'Content-Type': 'multipart/form-data'
+            } 
+        });
+        setLoading(false);
+        setRefresh(prev => !prev);
+        resetForm();
+        Alert.alert("Success", "Tempo added successfully!");
+        router.back();
     } catch (error) {
-      console.log(error);
-      setLoading(false);
-      Alert.alert("Error", "Failed to add tempo. Please try again.");
+        console.log(error);
+        setLoading(false);
+        Alert.alert("Error", "Failed to add tempo. Please try again.");
     }
-  };
+};
 
   const handleImagePicker = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -71,7 +81,7 @@ const AddTempoScreen: React.FC = () => {
     });
 
     if (!result.canceled) {
-      setTempoImages(result.assets.map(asset => asset.uri));
+      setTempoImages(result.assets);
     }
   };
 
@@ -148,8 +158,8 @@ const AddTempoScreen: React.FC = () => {
             <Text style={styles.imagePickerText}>Upload Tempo Images (Max 5)</Text>
           </TouchableOpacity>
           <View style={styles.imagePreviewContainer}>
-            {tempoImages.map((uri, index) => (
-              <Image key={index} source={{ uri }} style={styles.previewImage} />
+            {tempoImages.map((image, index) => (
+              <Image key={index} source={{ uri: image.uri }} style={styles.previewImage} />
             ))}
           </View>
 

@@ -26,7 +26,7 @@ const AddServiceHistoryScreen: React.FC = () => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [workDescription, setWorkDescription] = useState("");
     const [vehicleNumber, setVehicleNumber] = useState("");
-    const [billImages, setBillImages] = useState<string[]>([]);
+    const [billImages, setBillImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
     const [loading, setLoading] = useState(false);
     const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
     const [inputHeight, setInputHeight] = useState(100);
@@ -72,25 +72,31 @@ const AddServiceHistoryScreen: React.FC = () => {
             return;
         }
 
-        const newServiceHistory = {
-            garageName,
-            garageNumber,
-            date: date,
-            workDescription,
-            vehicleNumeber: vehicleNumber,
-            bill: billImages,
+        const formData = new FormData();
+        formData.append('garageName', garageName);
+        formData.append('garageNumber', garageNumber);
+        formData.append('date', date.toISOString());
+        formData.append('workDescription', workDescription);
+        formData.append('vehicleNumber', vehicleNumber);
+
+        const addImageToFormData = async (image: ImagePicker.ImagePickerAsset, fieldName: string) => {
+            const response = await fetch(image.uri);
+            const blob = await response.blob();
+            formData.append(fieldName, blob, `${fieldName}.jpg`);
         };
 
-        console.log(newServiceHistory);
+        for (let i = 0; i < billImages.length; i++) {
+            await addImageToFormData(billImages[i], `bill[${i}]`);
+        }
 
         setLoading(true);
         try {
-            await apiCaller.post('/api/service', newServiceHistory, { headers: { 'Content-Type': 'multipart/form-data' } });
+            await apiCaller.post('/api/service', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
-            setRefresh(prev=>!prev)
+            setRefresh(prev => !prev);
             resetForm();
             Alert.alert("Success", "Service history added successfully!");
-            router.back()
+            router.back();
         } catch (error) {
             console.log(error);
             setLoading(false);
@@ -106,7 +112,7 @@ const AddServiceHistoryScreen: React.FC = () => {
         });
 
         if (!result.canceled) {
-            setBillImages(result.assets.map(asset => asset.uri));
+            setBillImages(result.assets);
         }
     };
 
@@ -189,8 +195,8 @@ const AddServiceHistoryScreen: React.FC = () => {
                             <Text style={styles.imagePickerText}>Select Bill Images</Text>
                         </TouchableOpacity>
                         <View style={styles.imagePreviewContainer}>
-                            {billImages.map((uri, index) => (
-                                <Image key={index} source={{ uri }} style={styles.previewImage} />
+                            {billImages.map((image, index) => (
+                                <Image key={index} source={{ uri: image.uri }} style={styles.previewImage} />
                             ))}
                         </View>
 

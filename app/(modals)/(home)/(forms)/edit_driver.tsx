@@ -22,7 +22,7 @@ import { router } from "expo-router";
 type CityType = {
     countryCode: string;
     name: string;
-    stateCode: string;
+    stateCode: string; 
 };
 
 const AddDriverScreen: React.FC = () => {
@@ -32,9 +32,9 @@ const AddDriverScreen: React.FC = () => {
     const [city, setCity] = useState("");
     const [state, setState] = useState("");
     const [vehicleType, setVehicleType] = useState("");
-    const [driverImage, setDriverImage] = useState<string | null>(null);
-    const [aadharImage, setAadharImage] = useState<string | null>(null);
-    const [licenseImage, setLicenseImage] = useState<string | null>(null);
+    const [driverImage, setDriverImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+    const [aadharImage, setAadharImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+    const [licenseImage, setLicenseImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
     const [loading, setLoading] = useState(false);
     const [cityList, setCityList] = useState<CityType[]>([]);
     const { apiCaller, editData, setRefresh } = useGlobalContext();
@@ -68,21 +68,41 @@ const AddDriverScreen: React.FC = () => {
             return;
         }
 
-        const newDriver = {
-            name,
-            mobileNumber: mobile,
-            password,
-            city,
-            state,
-            vehicleType,
-            photo: driverImage,
-            aadharCard: aadharImage,
-            license: licenseImage,
-        };
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('mobileNumber', mobile);
+        formData.append('password', password);
+        formData.append('city', city);
+        formData.append('state', state);
+        formData.append('vehicleType', vehicleType);
+    
+        if (driverImage) {
+            formData.append('photo', {
+                uri: driverImage,
+                type: 'image/jpeg',
+                name: 'driver_photo.jpg'
+            } as any);
+        }
+    
+        if (aadharImage) {
+            formData.append('aadharCard', {
+                uri: aadharImage,
+                type: 'image/jpeg',
+                name: 'aadhar_card.jpg'
+            } as any);
+        }
+    
+        if (licenseImage) {
+            formData.append('license', {
+                uri: licenseImage,
+                type: 'image/jpeg',
+                name: 'driver_license.jpg'
+            } as any);
+        }
 
         setLoading(true);
         try {
-            await apiCaller.patch(`/api/driver?driverId=${editData._id}`, newDriver, { headers: { 'Content-Type': 'multipart/form-data' } });
+            await apiCaller.patch(`/api/driver?driverId=${editData._id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
             setRefresh(prev=>!prev)
             resetForm();
@@ -105,11 +125,11 @@ const AddDriverScreen: React.FC = () => {
 
         if (!result.canceled) {
             if (type === "driver") {
-                setDriverImage(result.assets[0].uri);
+                setDriverImage(result.assets[0]);
             } else if (type === "aadhar") {
-                setAadharImage(result.assets[0].uri);
+                setAadharImage(result.assets[0]);
             } else {
-                setLicenseImage(result.assets[0].uri);
+                setLicenseImage(result.assets[0]);
             }
         }
     };
@@ -207,17 +227,17 @@ const AddDriverScreen: React.FC = () => {
                     <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("driver")}>
                         <Text style={styles.imagePickerText}>Select Driver Image</Text>
                     </TouchableOpacity>
-                    {driverImage && <Image source={{ uri: driverImage }} style={styles.previewImage} />}
+                    {driverImage && <Image source={{ uri: driverImage.uri }} style={styles.previewImage} />}
 
                     <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("aadhar")}>
                         <Text style={styles.imagePickerText}>Select Aadhar Card Image</Text>
                     </TouchableOpacity>
-                    {aadharImage && <Image source={{ uri: aadharImage }} style={styles.previewImage} />}
+                    {aadharImage && <Image source={{ uri: aadharImage.uri }} style={styles.previewImage} />}
 
                     <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("license")}>
                         <Text style={styles.imagePickerText}>Select Driver License Image</Text>
                     </TouchableOpacity>
-                    {licenseImage && <Image source={{ uri: licenseImage }} style={styles.previewImage} />}
+                    {licenseImage && <Image source={{ uri: licenseImage.uri }} style={styles.previewImage} />}
 
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity

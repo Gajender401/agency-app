@@ -33,8 +33,8 @@ const AddEmployeeScreen: React.FC = () => {
     const [city, setCity] = useState("");
     const [state, setState] = useState("");
     const [employerType, setEmployerType] = useState("");
-    const [selfie, setSelfie] = useState<string | null>(null);
-    const [aadharImage, setAadharImage] = useState<string | null>(null);
+    const [selfie, setSelfie] = useState<ImagePicker.ImagePickerAsset | null>(null);
+    const [aadharImage, setAadharImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
     const [loading, setLoading] = useState(false);
     const [cityList, setCityList] = useState<CityType[]>([]);
     const { apiCaller, setRefresh } = useGlobalContext(); // Ensure your global context provides an apiCaller
@@ -53,31 +53,48 @@ const AddEmployeeScreen: React.FC = () => {
             Alert.alert("Please fill all fields and provide both images.");
             return;
         }
-
+    
         if (mobile.length !== 10) {
             Alert.alert("Please enter a valid 10-digit phone number.");
             return;
         }
-
-        const newEmployee = {
-            name,
-            mobileNumber: mobile,
-            password,
-            city,
-            state,
-            employeeType: employerType,
-            photo: selfie,
-            aadharCard: aadharImage,
-        };
-
+    
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('mobileNumber', mobile);
+        formData.append('password', password);
+        formData.append('city', city);
+        formData.append('state', state);
+        formData.append('employeeType', employerType);
+    
+        if (selfie) {
+            formData.append('photo', {
+                uri: selfie,
+                type: 'image/jpeg',
+                name: 'employee_selfie.jpg'
+            } as any);
+        }
+    
+        if (aadharImage) {
+            formData.append('aadharCard', {
+                uri: aadharImage,
+                type: 'image/jpeg',
+                name: 'aadhar_card.jpg'
+            } as any);
+        }
+    
+        console.log(formData);
+        
         setLoading(true);
         try {
-            await apiCaller.post('/api/employee', newEmployee, { headers: { 'Content-Type': 'multipart/form-data' } });
+            await apiCaller.post('/api/employee', formData, { 
+                headers: { 'Content-Type': 'multipart/form-data' } 
+            });
             setLoading(false);
-            setRefresh(prev=>!prev)
+            setRefresh(prev => !prev);
             resetForm();
             Alert.alert("Success", "Employee added successfully!");
-            router.back()
+            router.back();
         } catch (error) {
             console.log(error);
             setLoading(false);
@@ -95,9 +112,9 @@ const AddEmployeeScreen: React.FC = () => {
 
         if (!result.canceled) {
             if (type === "selfie") {
-                setSelfie(result.assets[0].uri);
+                setSelfie(result.assets[0]);
             } else {
-                setAadharImage(result.assets[0].uri);
+                setAadharImage(result.assets[0]);
             }
         }
     };
@@ -195,12 +212,12 @@ const AddEmployeeScreen: React.FC = () => {
                     <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("selfie")}>
                         <Text style={styles.imagePickerText}>Select Selfie</Text>
                     </TouchableOpacity>
-                    {selfie && <Image source={{ uri: selfie }} style={styles.previewImage} />}
+                    {selfie && <Image source={{ uri: selfie.uri }} style={styles.previewImage} />}
 
                     <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("aadhar")}>
                         <Text style={styles.imagePickerText}>Select Aadhar Card Image</Text>
                     </TouchableOpacity>
-                    {aadharImage && <Image source={{ uri: aadharImage }} style={styles.previewImage} />}
+                    {aadharImage && <Image source={{ uri: aadharImage.uri }} style={styles.previewImage} />}
 
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity
