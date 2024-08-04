@@ -26,7 +26,7 @@ const AddServiceHistoryScreen: React.FC = () => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [workDescription, setWorkDescription] = useState("");
     const [vehicleId, setVehicleId] = useState("");
-    const [billImages, setBillImages] = useState<string[]>([]);
+    const [billImages, setBillImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
     const [loading, setLoading] = useState(false);
     const [inputHeight, setInputHeight] = useState(100);
     const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
@@ -34,7 +34,7 @@ const AddServiceHistoryScreen: React.FC = () => {
 
     const findVehicleByNumber = (number: string) => {
         return vehicleNumbers.find(vehicle => vehicle.id === number);
-      };
+    };
 
     useEffect(() => {
         fetchVehicles();
@@ -48,7 +48,6 @@ const AddServiceHistoryScreen: React.FC = () => {
             setWorkDescription(editData.workDescription);
             setVehicleId(editData.vehicle);
             setBillImages(editData.bill || []);
-            
         }
     }, [editData])
 
@@ -81,18 +80,24 @@ const AddServiceHistoryScreen: React.FC = () => {
             return;
         }
 
-        const newServiceHistory = {
-            garageName,
-            garageNumber,
-            date: date.toISOString().split('T')[0],
-            workDescription,
-            vehicleId: vehicleId,
-            bill: billImages,
-        };
+        const formData = new FormData();
+        formData.append('garageName', garageName);
+        formData.append('garageNumber', garageNumber);
+        formData.append('date', date.toISOString().split('T')[0]);
+        formData.append('workDescription', workDescription);
+        formData.append('vehicleId', vehicleId);
+
+        billImages.forEach((image, index) => {
+            formData.append('bill', {
+                uri: image.uri,
+                type: 'image/jpeg',
+                name: `bill${index}.jpg`
+            } as any);
+        });
 
         setLoading(true);
         try {
-            await apiCaller.patch(`/api/service?serviceId=${editData._id}`, newServiceHistory, { headers: { 'Content-Type': 'multipart/form-data' } });
+            await apiCaller.patch(`/api/service?serviceId=${editData._id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false);
             setRefresh(prev => !prev);
             router.back();
@@ -114,8 +119,7 @@ const AddServiceHistoryScreen: React.FC = () => {
         });
 
         if (!result.canceled) {
-            const newImages = result.assets.map(asset => asset.uri);
-            setBillImages(prevImages => [...prevImages, ...newImages]);
+            setBillImages(result.assets);
         }
     };
 
@@ -194,7 +198,7 @@ const AddServiceHistoryScreen: React.FC = () => {
                         </TouchableOpacity>
                         {billImages.map((image, index) => (
                             <View key={index} style={styles.imageContainer}>
-                                <Image source={{ uri: image }} style={styles.previewImage} />
+                                <Image source={{ uri: image.uri }} style={styles.previewImage} />
                                 <TouchableOpacity style={styles.removeButton} onPress={() => removeImage(index)}>
                                     <Text style={styles.removeButtonText}>Remove</Text>
                                 </TouchableOpacity>

@@ -19,12 +19,12 @@ import { Picker } from '@react-native-picker/picker';
 
 const EditVehicleDocumentsScreen: React.FC = () => {
     const [vehicleId, setVehicleId] = useState("");
-    const [rcImage, setRcImage] = useState<string | null>(null);
-    const [insuranceImage, setInsuranceImage] = useState<string | null>(null);
-    const [permitImage, setPermitImage] = useState<string | null>(null);
-    const [fitnessImage, setFitnessImage] = useState<string | null>(null);
-    const [taxImage, setTaxImage] = useState<string | null>(null);
-    const [pucImage, setPucImage] = useState<string | null>(null);
+    const [rcImage, setRcImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+    const [insuranceImage, setInsuranceImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+    const [permitImage, setPermitImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+    const [fitnessImage, setFitnessImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+    const [taxImage, setTaxImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+    const [pucImage, setPucImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
     const [loading, setLoading] = useState(false);
     const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
     const { apiCaller, editData, setRefresh } = useGlobalContext();
@@ -52,12 +52,12 @@ const EditVehicleDocumentsScreen: React.FC = () => {
     useEffect(() => {
         if (editData) {
             setVehicleId(editData._id);
-            setRcImage(editData.RC);
-            setInsuranceImage(editData.insurance);
-            setPermitImage(editData.permit);
-            setFitnessImage(editData.fitness);
-            setTaxImage(editData.tax);
-            setPucImage(editData.PUC);
+            setRcImage({uri:editData.RC});
+            setInsuranceImage({uri:editData.insurance});
+            setPermitImage({uri:editData.permit});
+            setFitnessImage({uri:editData.fitness});
+            setTaxImage({uri:editData.tax});
+            setPucImage({uri:editData.PUC});
         }
     }, [editData])
 
@@ -67,18 +67,41 @@ const EditVehicleDocumentsScreen: React.FC = () => {
             return;
         }
 
-        const newVehicleDocuments = {
-            RC: rcImage,
-            insurance: insuranceImage,
-            permit: permitImage,
-            fitness: fitnessImage,
-            tax: taxImage,
-            PUC: pucImage,
-        };
+        const formData = new FormData();
+        formData.append('RC', {
+            uri: rcImage.uri,
+            type: 'image/jpeg',
+            name: 'rc.jpg',
+        } as any);
+        formData.append('insurance', {
+            uri: insuranceImage.uri,
+            type: 'image/jpeg',
+            name: 'insurance.jpg',
+        } as any);
+        formData.append('permit', {
+            uri: permitImage.uri,
+            type: 'image/jpeg',
+            name: 'permit.jpg',
+        } as any);
+        formData.append('fitness', {
+            uri: fitnessImage.uri,
+            type: 'image/jpeg',
+            name: 'fitness.jpg',
+        } as any);
+        formData.append('tax', {
+            uri: taxImage.uri,
+            type: 'image/jpeg',
+            name: 'tax.jpg',
+        } as any);
+        formData.append('PUC', {
+            uri: pucImage.uri,
+            type: 'image/jpeg',
+            name: 'puc.jpg',
+        } as any);
 
         setLoading(true);
         try {
-            await apiCaller.patch(`/api/vehicle/addDocuments?vehicleId=${vehicleId}`, newVehicleDocuments, {
+            await apiCaller.patch(`/api/vehicle/addDocuments?vehicleId=${vehicleId}`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             setLoading(false);
@@ -93,7 +116,7 @@ const EditVehicleDocumentsScreen: React.FC = () => {
         }
     };
 
-    const handleImagePicker = async (setImage: React.Dispatch<React.SetStateAction<string | null>>) => {
+    const handleImagePicker = async (setImage: React.Dispatch<React.SetStateAction<ImagePicker.ImagePickerAsset | null>>) => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsMultipleSelection: false,
@@ -101,7 +124,7 @@ const EditVehicleDocumentsScreen: React.FC = () => {
         });
 
         if (!result.canceled) {
-            setImage(result.assets[0].uri);
+            setImage(result.assets[0]);
         }
     };
 
@@ -142,7 +165,7 @@ const EditVehicleDocumentsScreen: React.FC = () => {
                         >
                             <Text style={styles.imagePickerText}>Upload RC</Text>
                         </TouchableOpacity>
-                        {rcImage && <Image source={{ uri: rcImage }} style={styles.previewImage} />}
+                        {rcImage && <Image source={{ uri: rcImage.uri }} style={styles.previewImage} />}
                     </View>
 
                     <View style={styles.inputGroup}>
@@ -152,7 +175,7 @@ const EditVehicleDocumentsScreen: React.FC = () => {
                         >
                             <Text style={styles.imagePickerText}>Upload Insurance</Text>
                         </TouchableOpacity>
-                        {insuranceImage && <Image source={{ uri: insuranceImage }} style={styles.previewImage} />}
+                        {insuranceImage && <Image source={{ uri: insuranceImage.uri }} style={styles.previewImage} />}
                     </View>
 
                     <View style={styles.inputGroup}>
@@ -162,7 +185,7 @@ const EditVehicleDocumentsScreen: React.FC = () => {
                         >
                             <Text style={styles.imagePickerText}>Upload Permit</Text>
                         </TouchableOpacity>
-                        {permitImage && <Image source={{ uri: permitImage }} style={styles.previewImage} />}
+                        {permitImage && <Image source={{ uri: permitImage.uri }} style={styles.previewImage} />}
                     </View>
 
                     <View style={styles.inputGroup}>
@@ -172,7 +195,7 @@ const EditVehicleDocumentsScreen: React.FC = () => {
                         >
                             <Text style={styles.imagePickerText}>Upload Fitness</Text>
                         </TouchableOpacity>
-                        {fitnessImage && <Image source={{ uri: fitnessImage }} style={styles.previewImage} />}
+                        {fitnessImage && <Image source={{ uri: fitnessImage.uri }} style={styles.previewImage} />}
                     </View>
 
                     <View style={styles.inputGroup}>
@@ -182,7 +205,7 @@ const EditVehicleDocumentsScreen: React.FC = () => {
                         >
                             <Text style={styles.imagePickerText}>Upload Tax</Text>
                         </TouchableOpacity>
-                        {taxImage && <Image source={{ uri: taxImage }} style={styles.previewImage} />}
+                        {taxImage && <Image source={{ uri: taxImage.uri }} style={styles.previewImage} />}
                     </View>
 
                     <View style={styles.inputGroup}>
@@ -192,7 +215,7 @@ const EditVehicleDocumentsScreen: React.FC = () => {
                         >
                             <Text style={styles.imagePickerText}>Upload PUC</Text>
                         </TouchableOpacity>
-                        {pucImage && <Image source={{ uri: pucImage }} style={styles.previewImage} />}
+                        {pucImage && <Image source={{ uri: pucImage.uri }} style={styles.previewImage} />}
                     </View>
 
                     <View style={styles.modalButtons}>
