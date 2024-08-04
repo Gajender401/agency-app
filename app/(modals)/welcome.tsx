@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -7,12 +7,14 @@ import {
   TouchableOpacity,
   Image,
   SafeAreaView,
+  Dimensions,
 } from "react-native";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
 
-const WelcomeScreen = () => {
+const { width: screenWidth } = Dimensions.get('window');
 
+const WelcomeScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -20,16 +22,12 @@ const WelcomeScreen = () => {
       <View style={styles.innerContainer}>
         <Image style={styles.image} source={require('@/assets/images/welcome.png')} />
         <View style={styles.button_container}>
-          <Image style={{ marginBottom: 10 }} source={require('@/assets/images/tourist_text.png')} />
-          <TouchableOpacity onPress={()=> router.push("/(modals)/login")} style={styles.button}>
-            <Text style={styles.buttonText}>
-              Login
-            </Text>
+          <Image style={styles.tourist_text} source={require('@/assets/images/tourist_text.png')} />
+          <TouchableOpacity onPress={() => router.push("/(modals)/login")} style={styles.button}>
+            <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={()=> router.push("/(modals)/signup")} style={styles.button}>
-            <Text style={styles.buttonText}>
-              Sign Up
-            </Text>
+          <TouchableOpacity onPress={() => router.push("/(modals)/signup")} style={styles.button}>
+            <Text style={styles.buttonText}>Sign Up</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -40,7 +38,6 @@ const WelcomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     justifyContent: "flex-end",
     alignItems: "center",
     marginTop: StatusBar.currentHeight,
@@ -49,20 +46,20 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
     alignItems: "center",
-    padding: 10,
     width: "100%",
-    gap:80,
-    paddingBottom:100
+    paddingBottom: 100,
   },
   image: {
-    width: 200,
-    height: 200,
+    width: screenWidth * 0.5,
+    height: screenWidth * 0.5,
+    maxWidth: 200,
+    maxHeight: 200,
+    marginBottom: 80,
   },
   button_container: {
-    width: 240,
-    gap: 25,
-    justifyContent: "center",
-    alignItems: "center"
+    width: "80%",
+    maxWidth: 240,
+    alignItems: "center",
   },
   button: {
     borderRadius: 30,
@@ -70,17 +67,25 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     alignItems: "center",
     width: "100%",
-    borderColor:Colors.primary
+    borderColor: Colors.primary,
+    marginBottom: 25,
   },
   buttonText: {
-    fontSize: 21,
+    fontSize: Math.min(21, screenWidth * 0.05),
+    textAlign: 'center',
+    paddingHorizontal: 10,
   },
   wave_image: {
     width: "110%",
     position: "absolute",
     height: 300,
-    top:0
-},
+    top: 0,
+  },
+  tourist_text: {
+    marginBottom: 25,
+    width: "100%",
+    resizeMode: "contain",
+  },
 });
 
 export default WelcomeScreen;
