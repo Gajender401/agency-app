@@ -7,6 +7,7 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  Image
 } from "react-native";
 import { Colors } from "@/constants/Colors";
 import RazorpayCheckout from 'react-native-razorpay';
@@ -39,7 +40,7 @@ const PlansScreen: React.FC = () => {
       <Text style={styles.featureText}>• {item}</Text>
     </View>
   );
-
+  
   const renderPlan = ({ item }: { item: typeof plans[0] }) => (
     <TouchableOpacity
       style={[
@@ -48,6 +49,12 @@ const PlansScreen: React.FC = () => {
       ]}
       onPress={() => handlePlanSelect(item)}
     >
+      {item.name === "Annual Plan" && (
+        <Image
+          source={require('@/assets/images/top-seller.png')} // Update the path to your "bestseller" image
+          style={styles.bestsellerImage}
+        />
+      )}
       <Text style={[
         styles.planName,
         selectedPlan?.name === item.name && styles.selectedPlanText
@@ -159,6 +166,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FAF9F6",
     padding: 16,
+  },
+  bestsellerImage: {
+    position: 'absolute',
+    top: -10,
+    right: -10,
+    width: 100,
+    height: 50,
+    resizeMode: 'contain',
   },
   header: {
     marginBottom: 20,

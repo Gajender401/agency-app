@@ -20,6 +20,7 @@ import { router } from "expo-router";
 import { useGlobalContext } from "@/context/GlobalProvider";
 import { Picker } from '@react-native-picker/picker';
 import { State, City } from 'country-state-city';
+import { Rating, AirbnbRating } from 'react-native-ratings';
 
 interface BlurOverlayProps {
     visible: boolean;
@@ -66,6 +67,8 @@ const TechnicianSupport: React.FC = () => {
     const { apiCaller, setEditData, refresh } = useGlobalContext();
     const [currentPage, setCurrentPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [timeoutId, setTimeoutId] = useState(null);
 
     const states = State.getStatesOfCountry('IN');
     const cities = City.getCitiesOfState('IN', stateFilter);
@@ -125,9 +128,24 @@ const TechnicianSupport: React.FC = () => {
         fetchTechnicians(1);
     };
 
+    const handlePress = (number: string) => {
+        Linking.openURL(`tel:${number}`);
+        console.log('Phone number dialed: ', number); // Debugging
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        const id = setTimeout(() => {
+          console.log('Showing modal'); // Debugging
+          setModalVisible(true);
+        }, 100);
+        setTimeoutId(id);
+      };
+
     const dialNumber = (number: string) => {
         Linking.openURL(`tel:${number}`);
     };
+
+    
 
     const handleVehicleFilterChange = (itemValue: string) => {
         if (itemValue == 'all') {
@@ -156,22 +174,62 @@ const TechnicianSupport: React.FC = () => {
     };
 
     const renderTechnicianItem = ({ item }: { item: Technician }) => (
-        <View style={styles.card}>
-            <View style={[styles.cardHeader, { marginBottom: 2, marginTop: 5 }]}>
-                <TouchableOpacity onPress={() => dialNumber(item.mobileNumber)}>
-                    <MaterialIcons name="phone-in-talk" size={24} color={Colors.darkBlue} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => dialNumber(item.alternateNumber)}>
-                    <MaterialIcons name="phone-in-talk" size={24} color={Colors.secondary} />
-                </TouchableOpacity>
-            </View>
-            <Text style={styles.cardText}>Technician Name: <Text style={{ color: "black" }}> {item.name}</Text></Text>
+        <>
+          
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Check Airbnb Ratings Below:</Text>
+      
+      <Text>Check Airbnb Ratings Below:</Text>
+      <View style={styles.ratingContainer}>
+        <AirbnbRating />
+        <AirbnbRating
+          count={11}
+          reviews={["Terrible", "Bad", "Meh", "OK", "Good", "Hmm...", "Very Good", "Wow", "Amazing", "Unbelievable", "Jesus"]}
+          defaultRating={11}
+          size={20}
+        />
+      </View>
+        
+       
+            
+     <View style={[styles.cardHeader, { marginBottom: 2, marginTop: 5 }]}>
+        <TouchableOpacity onPress={() => handlePress(item.mobileNumber)}>
+          <MaterialIcons name="phone-in-talk" size={24} color={Colors.darkBlue} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handlePress(item.alternateNumber)}>
+          <MaterialIcons name="phone-in-talk" size={24} color={Colors.secondary} />
+        </TouchableOpacity>
+      </View>
+
+            <Text style={styles.cardText}>Techniciannnn Name: <Text style={{ color: "black" }}> {item.name}</Text></Text>
             <Text style={styles.cardText}>Technician Type: <Text style={{ color: "black" }}> {item.technicianType}</Text></Text>
             <Text style={styles.cardText}>City: <Text style={{ color: "black" }}>{item.city}</Text></Text>
             <Text style={styles.cardText}>State: <Text style={{ color: "black" }}>{item.state}</Text></Text>
             <Text style={styles.cardText}>Vehicle Type: <Text style={{ color: "black" }}> {item.vehicleType}</Text></Text>
+
+            
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <AirbnbRating
+              reviews={['bad', 'ok', 'good', 'very good', 'excellent']}
+              count={5}
+              defaultRating={3}
+            />
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-    );
+      </Modal>
+        </View>
+        </>
+    ); 
 
     const handleLoadMore = () => {
         if (!loading && hasMore) {
@@ -315,6 +373,9 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: "#fff",
     },
+    ratingContainer: {
+        marginBottom: 20,
+      },
     searchContainer: {
         flexDirection: "row",
         alignItems: "center",
@@ -325,6 +386,28 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         paddingVertical: 5,
     },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+      },
+      modalContent: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 10,
+        width: '80%',
+        alignItems: 'center',
+      },
+      closeButton: {
+        marginTop: 10,
+        padding: 10,
+        backgroundColor: '#ddd',
+        borderRadius: 5,
+      },
+      closeButtonText: {
+        color: 'black',
+      },
     searchInput: {
         flex: 1,
         marginLeft: 10,

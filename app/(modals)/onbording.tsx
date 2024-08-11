@@ -12,7 +12,7 @@ import { Colors } from "@/constants/Colors";
 
 const OnboardingScreen = () => {
   const handleNext = () => {
-    router.push("/(modals)/welcome");
+    router.push("/(modals)/customerOrAgency");
   };
 
   return (

@@ -43,6 +43,8 @@ const GalleryGridScreen: React.FC = () => {
         }
     };
 
+
+
     const toggleImageSelection = (image: string) => {
         setSelectedImages(prev =>
             prev.includes(image)
