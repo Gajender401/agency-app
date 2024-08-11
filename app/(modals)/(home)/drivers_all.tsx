@@ -46,17 +46,31 @@ const DriverListScreen: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const { apiCaller, setEditData, refresh } = useGlobalContext();
 
-    const fetchDrivers = async () => {
-        try {
+    // const fetchDrivers = async () => {
+    //     try {
+    //         setLoading(true);
+    //         const response = await apiCaller.get('/api/driver/all');
+    //         setDrivers(response.data.data);
+    //     } catch (err) {
+    //         console.log(err);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    const fetchDrivers = async () =>{
+        try{
             setLoading(true);
             const response = await apiCaller.get('/api/driver/all');
             setDrivers(response.data.data);
-        } catch (err) {
+        }catch{
+           
             console.log(err);
-        } finally {
+
+        }finally{
             setLoading(false);
         }
-    };
+    }
 
     useEffect(() => {
         fetchDrivers();

@@ -159,6 +159,77 @@ const AddRouteScreen: React.FC = () => {
                                 />
                             )}
                         </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Arrival Time</Text>
+                            <TouchableOpacity
+                                style={styles.input}
+                                onPress={() => setShowTimePicker(true)}
+                            >
+                                <Text>{departureTime ? departureTime.toLocaleTimeString() : "Select Time"}</Text>
+                            </TouchableOpacity>
+                            {showTimePicker && (
+                                <DateTimePicker
+                                    value={departureTime || new Date()}
+                                    mode="time"
+                                    display="default"
+                                    onChange={onChangeTime}
+                                    is24Hour={false}
+                                />
+                            )}
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Add Pick up point</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={destinationPlace}
+                                onChangeText={(text) => setDestinationPlace(text)}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Add drop off point</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={destinationPlace}
+                                onChangeText={(text) => setDestinationPlace(text)}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Ticket Fare</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={destinationPlace}
+                                onChangeText={(text) => setDestinationPlace(text)}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Add Bus Photos</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={destinationPlace}
+                                onChangeText={(text) => setDestinationPlace(text)}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Vehicle Type</Text>
+                            <TextInput
+                                style={styles.input}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Coach Type</Text>
+                            <TextInput
+                                style={styles.input}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Select Aminities</Text>
+                            <TextInput
+                                style={styles.input}
+                            />
+                        </View>
+
+
+
 
                         <View style={styles.modalButtons}>
                             <TouchableOpacity

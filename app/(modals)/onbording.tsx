@@ -16,7 +16,7 @@ const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const OnboardingScreen = () => {
   const handleNext = () => {
-    router.push("/(modals)/welcome");
+    router.push("/(modals)/customerOrAgency");
   };
 
   return (

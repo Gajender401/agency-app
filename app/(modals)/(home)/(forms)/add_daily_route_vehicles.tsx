@@ -8,7 +8,8 @@ import {
     ScrollView,
     Platform,
     Alert,
-    ActivityIndicator
+    ActivityIndicator,
+    Image
 } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -16,6 +17,9 @@ import { Colors } from "@/constants/Colors"; // Replace with your colors constan
 import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have this hook or context
 import { GestureHandlerRootView, TextInput } from "react-native-gesture-handler";
 import { router } from "expo-router";
+const [busImages, setBusImages] = useState<string[]>([]);
+import * as ImagePicker from "expo-image-picker";
+
 
 const AddRouteScreen: React.FC = () => {
     const [vehicleNumber, setVehicleNumber] = useState<string>("");
@@ -26,10 +30,16 @@ const AddRouteScreen: React.FC = () => {
     const [vehicleNumbers, setVehicleNumbers] = useState<{ id: string, number: string }[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const { apiCaller, setRefresh } = useGlobalContext();
+    const [selectedAmenities, setSelectedAmenities] = useState<number[]>([]);
+    const [selectedOption, setSelectedOption] = useState(null);
+
 
     const extractNumbers = (data: Vehicle[]): { id: string, number: string }[] => {
         return data.map(vehicle => ({ id: vehicle._id, number: vehicle.number }));
     };
+      
+      
+   
 
     const fetchVehicles = async () => {
         try {
@@ -74,6 +84,19 @@ const AddRouteScreen: React.FC = () => {
             Alert.alert("Error", "Failed to add route. Please try again.");
         }
     };
+    
+    const handleImagePicker = async () => {
+        let result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsMultipleSelection: true,
+          quality: 1,
+        });
+      
+        if (!result.canceled && result.assets) {
+          setBusImages(result.assets.map(asset => asset.uri));
+        }
+      };
+      
 
     const resetForm = () => {
         setVehicleNumber("");
@@ -88,6 +111,16 @@ const AddRouteScreen: React.FC = () => {
             setDepartureTime(selectedTime);
         }
     };
+    
+    const toggleSelectAmenity = (id: number) => {
+        setSelectedAmenities(prevSelected =>
+            prevSelected.includes(id)
+                ? prevSelected.filter(amenityId => amenityId !== id)
+                : [...prevSelected, id]
+        );
+    };
+
+    
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
@@ -142,6 +175,160 @@ const AddRouteScreen: React.FC = () => {
                                 />
                             )}
                         </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Arrival Time</Text>
+                            <TouchableOpacity
+                                style={styles.input}
+                                onPress={() => setShowTimePicker(true)}
+                            >
+                                <Text>{departureTime ? departureTime.toLocaleTimeString() : "Select Time"}</Text>
+                            </TouchableOpacity>
+                            {showTimePicker && (
+                                <DateTimePicker
+                                    value={departureTime || new Date()}
+                                    mode="time"
+                                    display="default"
+                                    onChange={onChangeTime}
+                                    is24Hour={false}
+                                />
+                            )}
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Add Pick up point</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={destinationPlace}
+                                // onChangeText={(text) => setDestinationPlace(text)}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Add drop off point</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={destinationPlace}
+                                // onChangeText={(text) => setDestinationPlace(text)}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Ticket Fare</Text>
+                            <TextInput
+                                style={styles.input}
+                                value={destinationPlace}
+                                // onChangeText={(text) => setDestinationPlace(text)}
+                            />
+                        </View>
+
+                        <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
+                            <Text style={styles.imagePickerText}>Upload Bus Images (Max 5)</Text>
+                        </TouchableOpacity>
+                        <View style={styles.imagePreviewContainer}>
+                            {busImages.map((uri, index) => (
+                            <Image key={index} source={{ uri }} style={styles.previewImage} />
+                            ))}
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Vehicle Type</Text>
+                            <TextInput
+                                style={styles.input}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Coach Type</Text>
+                            <TextInput
+                                style={styles.input}
+                            />
+                        </View>
+                        <Text style={{ flex: 1, fontWeight: 'bold', color:'#87CEEB'}}>Select Amenities:</Text>
+                        <View style={{ paddingTop: 1, paddingBottom: 14, flexDirection: 'row', flexWrap: 'wrap' }}>
+                            {[
+                                { id: 1, source: require('@/assets/images/wifi-icon.png') },
+                                { id: 2, source: require('@/assets/images/blanket.png') },
+                                { id: 3, source: require('@/assets/images/bottle.png') },
+                                { id: 4, source: require('@/assets/images/charger.png') },
+                                { id: 5, source: require('@/assets/images/meal.png') },
+                                { id: 6, source: require('@/assets/images/pillow.png') },
+                                { id: 7, source: require('@/assets/images/tv.png') },
+                            ].map(amenity => (
+                                <TouchableOpacity
+                                    key={amenity.id}
+                                    onPress={() => toggleSelectAmenity(amenity.id)}
+                                    style={{
+                                        backgroundColor: selectedAmenities.includes(amenity.id) ? '#87CEEB' : 'transparent',
+                                        padding: 5,
+                                        borderRadius: 5,
+                                        marginHorizontal: 5,
+                                    }}>
+                                    <Image source={amenity.source} style={{ width: 30, height: 30 }} />
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                       
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Do you provide courier parcel services</Text>
+                             <Text>Yes</Text>
+                             <Text>No</Text>
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Do you Book Train Tickets</Text>
+                            <Text>Yes</Text>
+                            <Text>No</Text>
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Add your PhonePe no and name here</Text>
+                            <TextInput
+                                style={styles.input}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Add your QR photo here</Text>
+                            <TextInput
+                                style={styles.input}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Add your Seating Arrengement Chart photo here</Text>
+                            <TextInput
+                                style={styles.input}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Add your Office Name</Text>
+                            <TextInput
+                                style={styles.input}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Mobile No 1</Text>
+                            <TextInput
+                                style={styles.input}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Mobile No 2</Text>
+                            <TextInput
+                                style={styles.input}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Mobile No 3</Text>
+                            <TextInput
+                                style={styles.input}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Mobile No 4</Text>
+                            <TextInput
+                                style={styles.input}
+                            />
+                        </View>
+                        <View style={styles.inputGroup}>
+                            <Text style={styles.label}>Add Office Address</Text>
+                            <TextInput
+                                style={styles.input}
+                            />
+                        </View>
+
 
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
@@ -165,7 +352,7 @@ const AddRouteScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
+        padding: 2,
         backgroundColor: "#ffffff",
     },
     modalContainer: {
@@ -188,6 +375,21 @@ const styles = StyleSheet.create({
         color: Colors.secondary,
         fontWeight: "500"
     },
+    checkboxContainer: {
+        flexDirection: 'row',
+        marginTop: 8,
+      },
+      checkboxWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 16,
+      },
+      checkbox: {
+        marginRight: 8,
+      },
+      checkboxLabel: {
+        fontSize: 16,
+      },
     input: {
         borderColor: Colors.secondary,
         borderWidth: 1,
@@ -201,6 +403,30 @@ const styles = StyleSheet.create({
         textAlignVertical: 'top',
         paddingTop: 10,
     },
+    imagePicker: {
+        padding: 15,
+        backgroundColor: Colors.secondary,
+        borderRadius: 10,
+        alignItems: "center",
+        marginVertical: 15,
+      },
+      imagePickerText: {
+        fontSize: 14,
+        fontWeight: "500",
+        color: Colors.primary,
+      },
+      imagePreviewContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-around",
+        marginBottom: 15,
+      },
+      previewImage: {
+        width: 70,
+        height: 70,
+        borderRadius: 10,
+        marginBottom: 10,
+      },
     pickerContainer: {
         borderColor: Colors.secondary,
         borderWidth: 1,
