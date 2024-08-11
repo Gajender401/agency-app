@@ -17,11 +17,11 @@ import { Colors } from "@/constants/Colors"; // Replace with your colors constan
 import { useGlobalContext } from "@/context/GlobalProvider"; // Ensure you have this hook or context
 import { GestureHandlerRootView, TextInput } from "react-native-gesture-handler";
 import { router } from "expo-router";
-const [busImages, setBusImages] = useState<string[]>([]);
 import * as ImagePicker from "expo-image-picker";
 
 
 const AddRouteScreen: React.FC = () => {
+    const [busImages, setBusImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
     const [vehicleNumber, setVehicleNumber] = useState<string>("");
     const [departurePlace, setDeparturePlace] = useState<string>("");
     const [destinationPlace, setDestinationPlace] = useState<string>("");
@@ -93,7 +93,7 @@ const AddRouteScreen: React.FC = () => {
         });
       
         if (!result.canceled && result.assets) {
-          setBusImages(result.assets.map(asset => asset.uri));
+          setBusImages(result.assets);
         }
       };
       
@@ -222,8 +222,8 @@ const AddRouteScreen: React.FC = () => {
                             <Text style={styles.imagePickerText}>Upload Bus Images (Max 5)</Text>
                         </TouchableOpacity>
                         <View style={styles.imagePreviewContainer}>
-                            {busImages.map((uri, index) => (
-                            <Image key={index} source={{ uri }} style={styles.previewImage} />
+                            {busImages.map((image, index) => (
+                            <Image key={index} source={{ uri: image.uri }} style={styles.previewImage} />
                             ))}
                         </View>
 
