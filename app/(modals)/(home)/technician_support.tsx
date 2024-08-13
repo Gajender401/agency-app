@@ -56,7 +56,6 @@ interface Technician {
 
 const TechnicianSupport: React.FC = () => {
     const [technicians, setTechnicians] = useState<Technician[]>([]);
-    const [filteredTechnicians, setFilteredTechnicians] = useState<Technician[]>([]);
     const [loading, setLoading] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [idToDelete, setIdToDelete] = useState<null | string>(null);
@@ -68,7 +67,7 @@ const TechnicianSupport: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [modalVisible, setModalVisible] = useState(false);
-    const [timeoutId, setTimeoutId] = useState(null);
+    const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
     const states = State.getStatesOfCountry('IN');
     const cities = City.getCitiesOfState('IN', stateFilter);
@@ -78,15 +77,18 @@ const TechnicianSupport: React.FC = () => {
 
         try {
             setLoading(true);
-            const response = await apiCaller.get(`/api/technician?page=${page}`);
+            let url = `/api/technician?page=${page}`;
+            if (cityFilter) url += `&city=${cityFilter}`;
+            if (vehicleFilter) url += `&vehicleType=${vehicleFilter}`;
+            if (searchQuery) url += `&search=${searchQuery}`;
+
+            const response = await apiCaller.get(url);
             const newTechnicians = response.data.data;
             
             if (isLoadMore) {
                 setTechnicians(prev => [...prev, ...newTechnicians]);
-                setFilteredTechnicians(prev => [...prev, ...newTechnicians]);
             } else {
                 setTechnicians(newTechnicians);
-                setFilteredTechnicians(newTechnicians);
             }
 
             setHasMore(newTechnicians.length > 0);
@@ -100,27 +102,7 @@ const TechnicianSupport: React.FC = () => {
 
     useEffect(() => {
         fetchTechnicians(1);
-    }, [refresh]);
-
-    useEffect(() => {
-        const filtered = technicians.filter(tech => {
-            const matchesSearch = 
-                tech.technicianType.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                tech.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                tech.city.toLowerCase().includes(searchQuery.toLowerCase());
-
-            const matchesVehicle = vehicleFilter === '' || tech.vehicleType === vehicleFilter;
-            const matchesCity = cityFilter === '' || tech.city === cityFilter.toLowerCase();
-
-            if (vehicleFilter === '' && stateFilter === '' && cityFilter === '') {
-                return matchesSearch;
-            }
-
-            return matchesSearch && matchesVehicle && matchesCity;
-        });
-        
-        setFilteredTechnicians(filtered);
-    }, [searchQuery, vehicleFilter, stateFilter, cityFilter, technicians]);
+    }, [refresh, cityFilter, vehicleFilter, searchQuery]);
 
     const handleDelete = async () => {
         await apiCaller.delete(`/api/technician?technicianId=${idToDelete}`);
@@ -130,105 +112,78 @@ const TechnicianSupport: React.FC = () => {
 
     const handlePress = (number: string) => {
         Linking.openURL(`tel:${number}`);
-        console.log('Phone number dialed: ', number); // Debugging
+        console.log('Phone number dialed: ', number);
         if (timeoutId) {
           clearTimeout(timeoutId);
         }
         const id = setTimeout(() => {
-          console.log('Showing modal'); // Debugging
+          console.log('Showing modal');
           setModalVisible(true);
         }, 100);
         setTimeoutId(id);
-      };
-
-    const dialNumber = (number: string) => {
-        Linking.openURL(`tel:${number}`);
     };
 
-    
-
     const handleVehicleFilterChange = (itemValue: string) => {
-        if (itemValue == 'all') {
-            setVehicleFilter('');
-        } else {
-            setVehicleFilter(itemValue);
-        }
+        setVehicleFilter(itemValue === 'all' ? '' : itemValue);
     };
 
     const handleStateFilterChange = (itemValue: string) => {
-        if (itemValue == 'all') {
-            setStateFilter('');
-            setCityFilter('');
-        } else {
-            setStateFilter(itemValue);
-            setCityFilter('');
-        }
+        setStateFilter(itemValue === 'all' ? '' : itemValue);
+        setCityFilter('');
     };
 
     const handleCityFilterChange = (itemValue: string) => {
-        if (itemValue == 'all') {
-            setCityFilter('');
-        } else {
-            setCityFilter(itemValue);
-        }
+        setCityFilter(itemValue === 'all' ? '' : itemValue);
     };
 
     const renderTechnicianItem = ({ item }: { item: Technician }) => (
-        <>
-          
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Check Airbnb Ratings Below:</Text>
-      
-      <Text>Check Airbnb Ratings Below:</Text>
-      <View style={styles.ratingContainer}>
-        <AirbnbRating />
-        <AirbnbRating
-          count={11}
-          reviews={["Terrible", "Bad", "Meh", "OK", "Good", "Hmm...", "Very Good", "Wow", "Amazing", "Unbelievable", "Jesus"]}
-          defaultRating={11}
-          size={20}
-        />
-      </View>
-        
-       
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+            <Text>Check Airbnb Ratings Below:</Text>
+            <View style={styles.ratingContainer}>
+                <AirbnbRating />
+                <AirbnbRating
+                    count={11}
+                    reviews={["Terrible", "Bad", "Meh", "OK", "Good", "Hmm...", "Very Good", "Wow", "Amazing", "Unbelievable", "Jesus"]}
+                    defaultRating={11}
+                    size={20}
+                />
+            </View>
             
-     <View style={[styles.cardHeader, { marginBottom: 2, marginTop: 5 }]}>
-        <TouchableOpacity onPress={() => handlePress(item.mobileNumber)}>
-          <MaterialIcons name="phone-in-talk" size={24} color={Colors.darkBlue} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handlePress(item.alternateNumber)}>
-          <MaterialIcons name="phone-in-talk" size={24} color={Colors.secondary} />
-        </TouchableOpacity>
-      </View>
+            <View style={[styles.cardHeader, { marginBottom: 2, marginTop: 5 }]}>
+                <TouchableOpacity onPress={() => handlePress(item.mobileNumber)}>
+                    <MaterialIcons name="phone-in-talk" size={24} color={Colors.darkBlue} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handlePress(item.alternateNumber)}>
+                    <MaterialIcons name="phone-in-talk" size={24} color={Colors.secondary} />
+                </TouchableOpacity>
+            </View>
 
-            <Text style={styles.cardText}>Techniciannnn Name: <Text style={{ color: "black" }}> {item.name}</Text></Text>
+            <Text style={styles.cardText}>Technician Name: <Text style={{ color: "black" }}> {item.name}</Text></Text>
             <Text style={styles.cardText}>Technician Type: <Text style={{ color: "black" }}> {item.technicianType}</Text></Text>
             <Text style={styles.cardText}>City: <Text style={{ color: "black" }}>{item.city}</Text></Text>
             <Text style={styles.cardText}>State: <Text style={{ color: "black" }}>{item.state}</Text></Text>
             <Text style={styles.cardText}>Vehicle Type: <Text style={{ color: "black" }}> {item.vehicleType}</Text></Text>
-
             
-      <Modal
-        visible={modalVisible}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <AirbnbRating
-              reviews={['bad', 'ok', 'good', 'very good', 'excellent']}
-              count={5}
-              defaultRating={3}
-            />
-            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
+            <Modal
+                visible={modalVisible}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <AirbnbRating
+                            reviews={['bad', 'ok', 'good', 'very good', 'excellent']}
+                            count={5}
+                            defaultRating={3}
+                        />
+                        <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+                            <Text style={styles.closeButtonText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </View>
-      </Modal>
-        </View>
-        </>
     ); 
 
     const handleLoadMore = () => {
@@ -255,7 +210,7 @@ const TechnicianSupport: React.FC = () => {
             );
         }
 
-        if (filteredTechnicians.length === 0) {
+        if (technicians.length === 0) {
             return (
                 <View style={styles.centerContainer}>
                     <Text style={styles.noTechnicianText}>
@@ -267,7 +222,7 @@ const TechnicianSupport: React.FC = () => {
 
         return (
             <FlatList
-                data={filteredTechnicians}
+                data={technicians}
                 renderItem={renderTechnicianItem}
                 keyExtractor={(item) => item._id}
                 onEndReached={handleLoadMore}
@@ -304,7 +259,7 @@ const TechnicianSupport: React.FC = () => {
                         <Picker.Item label="TAMPO" value="TAMPO" />
                     </Picker>
                 </View>
-{/* 
+
                 <View style={styles.locationFilterContainer}>
                     <Picker
                         selectedValue={stateFilter}
@@ -328,7 +283,7 @@ const TechnicianSupport: React.FC = () => {
                             <Picker.Item key={city.name} label={city.name} value={city.name} />
                         ))}
                     </Picker>
-                </View> */}
+                </View>
             </View>
 
             <TouchableOpacity onPress={() => router.push("add_technician")} style={styles.addButton}>
