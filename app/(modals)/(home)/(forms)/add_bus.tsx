@@ -32,13 +32,19 @@ const AddBusScreen: React.FC = () => {
   const [selectedForRent, setSelectedForRent] = useState<boolean>(false);
   const [selectedForSell, setSelectedForSell] = useState<boolean>(false);
   const [busImages, setBusImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
+  const [isSeatPushBack, setIsSeatPushBack] = useState<string>("false")
+  const [isLuggageSpace, setIsLuggageSpace] = useState<string>("false")
+  const [curtain, setCurtain] = useState<string>("false")
+  const [amenities, setAmenities] = useState<string[]>([])
+  const [sellDescription, setSellDescription] = useState<string>("")
+
   const [loading, setLoading] = useState(false);
   const { apiCaller, setRefresh } = useGlobalContext();
 
   const handleAddBus = async () => {
     if (!vehicleNo || !seatingCapacity || !vehicleModel || !bodyType || !chassisBrand || !location || !contactNo || busImages.length === 0) {
-        Alert.alert("Please fill all fields and upload bus images.");
-        return;
+      Alert.alert("Please fill all fields and upload bus images.");
+      return;
     }
 
     const formData = new FormData();
@@ -53,33 +59,40 @@ const AddBusScreen: React.FC = () => {
     formData.append('isForRent', selectedForRent ? 'true' : 'false');
     formData.append('isForSell', selectedForSell ? 'true' : 'false');
     formData.append('type', "BUS");
+    formData.append("isLuggageSpace", isLuggageSpace || "false")
+    formData.append("isSeatPushBack", isSeatPushBack || "false")
+    formData.append("curtain", curtain || "false")
 
     busImages.forEach((image, index) => {
-        formData.append('photos', {
-            uri: image.uri,
-            type: 'image/jpeg',
-            name: `photo${index}.jpg`
-        } as any);
+      formData.append('photos', {
+        uri: image.uri,
+        type: 'image/jpeg',
+        name: `photo${index}.jpg`
+      } as any);
     });
+    amenities.forEach((amenity) => {
+      formData.append('amenities', amenity)
+    });
+
 
     setLoading(true);
     try {
-        await apiCaller.post('/api/vehicle', formData, { 
-            headers: { 
-                'Content-Type': 'multipart/form-data'
-            } 
-        });
-        setLoading(false);
-        setRefresh(prev => !prev);
-        resetForm();
-        Alert.alert("Success", "Bus added successfully!");
-        router.back();
+      await apiCaller.post('/api/vehicle', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setLoading(false);
+      setRefresh(prev => !prev);
+      resetForm();
+      Alert.alert("Success", "Bus added successfully!");
+      router.back();
     } catch (error) {
-        console.log(error);
-        setLoading(false);
-        Alert.alert("Error", "Failed to add bus. Please try again.");
+      console.log(error);
+      setLoading(false);
+      Alert.alert("Error", "Failed to add bus. Please try again.");
     }
-};
+  };
 
   const handleImagePicker = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -105,6 +118,14 @@ const AddBusScreen: React.FC = () => {
     setSelectedForRent(false);
     setSelectedForSell(false);
     setBusImages([]);
+  };
+
+  const toggleSelectAmenity = (name: string) => {
+    setAmenities(prevSelected =>
+      prevSelected.includes(name)
+        ? prevSelected.filter(amenityName => amenityName !== name)
+        : [...prevSelected, name]
+    );
   };
 
   return (
@@ -185,6 +206,51 @@ const AddBusScreen: React.FC = () => {
             </RadioButtonGroup>
           </View>
 
+          <View style={styles.featuresOuterContainer}>
+            <Text>Does seat push back?</Text>
+            <View style={styles.featuresContainer}>
+              <RadioButtonGroup
+                containerStyle={styles.radioButtonGroup}
+                selected={isSeatPushBack}
+                onSelected={(value: string) => setIsSeatPushBack(value)}
+                radioBackground={Colors.darkBlue}
+              >
+                <RadioButtonItem value={"true"} label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>Yes</Text>} style={styles.radioButtonItem} />
+                <RadioButtonItem value={"false"} label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>No</Text>} style={styles.radioButtonItem} />
+              </RadioButtonGroup>
+            </View>
+          </View>
+
+          <View style={styles.featuresOuterContainer}>
+            <Text>Do bus have luggage space?</Text>
+            <View style={styles.featuresContainer}>
+              <RadioButtonGroup
+                containerStyle={styles.radioButtonGroup}
+                selected={isLuggageSpace}
+                onSelected={(value: string) => setIsLuggageSpace(value)}
+                radioBackground={Colors.darkBlue}
+              >
+                <RadioButtonItem value={"true"} label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>Yes</Text>} style={styles.radioButtonItem} />
+                <RadioButtonItem value={"false"} label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>No</Text>} style={styles.radioButtonItem} />
+              </RadioButtonGroup>
+            </View>
+          </View>
+
+          <View style={styles.featuresOuterContainer}>
+            <Text>Do bus have curtain/seat covers?</Text>
+            <View style={styles.featuresContainer}>
+              <RadioButtonGroup
+                containerStyle={styles.radioButtonGroup}
+                selected={curtain}
+                onSelected={(value: string) => setCurtain(value)}
+                radioBackground={Colors.darkBlue}
+              >
+                <RadioButtonItem value={"true"} label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>Yes</Text>} style={styles.radioButtonItem} />
+                <RadioButtonItem value={"false"} label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>No</Text>} style={styles.radioButtonItem} />
+              </RadioButtonGroup>
+            </View>
+          </View>
+
           <View style={styles.featuresContainer}>
             <TouchableOpacity style={styles.checkboxContainer} onPress={() => setSelectedForRent(!selectedForRent)}>
               <Text style={styles.checkboxLabel}>{selectedForRent ? "✔ " : ""}For Rent</Text>
@@ -192,6 +258,40 @@ const AddBusScreen: React.FC = () => {
             <TouchableOpacity style={styles.checkboxContainer} onPress={() => setSelectedForSell(!selectedForSell)}>
               <Text style={styles.checkboxLabel}>{selectedForSell ? "✔ " : ""}For Sell</Text>
             </TouchableOpacity>
+          </View>
+
+          {selectedForSell && <View style={styles.inputGroup}>
+            <Text style={styles.label}>Sell Description</Text>
+            <TextInput
+              style={styles.input}
+              value={sellDescription}
+              onChangeText={(text) => setSellDescription(text)}
+            />
+          </View>}
+
+          <Text style={{ flex: 1, fontWeight: 'bold', color: '#87CEEB' }}>Select Amenities:</Text>
+          <View style={{ paddingTop: 1, paddingBottom: 14, flexDirection: 'row', flexWrap: 'wrap' }}>
+            {[
+              { id: 1, name: "wifi", source: require('@/assets/images/wifi-icon.png') },
+              { id: 2, name: "blanket", source: require('@/assets/images/blanket.png') },
+              { id: 3, name: "bottle", source: require('@/assets/images/bottle.png') },
+              { id: 4, name: "charger", source: require('@/assets/images/charger.png') },
+              { id: 5, name: "meal", source: require('@/assets/images/meal.png') },
+              { id: 6, name: "pillow", source: require('@/assets/images/pillow.png') },
+              { id: 7, name: "tv", source: require('@/assets/images/tv.png') },
+            ].map(amenity => (
+              <TouchableOpacity
+                key={amenity.id}
+                onPress={() => toggleSelectAmenity(amenity.name)}
+                style={{
+                  backgroundColor: amenities.includes(amenity.name) ? '#87CEEB' : 'transparent',
+                  padding: 5,
+                  borderRadius: 5,
+                  marginHorizontal: 5,
+                }}>
+                <Image source={amenity.source} style={{ width: 30, height: 30 }} />
+              </TouchableOpacity>
+            ))}
           </View>
 
           <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
@@ -253,9 +353,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     height: 40,
   },
+  featuresOuterContainer: {
+    flexDirection: "column",
+    // justifyContent: "space-between",
+    alignItems: 'center',
+    backgroundColor: Colors.secondary,
+    paddingTop: 10,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
   featuresContainer: {
     flexDirection: "row",
-    flexWrap: "wrap",
+    // flexWrap: "wrap",
     justifyContent: "space-between",
     backgroundColor: Colors.secondary,
     padding: 10,
