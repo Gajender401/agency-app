@@ -61,7 +61,6 @@ function timestampToTime(timestamp: string): string {
 }
 
 const DailyRouteVehicles: React.FC = () => {
-  
   const [dailyRoutes, setDailyRoutes] = useState<DailyRoute[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -78,9 +77,10 @@ const DailyRouteVehicles: React.FC = () => {
   const [inputHeight, setInputHeight] = useState(50);
   // const [modalVisible, setModalVisible] = useState(false);
 
-  const [qrModalVisible, setQrModalVisible] = useState(false);
-  const [driverModalVisible, setDriverModalVisible] = useState(false);
-  const [chartModalVisible, setChartModalVisible] = useState(false);
+  const [isQRModalVisible, setIsQrModalVisible] = useState(null);
+  const [isDriverModalVisible, setIsDriverModalVisible] = useState(null);
+  const [isChartModalVisible, setIsChartModalVisible] = useState(null);
+
   const [discountAmount, setDiscountAmount] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -94,9 +94,9 @@ const DailyRouteVehicles: React.FC = () => {
   const fetchDailyRoutes = async () => {
     try {
       setLoading(true);
-      const response = await apiCaller.get('/api/dailyRoute');
+      const response = await apiCaller.get('/api/busRoute');
       setDailyRoutes(response.data.data);
-      console.log(response.data.data[0].vehicle.number);
+      // console.log(response.data.data[0]?.vehicle?.number);
 
     } catch (err) {
       console.log(err);
@@ -138,7 +138,7 @@ const DailyRouteVehicles: React.FC = () => {
   const handleDelete = async () => {
     if (selectedRoute) {
       try {
-        await apiCaller.delete(`/api/dailyRoute?dailyRouteId=${selectedRoute._id}`);
+        await apiCaller.delete(`/api/busRoute?routeId=${selectedRoute._id}`);
         fetchDailyRoutes();
         setShowDeleteModal(false);
       } catch (err) {
@@ -154,7 +154,7 @@ const DailyRouteVehicles: React.FC = () => {
   };
 
   const handleAddDriver = async () => {
-    if (!selectedPrimaryDriver && !selectedSecondaryDriver && !selectedCleaner && !instruction) {
+    if (!selectedPrimaryDriver) {
       Alert.alert("Please fill at least one field.");
       return;
     }
@@ -168,7 +168,7 @@ const DailyRouteVehicles: React.FC = () => {
 
     try {
       setLoading(true);
-      await apiCaller.patch(`/api/dailyRoute/finalize?routeId=${selectedRoute?._id}`, newDriverData);
+      await apiCaller.patch(`/api/busRoute/finalize?routeId=${selectedRoute?._id}`, newDriverData);
       Alert.alert("Success", "Drivers and cleaner added successfully!");
       fetchDailyRoutes();
       setShowAddDriverModal(false);
@@ -198,7 +198,7 @@ const DailyRouteVehicles: React.FC = () => {
   const phoneNumbers = ['7249005806', '7249005807', '7249005808', '7249005808']; // Example list of numbers
 
 
-  
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.searchContainer}>
@@ -234,16 +234,16 @@ const DailyRouteVehicles: React.FC = () => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={{
-                      backgroundColor: '#87CEEB',
-                      paddingVertical: 5,
-                      paddingHorizontal: 10,
-                      borderRadius: 5,
-                    }}
-                    onPress={() => setModalVisible(true)}
-                  >
-                    <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12 }}>Create Discount</Text>
-                  </TouchableOpacity>
+                  style={{
+                    backgroundColor: '#87CEEB',
+                    paddingVertical: 5,
+                    paddingHorizontal: 10,
+                    borderRadius: 5,
+                  }}
+                  onPress={() => setModalVisible(true)}
+                >
+                  <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12 }}>Create Discount</Text>
+                </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => { setShowDeleteModal(true); setSelectedRoute(route); }}>
                   <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
@@ -252,129 +252,129 @@ const DailyRouteVehicles: React.FC = () => {
 
               <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                 <View style={{ position: 'relative' }}>
-                  <Carousel images={images} />
+                  <Carousel images={route?.vehicle?.photos} />
                   <View style={styles.circle}>
-                    <Text style={styles.circleText}>AC</Text>
-                    <Text style={styles.circleText}>Sleeper</Text>
-                    <Text style={styles.circleText}>{route.vehicle.number.toUpperCase()}</Text>
+                    <Text style={styles.circleText}>{route?.vehicle.isAC ? "AC" : "Non-AC"}</Text>
+                    <Text style={styles.circleText}>{route?.vehicle.isSleeper ? "Sleeper" : "Non-Sleeper"}</Text>
+                    <Text style={styles.circleText}>{route?.vehicle?.number.toUpperCase()}</Text>
                   </View>
                 </View>
               </View>
               <View >
-              <Text
-                style={{
-                  fontSize: 20,
-                  fontWeight: '900',
-                  color: '#87CEEB',
-                  fontFamily: 'sans-serif',
-                  textAlign:'center'
-                }}
-              >
-                Tusharraj Travels
-              </Text>
-            </View>
+                <Text
+                  style={{
+                    fontSize: 20,
+                    fontWeight: '900',
+                    color: '#87CEEB',
+                    fontFamily: 'sans-serif',
+                    textAlign: 'center'
+                  }}
+                >
+                  {route?.agencyName}
+                </Text>
+              </View>
 
 
-    <View style={{ width: "100%", paddingHorizontal:40 }}>
-      {/* Departure and Arrival Labels */}
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        {/* Departure Label */}
-        <View style={{ alignItems: "flex-start" }}>
-          <Text style={{ fontWeight: "bold", fontSize: 15 }}>Departure</Text>
-        </View>
+              <View style={{ width: "100%", paddingHorizontal: 40 }}>
+                {/* Departure and Arrival Labels */}
+                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                  {/* Departure Label */}
+                  <View style={{ alignItems: "flex-start" }}>
+                    <Text style={{ fontWeight: "bold", fontSize: 15 }}>Departure</Text>
+                  </View>
 
-        {/* Arrival Label */}
-        <View style={{ alignItems: "flex-start" }}>
-          <Text style={{ fontWeight: "bold", fontSize: 15, paddingRight:13 }}>Arrival</Text>
-        </View>
-      </View>
-      
-      {/* Departure and Arrival Places with Times */}
-      <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 1 }}>
-        {/* Departure Place and Time */}
-        <View style={{ alignItems: "center" }}>
-          <Text style={{ fontWeight: "bold", fontSize: 18, color: "#87CEEB" }}>
-            {route.departurePlace}
-          </Text>
-          <Text>12:30 pm</Text>
-        </View>
+                  {/* Arrival Label */}
+                  <View style={{ alignItems: "flex-start" }}>
+                    <Text style={{ fontWeight: "bold", fontSize: 15, paddingRight: 13 }}>Arrival</Text>
+                  </View>
+                </View>
 
-        {/* Arrow Icon */}
-        <MaterialIcons name="keyboard-double-arrow-right" size={24} color="#00008B" />
+                {/* Departure and Arrival Places with Times */}
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 1 }}>
+                  {/* Departure Place and Time */}
+                  <View style={{ alignItems: "center" }}>
+                    <Text style={{ fontWeight: "bold", fontSize: 18, color: "#87CEEB" }}>
+                      {route?.departurePlace}
+                    </Text>
+                    <Text>{route.departureTime ? new Date(route.departureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) : "Time not added"}</Text>
+                  </View>
 
-        {/* Arrival Place and Time */}
-        <View style={{ alignItems: "center" }}>
-          <Text style={{ fontWeight: "bold", fontSize: 18, color: "#87CEEB" }}>
-            {route.destinationPlace}
-          </Text>
-          <Text style={{ marginBottom:14 }} >11:11 pm</Text>
-        </View>
-      </View>
-    </View>
-{/* 
+                  {/* Arrow Icon */}
+                  <MaterialIcons name="keyboard-double-arrow-right" size={24} color="#00008B" />
+
+                  {/* Arrival Place and Time */}
+                  <View style={{ alignItems: "center" }}>
+                    <Text style={{ fontWeight: "bold", fontSize: 18, color: "#87CEEB" }}>
+                      {route?.destinationPlace}
+                    </Text>
+                    <Text style={{ marginBottom: 14 }} >{route.arrivalTime ? new Date(route.arrivalTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }) : "Time not added"}</Text>
+                  </View>
+                </View>
+              </View>
+              {/* 
               <Text style={styles.cardText}>
                 Vehicle Number: <Text style={{ color: "black" }}>{route.vehicle.number.toUpperCase()}</Text>
               </Text> */}
-             
-              
-              <Text style={styles.cardText }>
-                Pick Up Point: Pune
+
+
+              <Text style={styles.cardText}>
+                Pick Up Point: {route?.pickupPoint}
               </Text>
               <Text style={styles.cardText}>
-                Dropping Point: delhi
+                Dropping Point: {route?.dropoffPoint}
               </Text>
               <Text style={styles.cardText}>
-                Ticket Price: 500
+                Ticket Price: {route?.ticketFare}
               </Text>
-                        
+
               <View>
-                   <Text style={{ flex: 1, fontWeight: 'bold',  fontSize: 12,}}>Office Address: sai nagar osmanabad </Text>
+                <Text style={{ flex: 1, fontWeight: 'bold', fontSize: 12, }}>Office Address: {route?.officeAddress} </Text>
               </View>
               <View>
-                   <Text style={{ flex: 1, fontWeight: 'bold',  fontSize: 12, marginBottom:4}}>Phone Pe No: 7249005806 </Text>
+                <Text style={{ flex: 1, fontWeight: 'bold', fontSize: 12, marginBottom: 4 }}>Phone Pe No: {route?.phonepeNumber} </Text>
               </View>
-              <Text style={{ flex: 1, fontWeight: 'bold', color:'#87CEEB'}}>Amenities:</Text>
+              <Text style={{ flex: 1, fontWeight: 'bold', color: '#87CEEB' }}>Amenities:</Text>
               <View style={{
-                    paddingTop:1,
-                    paddingBottom:14,
-                    flexDirection:'row',
-                    
-                  }}>
-               
-                   <Image
-                      source={require('@/assets/images/wifi-icon.png')}
-                      style={{ width: 30, height: 30, marginHorizontal: 5 }}
-                    />
-                   <Image
-                      source={require('@/assets/images/blanket.png')}
-                      style={{ width: 30, height: 30, marginHorizontal: 5 }}
-                    />
-                   <Image
-                      source={require('@/assets/images/bottle.png')}
-                      style={{ width: 30, height: 30, marginHorizontal: 5 }}
-                    />
-                   <Image
-                      source={require('@/assets/images/charger.png')}
-                      style={{ width: 30, height: 30, marginHorizontal: 5 }}
-                    />
-                   <Image
-                      source={require('@/assets/images/meal.png')}
-                      style={{ width: 30, height: 30, marginHorizontal: 5 }}
-                    />
-                   <Image
-                      source={require('@/assets/images/pillow.png')}
-                      style={{ width: 30, height: 30, marginHorizontal: 5 }}
-                    />
-                   <Image
-                      source={require('@/assets/images/tv.png')}
-                      style={{ width: 30, height: 30, marginHorizontal: 5 }}
-                    />           
+                paddingTop: 1,
+                paddingBottom: 14,
+                flexDirection: 'row',
+
+              }}>
+
+                {route?.amenities?.includes("wifi") && <Image
+                  source={require('@/assets/images/wifi-icon.png')}
+                  style={{ width: 30, height: 30, marginHorizontal: 5 }}
+                />}
+                {route?.amenities?.includes("blanket") && <Image
+                  source={require('@/assets/images/blanket.png')}
+                  style={{ width: 30, height: 30, marginHorizontal: 5 }}
+                />}
+                {route?.amenities?.includes("bottle") && <Image
+                  source={require('@/assets/images/bottle.png')}
+                  style={{ width: 30, height: 30, marginHorizontal: 5 }}
+                />}
+                {route?.amenities?.includes("charger") && <Image
+                  source={require('@/assets/images/charger.png')}
+                  style={{ width: 30, height: 30, marginHorizontal: 5 }}
+                />}
+                {route?.amenities?.includes("meal") && <Image
+                  source={require('@/assets/images/meal.png')}
+                  style={{ width: 30, height: 30, marginHorizontal: 5 }}
+                />}
+                {route?.amenities?.includes("pillow") && <Image
+                  source={require('@/assets/images/pillow.png')}
+                  style={{ width: 30, height: 30, marginHorizontal: 5 }}
+                />}
+                {route?.amenities?.includes("tv") && <Image
+                  source={require('@/assets/images/tv.png')}
+                  style={{ width: 30, height: 30, marginHorizontal: 5 }}
+                />}
               </View>
 
               <View style={{ padding: 1 }}>
-                 <PhoneNumbersList phoneNumbers={phoneNumbers} />
+                <PhoneNumbersList phoneNumbers={route?.mobileNumbers} />
               </View>
-                  {/* <View
+              {/* <View
                     style={{
                       flexDirection: 'row',
                       justifyContent: 'space-between',
@@ -387,306 +387,341 @@ const DailyRouteVehicles: React.FC = () => {
                     <Text style={{ flex: 1, fontWeight: 'bold', color: '#87CEEB' }}>Two Wheeler Courier</Text>
                   </View> */}
               <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
-    >
-       
-       <View style={{ padding: 1 }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20, paddingTop:14 }}>
-        {/* Column for Courier Service and QR Code Button */}
-        <View style={{ alignItems: 'center' }}>
-          <Text
-            style={{
-              fontWeight: 'bold',
-              fontSize: 12,
-              marginBottom: 5,
-              backgroundColor: '#e6f2ff', // Yellow background
-              paddingVertical: 5,
-              paddingHorizontal: 6,
-              borderRadius: 5, // Optional: rounded corners
-            }}
-          >
-            Courier Service
-          </Text>
-          <CustomButton
-            title="View QR Code"
-            onPress={() => setQrModalVisible(true)}
-          />
-        </View>
-
-        {/* Column for Train Ticket and Driver Button */}
-        <View style={{ alignItems: 'center' }}>
-          <Text
-            style={{
-              fontWeight: 'bold',
-              fontSize: 12,
-              marginBottom: 5,
-              backgroundColor: '#e6f2ff', // Yellow background
-              paddingVertical: 5,
-              paddingHorizontal: 6,
-              borderRadius: 5, // Optional: rounded corners
-            }}
-          >
-            Train Ticket
-          </Text>
-          <CustomButton
-            title="View Driver"
-            onPress={() => setDriverModalVisible(true)}
-          />
-        </View>
-
-        {/* Column for Two Wheeler Courier and Chart Button */}
-        <View style={{ alignItems: 'center' }}>
-          <Text
-            style={{
-              fontWeight: 'bold',
-              fontSize: 12,
-              marginBottom: 5,
-              backgroundColor: '#e6f2ff', 
-              paddingVertical: 5,
-              paddingHorizontal: 2,
-              borderRadius: 5, // Optional: rounded corners
-            }}
-          >
-            Two Wheeler Courier
-          </Text>
-          <CustomButton
-            title="View Chart"
-            onPress={() => setChartModalVisible(true)}
-          />
-        </View>
-      </View>
-    </View>
-      {/* Modal for displaying QR code */}
-      <Modal
-        transparent={true}
-        visible={qrModalVisible}
-        animationType="slide"
-        onRequestClose={() => setQrModalVisible(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: 'white',
-              padding: 20,
-              borderRadius: 10,
-              width: '80%',
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ fontSize: 16, marginBottom: 10 }}>
-              Scan this QR Code:
-            </Text>
-            <Image
-              source={require('@/assets/images/vehicle_documents.png')} // Replace with your QR code image URL
-              style={{ width: 200, height: 200 }}
-            />
-            <CustomButton
-              title="Close"
-              onPress={() => setQrModalVisible(false)}
-            />
-          </View>
-        </View>
-      </Modal>
-
-       {/* Modal for Discount Entry */}
-       <Modal
-        transparent={true}
-        visible={modalVisible}
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: 'white',
-              padding: 20,
-              borderRadius: 10,
-              width: '80%',
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: 'bold',
-                marginBottom: 10,
-                textAlign: 'center',
-              }}
-            >
-              Enter Discount Amount
-            </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                borderWidth: 1,
-                borderColor: '#ccc',
-                borderRadius: 5,
-                marginBottom: 20,
-                paddingRight: 10, // padding for the icon
-              }}
-            >
-              <TextInput
                 style={{
                   flex: 1,
-                  padding: 10,
-                  fontSize: 16,
-                  textAlign: 'center', // center the cursor
+                  justifyContent: 'center',
+                  alignItems: 'center',
                 }}
-                placeholder="Enter amount"
-                keyboardType="numeric"
-                value={discountAmount}
-                onChangeText={setDiscountAmount}
-              />
-              <MaterialCommunityIcons
-                name="percent"
-                size={24}
-                color="#000" // You can change the color as needed
-              />
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <TouchableOpacity
-                style={{
-                  backgroundColor: '#4CAF50',
-                  paddingVertical: 10,
-                  paddingHorizontal: 20,
-                  borderRadius: 5,
-                }}
-                onPress={handleCreateDiscount}
               >
-                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>Submit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={{
-                  backgroundColor: '#4CAF50',
-                  paddingVertical: 10,
-                  paddingHorizontal: 20,
-                  borderRadius: 5,
-                }}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
 
-      {/* Modal for displaying driver information */}
-      <Modal
-        transparent={true}
-        visible={driverModalVisible}
-        animationType="slide"
-        onRequestClose={() => setDriverModalVisible(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: 'white',
-              padding: 20,
-              borderRadius: 10,
-              width: '80%',
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ fontSize: 16, marginVertical: 5 }}>
-              Cleaner Name:{' '}
-              <Text style={{ color: 'black' }}>
-                {route.cleaner ? route.cleaner.name : ''}
-              </Text>
-            </Text>
-            <Text style={{ fontSize: 16, marginVertical: 5 }}>
-              Primary Driver:{' '}
-              <Text style={{ color: 'black' }}>
-                {route.primaryDriver ? route.primaryDriver.name : ''}
-              </Text>
-            </Text>
-            <Text style={{ fontSize: 16, marginVertical: 5 }}>
-              Secondary Driver:{' '}
-              <Text style={{ color: 'black' }}>
-                {route.secondaryDriver ? route.secondaryDriver.name : ''}
-              </Text>
-            </Text>
-            <CustomButton
-              title="Close"
-              onPress={() => setDriverModalVisible(false)}
-            />
-          </View>
-        </View>
-      </Modal>
+                <View style={{ padding: 1 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20, paddingTop: 14 }}>
+                    {/* Column for Courier Service and QR Code Button */}
+                    <View style={{ alignItems: 'center' }}>
+                      {route?.doesProvideCorierService ? <Text
+                        style={{
+                          fontWeight: 'bold',
+                          fontSize: 12,
+                          marginBottom: 5,
+                          backgroundColor: '#e6f2ff', // Yellow background
+                          paddingVertical: 5,
+                          paddingHorizontal: 6,
+                          borderRadius: 5, // Optional: rounded corners
+                        }}
+                      >
+                        Courier Service
+                      </Text> : <Text
+                        style={{
+                          fontWeight: 'bold',
+                          fontSize: 12,
+                          marginBottom: 5,
+                          // backgroundColor: '#e6f2ff', // Yellow background
+                          paddingVertical: 5,
+                          paddingHorizontal: 6,
+                          borderRadius: 5, // Optional: rounded corners
+                        }}
+                      >
 
-      {/* Modal for displaying chart */}
-      <Modal
-        transparent={true}
-        visible={chartModalVisible}
-        animationType="slide"
-        onRequestClose={() => setChartModalVisible(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: 'white',
-              padding: 20,
-              borderRadius: 10,
-              width: '80%',
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ fontSize: 16, marginBottom: 10 }}>
-              Here is your chart:
-            </Text>
-            <Image
-              source={{ uri: 'https://example.com/your-chart.png' }} // Replace with your chart image URL
-              style={{ width: 200, height: 200 }}
-            />
-            <CustomButton
-              title="Close"
-              onPress={() => setChartModalVisible(false)}
-            />
-          </View>
-        </View>
-      </Modal>
-    </View>
-               
+                      </Text>}
+                      <CustomButton
+                        title="View QR Code"
+                        onPress={() => setIsQrModalVisible(route._id)}
+                      />
+                    </View>
 
-              
+                    {/* Column for Train Ticket and Driver Button */}
+                    <View style={{ alignItems: 'center' }}>
+                      {route?.doesBookTrainTickets ? <Text
+                        style={{
+                          fontWeight: 'bold',
+                          fontSize: 12,
+                          marginBottom: 5,
+                          backgroundColor: '#e6f2ff', // Yellow background
+                          paddingVertical: 5,
+                          paddingHorizontal: 6,
+                          borderRadius: 5, // Optional: rounded corners
+                        }}
+                      >
+                        Train Ticket
+                      </Text> : <Text
+                        style={{
+                          fontWeight: 'bold',
+                          fontSize: 12,
+                          marginBottom: 5,
+                          // backgroundColor: '#e6f2ff', // Yellow background
+                          paddingVertical: 5,
+                          paddingHorizontal: 6,
+                          borderRadius: 5, // Optional: rounded corners
+                        }}
+                      >
+
+                      </Text>}
+                      <CustomButton
+                        title="View Driver"
+                        onPress={() => setIsDriverModalVisible(route._id)}
+                      />
+                    </View>
+
+                    {/* Column for Two Wheeler Courier and Chart Button */}
+                    <View style={{ alignItems: 'center' }}>
+                      {route?.doesCarryTwoWheelers ? <Text
+                        style={{
+                          fontWeight: 'bold',
+                          fontSize: 12,
+                          marginBottom: 5,
+                          backgroundColor: '#e6f2ff', // Yellow background
+                          paddingVertical: 5,
+                          paddingHorizontal: 6,
+                          borderRadius: 5, // Optional: rounded corners
+                        }}
+                      >
+                        Two Wheeler Courier
+                      </Text> : <Text
+                        style={{
+                          fontWeight: 'bold',
+                          fontSize: 12,
+                          marginBottom: 5,
+                          // backgroundColor: '#e6f2ff', // Yellow background
+                          paddingVertical: 5,
+                          paddingHorizontal: 6,
+                          borderRadius: 5, // Optional: rounded corners
+                        }}
+                      >
+
+                      </Text>}
+                      <CustomButton
+                        title="View Chart"
+                        onPress={() => setIsChartModalVisible(route._id)}
+                      />
+                    </View>
+                  </View>
+                </View>
+                {/* Modal for displaying QR code */}
+                <Modal
+                  transparent={true}
+                  visible={isQRModalVisible === route._id}
+                  animationType="slide"
+                  onRequestClose={() => setIsQrModalVisible(null)}
+                >
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    }}
+                  >
+                    <View
+                      style={{
+                        backgroundColor: 'white',
+                        padding: 20,
+                        borderRadius: 10,
+                        width: '80%',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Text style={{ fontSize: 16, marginBottom: 10 }}>
+                      </Text>
+                      <Image
+                        source={{ uri: route.QR }} // Replace with your QR code image URL
+                        style={{ width: 200, height: 200, marginBottom: 4 }}
+                      />
+                      <CustomButton
+                        title="Close"
+                        onPress={() => setIsQrModalVisible(null)}
+                      />
+                    </View>
+                  </View>
+                </Modal>
+
+                {/* Modal for Discount Entry */}
+                <Modal
+                  transparent={true}
+                  visible={modalVisible}
+                  animationType="slide"
+                  onRequestClose={() => setModalVisible(false)}
+                >
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    }}
+                  >
+                    <View
+                      style={{
+                        backgroundColor: 'white',
+                        padding: 20,
+                        borderRadius: 10,
+                        width: '80%',
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 18,
+                          fontWeight: 'bold',
+                          marginBottom: 10,
+                          textAlign: 'center',
+                        }}
+                      >
+                        Enter Discount Amount
+                      </Text>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          borderWidth: 1,
+                          borderColor: '#ccc',
+                          borderRadius: 5,
+                          marginBottom: 20,
+                          paddingRight: 10, // padding for the icon
+                        }}
+                      >
+                        <TextInput
+                          style={{
+                            flex: 1,
+                            padding: 10,
+                            fontSize: 16,
+                            textAlign: 'center', // center the cursor
+                          }}
+                          placeholder="Enter amount"
+                          keyboardType="numeric"
+                          value={discountAmount}
+                          onChangeText={setDiscountAmount}
+                        />
+                        <MaterialCommunityIcons
+                          name="percent"
+                          size={24}
+                          color="#000" // You can change the color as needed
+                        />
+                      </View>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <TouchableOpacity
+                          style={{
+                            backgroundColor: '#4CAF50',
+                            paddingVertical: 10,
+                            paddingHorizontal: 20,
+                            borderRadius: 5,
+                          }}
+                          onPress={handleCreateDiscount}
+                        >
+                          <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>Submit</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={{
+                            backgroundColor: '#4CAF50',
+                            paddingVertical: 10,
+                            paddingHorizontal: 20,
+                            borderRadius: 5,
+                          }}
+                          onPress={() => setModalVisible(false)}
+                        >
+                          <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>Cancel</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </View>
+                </Modal>
+
+                {/* Modal for displaying driver information */}
+                <Modal
+                  transparent={true}
+                  visible={isDriverModalVisible === route._id}
+                  animationType="slide"
+                  onRequestClose={() => setIsDriverModalVisible(null)}
+                >
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    }}
+                  >
+                    <View
+                      style={{
+                        backgroundColor: 'white',
+                        padding: 20,
+                        borderRadius: 10,
+                        width: '80%',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Text style={{ fontSize: 16, marginVertical: 5 }}>
+                        Cleaner Name:{' '}
+                        <Text style={{ color: 'black' }}>
+                          {route.cleaner ? route.cleaner.name : ''}
+                        </Text>
+                      </Text>
+                      <Text style={{ fontSize: 16, marginVertical: 5 }}>
+                        Primary Driver:{' '}
+                        <Text style={{ color: 'black' }}>
+                          {route.primaryDriver ? route.primaryDriver.name : ''}
+                        </Text>
+                      </Text>
+                      <Text style={{ fontSize: 16, marginVertical: 5 }}>
+                        Secondary Driver:{' '}
+                        <Text style={{ color: 'black' }}>
+                          {route.secondaryDriver ? route.secondaryDriver.name : ''}
+                        </Text>
+                      </Text>
+                      <CustomButton
+                        title="Close"
+                        onPress={() => setIsDriverModalVisible(null)}
+                      />
+                    </View>
+                  </View>
+                </Modal>
+
+                {/* Modal for displaying chart */}
+                <Modal
+                  transparent={true}
+                  visible={isChartModalVisible === route._id}
+                  animationType="slide"
+                  onRequestClose={() => setIsChartModalVisible(null)}
+                >
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    }}
+                  >
+                    <View
+                      style={{
+                        backgroundColor: 'white',
+                        padding: 20,
+                        borderRadius: 10,
+                        width: '80%',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <Text style={{ fontSize: 16, marginBottom: 10 }}>
+                        Here is your chart:
+                      </Text>
+                      <Image
+                        source={{ uri: route.seatingArrangement }} // Replace with your chart image URL
+                        style={{ width: 200, height: 200, marginBottom: 4 }}
+                      />
+                      <CustomButton
+                        title="Close"
+                        onPress={() => setIsChartModalVisible(null)}
+                      />
+                    </View>
+                  </View>
+                </Modal>
+              </View>
+
+
+
             </View>
           ))}
         </ScrollView>
       )}
 
-      
+
 
       <Modal
         animationType="slide"
@@ -811,8 +846,8 @@ const styles = StyleSheet.create({
   circleText: {
     color: '#000000',
     textAlign: 'center',
-    fontSize:8,
-    fontWeight:'900'
+    fontSize: 8,
+    fontWeight: '900'
   },
   searchContainer: {
     flexDirection: "row",
@@ -850,7 +885,7 @@ const styles = StyleSheet.create({
     padding: 4,
     borderRadius: 5,
     marginBottom: 20,
-    paddingHorizontal:8,
+    paddingHorizontal: 8,
     elevation: 3,
     shadowColor: "#000",
     shadowOffset: { width: 2, height: 2 },
