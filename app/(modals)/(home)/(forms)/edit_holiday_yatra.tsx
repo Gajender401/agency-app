@@ -1,11 +1,12 @@
-import { SafeAreaView, ScrollView, StyleSheet, Text, View, TextInput, Image, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
-import React, { useState } from 'react'
+import { SafeAreaView, ScrollView, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Alert } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { Colors } from "@/constants/Colors";
 import * as ImagePicker from "expo-image-picker";
 import TextInputField from '@/components/TextInputField';
 import FileInputField from '@/components/FileInputField';
 import { useGlobalContext } from '@/context/GlobalProvider';
 import { router } from 'expo-router';
+
 type Tour = {
     name: string,
     primaryMobileNumber: string,
@@ -15,11 +16,11 @@ type Tour = {
     photo: ImagePicker.ImagePickerAsset | null
 }
 
-const add_holiday_yatra = () => {
+export default function EditHolidayYatraScreen() {
 
-    // const [busImages, setBusImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
     const [loading, setLoading] = useState(false);
-    const { apiCaller, setRefresh } = useGlobalContext();
+    const { apiCaller, setRefresh, editData } = useGlobalContext();
+
 
     const [tour, setTour] = useState<Tour>({
         name: "",
@@ -59,6 +60,7 @@ const add_holiday_yatra = () => {
         }
     };
 
+
     const handleSubmit = async () => {
         try {
             setLoading(true)
@@ -70,7 +72,7 @@ const add_holiday_yatra = () => {
                 // console.log({ ele: tour[key] });
 
                 // If the field is an image, handle it differently
-                if (ele === "photo") {
+                if (tour[ele]?.uri && ele === "photo") {
                     formData.append(ele, {
                         uri: tour[key].uri,
                         name: tour[key].fileName || "photo.jpg",
@@ -81,15 +83,15 @@ const add_holiday_yatra = () => {
                 }
             });
 
-            const res = await apiCaller.post('/api/tour', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+            const res = await apiCaller.patch(`/api/tour?tourId=${editData._id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false)
             resetForm()
-            Alert.alert("Success", "Tour added successfully!");
+            Alert.alert("Success", "Tour updated successfully!");
             router.back()
         } catch (error) {
             console.log(error);
             setLoading(false);
-            Alert.alert("Error", "Failed to add route. Please try again.");
+            Alert.alert("Error", "Failed to Update tour. Please try again.");
         }
 
 
@@ -106,6 +108,10 @@ const add_holiday_yatra = () => {
         })
     }
 
+    useEffect(()=>{
+        setTour(editData)
+    }, [editData])
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView style={styles.scrollView}>
@@ -113,7 +119,7 @@ const add_holiday_yatra = () => {
 
                     {
                         formFields.map((field) => {
-                            return field.type === "text" ? <TextInputField name={field.name} value={tour[field.name]} label={field.label} onChange={onChange} type={field.type} key={field.name} keyboardType={field.keyboardType? field.keyboardType: undefined} /> :
+                            return field.type === "text" ? <TextInputField name={field.name} value={tour[field.name]} label={field.label} onChange={onChange} type={field.type} key={field.name} keyboardType={field.keyboardType ? field.keyboardType : undefined} /> :
                                 field.type === "file" ? <FileInputField OnPress={handleImagePicker} image={tour.photo} isImageArray={false} label={field.label} key={field.name} /> : null
                         })
                     }
@@ -140,8 +146,6 @@ const add_holiday_yatra = () => {
         </SafeAreaView>
     )
 }
-
-export default add_holiday_yatra
 
 const styles = StyleSheet.create({
     container: {

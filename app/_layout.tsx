@@ -43,7 +43,7 @@ export default function RootLayout() {
         <Stack.Screen name="(modals)/(home)/drivers_all" options={{  headerShadowVisible:false, headerTitle:"All Drivers List", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/cleaners_list" options={{ headerShadowVisible:false, headerTitle:"Cleaner List", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/employee_list" options={{ headerShadowVisible:false, headerTitle:"Employee List", headerTitleAlign:"center" }} />
-        <Stack.Screen name="(modals)/(home)/(forms)/edit_profile" options={{ headerShown: false }} />
+        {/* <Stack.Screen name="(modals)/(home)/(forms)/edit_profile" options={{ headerShown: false }} /> */}
         <Stack.Screen name="(modals)/(home)/all_vehicle_list" options={{ headerShadowVisible:false, headerTitle:"All Vehicle List", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/car_list" options={{ headerShadowVisible:false, headerTitle:"Car List", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/bus_list" options={{ headerShadowVisible:false, headerTitle:"Bus List", headerTitleAlign:"center" }} />
@@ -89,6 +89,7 @@ export default function RootLayout() {
         <Stack.Screen name="(modals)/(home)/(forms)/edit_vehicle_servicing_history" options={{ headerShadowVisible:false, headerTitle:"Vehicle Documents", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/(forms)/edit_vehicle_documents" options={{ headerShadowVisible:false, headerTitle:"Vehicle Documents", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/(forms)/add_holiday_yatra" options={{ headerShadowVisible:false, headerTitle:"Add Holiday yatra", headerTitleAlign:"center" }} />
+        <Stack.Screen name="(modals)/(home)/(forms)/edit_holiday_yatra" options={{ headerShadowVisible:false, headerTitle:"Edit Holiday yatra", headerTitleAlign:"center" }} />
         
         <Stack.Screen name="(modals)/plans" options={{ headerShadowVisible:false, headerTitle:"Premium", headerTitleAlign:"center" }} />
         <Stack.Screen name="(modals)/(home)/invoice" options={{ headerShadowVisible:false, headerTitle:"Invoice", headerTitleAlign:"center" }} />

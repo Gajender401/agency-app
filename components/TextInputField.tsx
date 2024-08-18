@@ -10,12 +10,13 @@ type componentProps = {
     label: string
 }
 
-export default function TextInputField({ value, onChange, type, name, label }: componentProps) {
+export default function TextInputField({ value, onChange, type, name, label, keyboardType }: componentProps) {
     return (
         <View style={styles.inputGroup}>
             <Text style={styles.label}>{label}</Text>
             <TextInput
                 style={styles.input}
+                keyboardType={keyboardType?keyboardType:"default"}
                 value={type === "text" ? value : type === "number" ? type.toString() : undefined}
                 onChangeText={(text) => onChange(name, text)}
             />

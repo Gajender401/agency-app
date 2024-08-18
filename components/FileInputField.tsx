@@ -19,10 +19,10 @@ export default function FileInputField({ OnPress, image, isImageArray, label }: 
                 <View style={styles.imagePreviewContainer}>
                     {isImageArray && image ? (
                         image.map((img: object, index: number) => (
-                            <Image key={index} source={{ uri: img.uri }} style={styles.previewImage} />
+                            <Image key={index} source={{ uri: img.uri || img }} style={styles.previewImage} />
                         ))
                     ) : (
-                        image && <Image source={{ uri: image.uri }} style={styles.previewImage} />
+                        image && <Image source={{ uri: image.uri || image }} style={styles.previewImage} />
                     )}
                 </View>
             )}

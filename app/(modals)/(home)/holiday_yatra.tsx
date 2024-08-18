@@ -2,11 +2,11 @@ import { StyleSheet, Text, View, Image, Dimensions, SafeAreaView, TextInput, Act
 import React, { useEffect, useState } from 'react';
 import { Colors } from "@/constants/Colors";
 import { GestureHandlerRootView, ScrollView } from 'react-native-gesture-handler';
-import { FontAwesome5 } from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { router } from 'expo-router';
-import Carousel from "@/components/Carousel";
 import PhoneNumbersList from '@/components/PhoneNumberList';
 import { useGlobalContext } from '@/context/GlobalProvider';
+import ConfirmationModal from '@/components/Modal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -15,15 +15,6 @@ const holiday_yatra = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [tours, setTours] = useState([])
   const { apiCaller, setRefresh } = useGlobalContext();
-
-  // const images = [
-  //   require('@/assets/images/carousel1.png'),
-  //   require('@/assets/images/carousel1.png'),
-  //   require('@/assets/images/carousel1.png'),
-  //   require('@/assets/images/carousel1.png'),
-  // ];
-
-  const phoneNumbers = ['7249005806', '7249005807']; // Example list of numbers
 
   const fetchTours = async () => {
     setIsLoading(true)
@@ -39,7 +30,7 @@ const holiday_yatra = () => {
     }
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchTours()
   }, [])
 
@@ -84,21 +75,55 @@ const holiday_yatra = () => {
 
 export default holiday_yatra;
 
-const TourCard = ({ tour }) => {
-  return (
-    <View style={styles.card}>
-      <Image source={{ uri: tour.photo }} height={400} />
+const TourCard = ({ tour } : any) => {
 
-      <Text style={styles.cardText}>{tour?.agencyName}<Text style={{ color: "black" }}></Text></Text>
-      <View style={{ padding: 1 }}>
-        <PhoneNumbersList phoneNumbers={[tour?.primaryMobileNumber, tour?.secondaryMobileNumber]} />
+  const { apiCaller, setEditData, setRefresh } = useGlobalContext();
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState<boolean>(false)
+  const handleDelete = async () => {
+    if (tour) {
+      try {
+        await apiCaller.delete(`/api/tour?tourId=${tour._id}`);
+        // fetchDailyRoutes();
+        setIsDeleteModalVisible(false);
+        setRefresh(prev => !prev)
+        Alert.alert("Success", "Holiday Yatra deleted")
+      } catch (err) {
+        console.error(err);
+        setIsDeleteModalVisible(false)
+        Alert.alert("Error", "Could not delete the holiday yatra")
+      }
+    }
+  };
+  return (
+    <>
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <TouchableOpacity onPress={() => { setEditData(tour); router.push("edit_holiday_yatra") }} style={styles.editButton}>
+            <Text style={styles.editButtonText}>Edit Tour</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => { setIsDeleteModalVisible(true) }} style={styles.editButton}>
+            {/* <MaterialIcons name="delete" size={24} color={Colors.darkBlue} /> */}
+            <Text style={styles.editButtonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+        <Image source={{ uri: tour.photo }} height={200} />
+
+        <Text style={styles.cardText}>{tour?.agencyName}<Text style={{ color: "black" }}></Text></Text>
+        <View style={{ padding: 1 }}>
+          <PhoneNumbersList phoneNumbers={[tour?.primaryMobileNumber, tour?.secondaryMobileNumber]} />
+        </View>
+        <Text style={styles.cardText}>Office Address:  <Text style={{ color: "black" }}>{tour?.officeAddress}</Text></Text>
+        <Text style={styles.cardText}>Tour Name: <Text style={{ color: "black" }}>{tour?.name}</Text></Text>
+        <Text style={styles.cardText}>Location: <Text style={{ color: "black" }}>{tour?.location}</Text></Text>
       </View>
-      <Text style={styles.cardText}>Office Address: {tour?.officeAddress} <Text style={{ color: "black" }}></Text></Text>
-      <Text style={styles.cardText}>Tour Name: {tour?.name}<Text style={{ color: "black" }}></Text></Text>
-      <Text style={styles.cardText}>Location: {tour?.location}<Text style={{ color: "black" }}></Text></Text>
-    </View>
+
+      <ConfirmationModal actionBtnText='Delete' closeModal={() => setIsDeleteModalVisible(false)} handler={handleDelete} isVisible={isDeleteModalVisible} message='Are you sure you want to delete holiday yatra' />
+    </>
   )
 }
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -131,6 +156,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
     marginBottom: 20,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginBottom: 10,
+    alignItems: "center",
+    gap: 5,
+  },
+  editButton: {
+    backgroundColor: Colors.darkBlue,
+    borderRadius: 5,
+    padding: 5,
+  },
+  editButtonText: {
+    color: "#fff",
+    fontSize: 12,
   },
   cardText: {
     marginBottom: 1,
