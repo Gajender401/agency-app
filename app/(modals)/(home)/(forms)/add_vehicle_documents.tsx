@@ -110,7 +110,7 @@ const AddVehicleDocumentsScreen: React.FC = () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsMultipleSelection: false,
-            quality: 1,
+            quality: .7,
         });
 
         if (!result.canceled) {

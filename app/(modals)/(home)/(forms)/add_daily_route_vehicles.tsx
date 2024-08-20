@@ -109,10 +109,10 @@ const AddRouteScreen: React.FC = () => {
         formData.append("doesProvideCourierService", doesProvideCourierService || "false")
         formData.append("doesBookTrainTickets", doesBookTrainTickets || "false")
 
-        Object.keys(mobileNumbers).map((key)=>{
-            if(mobileNumbers[key] === "") return;
+        Object.keys(mobileNumbers).map((key) => {
+            if (mobileNumbers[key] === "") return;
             formData.append("mobileNumbers", mobileNumbers[key])
-            })
+        })
 
         // busImages.forEach((image, index) => {
         //     ImageResizer.createResizedImage(image.uri, 200, 300, "JPEG", 60, 0).then(
@@ -150,13 +150,13 @@ const AddRouteScreen: React.FC = () => {
             uri: QR.uri,
             type: 'image/jpeg',
             name: `photo${1}.jpg`
-        } as any: undefined)
+        } as any : undefined)
 
         formData.append("seatingArrangement", seatingArrangement ? {
             uri: seatingArrangement.uri,
             type: 'image/jpeg',
             name: `photo${2}.jpg`
-        } as any: undefined)
+        } as any : undefined)
 
 
         setLoading(true);
@@ -324,11 +324,15 @@ const AddRouteScreen: React.FC = () => {
                         </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Discount</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={discount.toString() || ""}
-                                onChangeText={(text) => setDiscount(Number(text))}
-                            />
+                            <View style={{ ...styles.input, flexDirection: "row", justifyContent: "start", alignItems: "center" }}>
+                                <TextInput
+                                    style={{ flex: 1 }}
+                                    value={discount.toString() || "0"}
+                                    onChangeText={(text) => setDiscount(Number(text))}
+                                />
+                                <Text>%</Text>
+                                {/* <TouchableOpacity onPress={() => setIsPasswordVisible(prev => !prev)} style={{ backgroundColor: Colors.darkBlue, padding: 4, borderRadius: 5 }} ><Text style={[{ color: "#fff" }]}>{isPasswordVisible ? "Hide" : "Show"}</Text></TouchableOpacity> */}
+                            </View>
                         </View>
 
                         {/* <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("busPhotos")}>
@@ -452,7 +456,7 @@ const AddRouteScreen: React.FC = () => {
                             <TextInput
                                 style={styles.input}
                                 value={mobileNumbers.mobileNumber1}
-                                onChangeText={(text)=> setMobileNumbers({ ...mobileNumbers, mobileNumber1: text })}
+                                onChangeText={(text) => setMobileNumbers({ ...mobileNumbers, mobileNumber1: text })}
                             />
                         </View>
                         <View style={styles.inputGroup}>
@@ -460,7 +464,7 @@ const AddRouteScreen: React.FC = () => {
                             <TextInput
                                 style={styles.input}
                                 value={mobileNumbers.mobileNumber2}
-                                onChangeText={(text)=> setMobileNumbers({ ...mobileNumbers, mobileNumber2: text })}
+                                onChangeText={(text) => setMobileNumbers({ ...mobileNumbers, mobileNumber2: text })}
                             />
                         </View>
                         <View style={styles.inputGroup}>
@@ -468,7 +472,7 @@ const AddRouteScreen: React.FC = () => {
                             <TextInput
                                 style={styles.input}
                                 value={mobileNumbers.mobileNumber3}
-                                onChangeText={(text)=> setMobileNumbers({ ...mobileNumbers, mobileNumber3: text })}
+                                onChangeText={(text) => setMobileNumbers({ ...mobileNumbers, mobileNumber3: text })}
                             />
                         </View>
                         <View style={styles.inputGroup}>
@@ -476,7 +480,7 @@ const AddRouteScreen: React.FC = () => {
                             <TextInput
                                 style={styles.input}
                                 value={mobileNumbers.mobileNumber4}
-                                onChangeText={(text)=> setMobileNumbers({ ...mobileNumbers, mobileNumber4: text })}
+                                onChangeText={(text) => setMobileNumbers({ ...mobileNumbers, mobileNumber4: text })}
                             />
                         </View>
                         <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("QR")}>

@@ -85,6 +85,7 @@ export default function EditHolidayYatraScreen() {
 
             const res = await apiCaller.patch(`/api/tour?tourId=${editData._id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false)
+            setRefresh(prev => !prev)
             resetForm()
             Alert.alert("Success", "Tour updated successfully!");
             router.back()

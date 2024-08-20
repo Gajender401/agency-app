@@ -10,7 +10,8 @@ import {
     ScrollView,
     Platform,
     Alert,
-    ActivityIndicator
+    ActivityIndicator,
+    Pressable
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Colors } from "@/constants/Colors";
@@ -46,6 +47,8 @@ const AddDriverScreen: React.FC = () => {
     const [driverImage, setDriverImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
     const [aadharImage, setAadharImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
     const [licenseImage, setLicenseImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+
+    const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false)
     const [loading, setLoading] = useState(false);
     const [stateList, setStateList] = useState<StateType[]>([]);
     const [cityList, setCityList] = useState<CityType[]>([]);
@@ -74,11 +77,21 @@ const AddDriverScreen: React.FC = () => {
     }, [state]);
 
     const handleAddDriver = async () => {
-        if (!name || !mobile || !password || !city || !state || !vehicleType || !driverImage || !aadharImage || !licenseImage) {
+        if (!name || !mobile || !password || !city || !state || !vehicleType) {
             Alert.alert("Please fill all fields and provide images.");
             return;
         }
-    
+
+        if (mobile.length < 10 || mobile.length > 12) {
+            Alert.alert("Please provide a valid mobile number");
+            return;
+        }
+
+        if (mobile.length < 5) {
+            Alert.alert("Password must contain atleast 5 characters");
+            return;
+        }
+
         const formData = new FormData();
         formData.append('name', name);
         formData.append('mobileNumber', mobile);
@@ -86,47 +99,47 @@ const AddDriverScreen: React.FC = () => {
         formData.append('city', city);
         formData.append('state', state);
         formData.append('vehicleType', vehicleType);
-    
+
         if (driverImage) {
             formData.append('photo', {
-                uri: driverImage,
+                uri: driverImage.uri,
                 type: 'image/jpeg',
                 name: 'driver_photo.jpg'
             } as any);
         }
-    
+
         if (aadharImage) {
             formData.append('aadharCard', {
-                uri: aadharImage,
+                uri: aadharImage.uri,
                 type: 'image/jpeg',
                 name: 'aadhar_card.jpg'
             } as any);
         }
-    
+
         if (licenseImage) {
             formData.append('license', {
-                uri: licenseImage,
+                uri: licenseImage.uri,
                 type: 'image/jpeg',
                 name: 'driver_license.jpg'
             } as any);
         }
-    
+            
         console.log(formData);
-        
+
         setLoading(true);
         try {
-            await apiCaller.post('/api/driver', formData, { 
-                headers: { 'Content-Type': 'multipart/form-data' } 
+            await apiCaller.post('/api/driver', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
             setLoading(false);
             setRefresh(prev => !prev);
             resetForm();
             Alert.alert("Success", "Driver added successfully!");
             router.back();
-        } catch (error) {
-            console.log(error);
+        } catch (error: any) {
+            console.log(error.response?.data || error.message || error);
             setLoading(false);
-            Alert.alert("Error", "Driver with this number already exists.");
+            Alert.alert("Error", "Could not create driver. Please check your data or try again later");
         }
     };
 
@@ -184,12 +197,15 @@ const AddDriverScreen: React.FC = () => {
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Password</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={password}
-                            onChangeText={(text) => setPassword(text)}
-                            secureTextEntry
-                        />
+                        <View style={{ ...styles.input, flexDirection: "row", alignItems: "center" }}>
+                            <TextInput
+                                style={{ flex: 1 }}
+                                value={password}
+                                onChangeText={(text) => setPassword(text)}
+                                secureTextEntry={isPasswordVisible ? false : true}
+                            />
+                            <TouchableOpacity onPress={() => setIsPasswordVisible(prev => !prev)} style={{ backgroundColor: Colors.darkBlue, padding: 4, borderRadius: 5 }} ><Text style={[{ color: "#fff" }]}>{isPasswordVisible ? "Hide" : "Show"}</Text></TouchableOpacity>
+                        </View>
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>State</Text>

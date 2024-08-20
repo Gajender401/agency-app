@@ -115,7 +115,7 @@ const DriverListScreen: React.FC = () => {
                             <View style={styles.imageContainer}>
                                 <TouchableOpacity onPress={() => handleViewImage(driver.photo)} >
                                     <Image
-                                        source={{ uri: driver.photo }}
+                                        source={driver.photo ? { uri: driver.photo } : require("@/assets/images/avatar.jpg")}
                                         style={styles.driverImage}
                                     />
                                 </TouchableOpacity>

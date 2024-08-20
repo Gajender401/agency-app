@@ -32,9 +32,11 @@ const AddDriverScreen: React.FC = () => {
     const [city, setCity] = useState("");
     const [state, setState] = useState("");
     const [vehicleType, setVehicleType] = useState("");
-    const [driverImage, setDriverImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
-    const [aadharImage, setAadharImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
-    const [licenseImage, setLicenseImage] = useState<ImagePicker.ImagePickerAsset | null>(null);
+    const [driverImage, setDriverImage] = useState<ImagePicker.ImagePickerAsset | string>("");
+    const [aadharImage, setAadharImage] = useState<ImagePicker.ImagePickerAsset | string>("");
+    const [licenseImage, setLicenseImage] = useState<ImagePicker.ImagePickerAsset | string>("");
+
+    const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false)
     const [loading, setLoading] = useState(false);
     const [cityList, setCityList] = useState<CityType[]>([]);
     const { apiCaller, editData, setRefresh } = useGlobalContext();
@@ -63,8 +65,18 @@ const AddDriverScreen: React.FC = () => {
     }, [editData])
 
     const handleAddDriver = async () => {
-        if (!name || !mobile || !password || !city || !state || !vehicleType || !driverImage || !aadharImage || !licenseImage) {
-            Alert.alert("Please fill all fields and provide images.");
+        if (!name || !mobile || !password || !city || !state || !vehicleType) {
+            Alert.alert("Error","Please fill all fields and provide images.");
+            return;
+        }
+
+        if (mobile.length < 10 || mobile.length > 12) {
+            Alert.alert("Error","Please provide a valid mobile number");
+            return;
+        }
+
+        if (password.length < 5) {
+            Alert.alert("Error","Password must contain atleast 5 characters");
             return;
         }
 
@@ -76,25 +88,25 @@ const AddDriverScreen: React.FC = () => {
         formData.append('state', state);
         formData.append('vehicleType', vehicleType);
     
-        if (driverImage) {
+        if (driverImage && driverImage.uri) {
             formData.append('photo', {
-                uri: driverImage,
+                uri: driverImage.uri,
                 type: 'image/jpeg',
                 name: 'driver_photo.jpg'
             } as any);
         }
     
-        if (aadharImage) {
+        if (aadharImage && aadharImage.uri) {
             formData.append('aadharCard', {
-                uri: aadharImage,
+                uri: aadharImage.uri,
                 type: 'image/jpeg',
                 name: 'aadhar_card.jpg'
             } as any);
         }
     
-        if (licenseImage) {
+        if (licenseImage && licenseImage.uri) {
             formData.append('license', {
-                uri: licenseImage,
+                uri: licenseImage.uri,
                 type: 'image/jpeg',
                 name: 'driver_license.jpg'
             } as any);
@@ -169,12 +181,15 @@ const AddDriverScreen: React.FC = () => {
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Password</Text>
-                        <TextInput
-                            style={styles.input}
-                            value={password}
-                            onChangeText={(text) => setPassword(text)}
-                            secureTextEntry
-                        />
+                        <View style={{ ...styles.input, flexDirection: "row", alignItems: "center" }}>
+                            <TextInput
+                                style={{ flex: 1 }}
+                                value={password}
+                                onChangeText={(text) => setPassword(text)}
+                                secureTextEntry={isPasswordVisible ? false : true}
+                            />
+                            <TouchableOpacity onPress={() => setIsPasswordVisible(prev => !prev)} style={{ backgroundColor: Colors.darkBlue, padding: 4, borderRadius: 5 }} ><Text style={[{ color: "#fff" }]}>{isPasswordVisible ? "Hide" : "Show"}</Text></TouchableOpacity>
+                        </View>
                     </View>
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>State</Text>
@@ -217,6 +232,7 @@ const AddDriverScreen: React.FC = () => {
                             >
                                 <Picker.Item style={{ color: Colors.secondary }} label="Select Vehicle Type" value="" />
                                 <Picker.Item label="CAR" value="CAR" />
+                                <Picker.Item label="ALL" value="ALL" />
                                 <Picker.Item label="TRUCK" value="TRUCK" />
                                 <Picker.Item label="BUS" value="BUS" />
                                 <Picker.Item label="TAMPO" value="TAMPO" />
@@ -227,17 +243,17 @@ const AddDriverScreen: React.FC = () => {
                     <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("driver")}>
                         <Text style={styles.imagePickerText}>Select Driver Image</Text>
                     </TouchableOpacity>
-                    {driverImage && <Image source={{ uri: driverImage.uri }} style={styles.previewImage} />}
+                    {driverImage && <Image source={{ uri: driverImage.uri || driverImage }} style={styles.previewImage} />}
 
                     <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("aadhar")}>
                         <Text style={styles.imagePickerText}>Select Aadhar Card Image</Text>
                     </TouchableOpacity>
-                    {aadharImage && <Image source={{ uri: aadharImage.uri }} style={styles.previewImage} />}
+                    {aadharImage && <Image source={{ uri: aadharImage.uri || aadharImage }} style={styles.previewImage} />}
 
                     <TouchableOpacity style={styles.imagePicker} onPress={() => handleImagePicker("license")}>
                         <Text style={styles.imagePickerText}>Select Driver License Image</Text>
                     </TouchableOpacity>
-                    {licenseImage && <Image source={{ uri: licenseImage.uri }} style={styles.previewImage} />}
+                    {licenseImage && <Image source={{ uri: licenseImage.uri || licenseImage }} style={styles.previewImage} />}
 
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity

@@ -62,6 +62,7 @@ const AddBusScreen: React.FC = () => {
     formData.append("isLuggageSpace", isLuggageSpace || "false")
     formData.append("isSeatPushBack", isSeatPushBack || "false")
     formData.append("curtain", curtain || "false")
+    formData.append("sellDescription", sellDescription)
 
     busImages.forEach((image, index) => {
       formData.append('photos', {

@@ -50,6 +50,10 @@ interface Bus {
     isForRent: boolean;
     isForSell: boolean;
     type: string;
+    isSeatPushBack: boolean;
+    isLuggageSpace: boolean;
+    curtain: boolean;
+    amenities: string[];
 }
 
 interface Vehicle {
@@ -74,7 +78,7 @@ const BusListScreen: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = React.useState(false);
     const [selectedBusImage, setSelectedBusImage] = React.useState<string[] | null>(null);
     const [showPhotoModal, setShowPhotoModal] = React.useState(false);
-    const [idToDelete, setIdToDelete] = useState<null|string>(null);
+    const [idToDelete, setIdToDelete] = useState<null | string>(null);
     const [searchQuery, setSearchQuery] = useState("");
     const { apiCaller, setEditData, refresh } = useGlobalContext();
 
@@ -99,7 +103,7 @@ const BusListScreen: React.FC = () => {
         fetchBuses();
     }, [refresh]);
 
-    const handleDelete = async() => {
+    const handleDelete = async () => {
         await apiCaller.delete(`/api/vehicle?vehicleId=${idToDelete}`);
         setShowDeleteModal(false);
         fetchBuses()
@@ -150,10 +154,10 @@ const BusListScreen: React.FC = () => {
                     {filteredBuses.map((bus) => (
                         <View key={bus._id} style={styles.card}>
                             <View style={styles.cardHeader}>
-                                <TouchableOpacity onPress={()=> {setEditData(bus);router.push("edit_bus")}} style={styles.editButton}>
+                                <TouchableOpacity onPress={() => { setEditData(bus); router.push("edit_bus") }} style={styles.editButton}>
                                     <Text style={styles.editButtonText}>Edit form</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={() => {setShowDeleteModal(true); setIdToDelete(bus._id)}}>
+                                <TouchableOpacity onPress={() => { setShowDeleteModal(true); setIdToDelete(bus._id) }}>
                                     <MaterialIcons name="delete" size={24} color={Colors.darkBlue} />
                                 </TouchableOpacity>
                             </View>
@@ -165,6 +169,44 @@ const BusListScreen: React.FC = () => {
                             <Text style={styles.cardText}>Location: <Text style={{ color: "black" }}>{bus.location}</Text></Text>
                             <Text style={styles.cardText}>Contact Number: <Text style={{ color: "black" }}>{bus.contactNumber}</Text></Text>
                             <Text style={styles.cardText}>{bus.isAC ? "AC /" : "NON AC /"} {bus.isForRent && " Rent /"} {bus.isForSell && " Sell"}</Text>
+                            <Text style={styles.cardText}>{bus.isLuggageSpace ? "Carry Luggage /" : ""} {bus.isSeatPushBack && " Seat Push Back /"} {bus.curtain && " Curtain and Seat Cover"}</Text>
+                            <Text style={{ flex: 1, fontWeight: 'bold', color: '#87CEEB' }}>Amenities:</Text>
+                            <View style={{
+                                paddingTop: 1,
+                                paddingBottom: 14,
+                                flexDirection: 'row',
+
+                            }}>
+
+                                {bus?.amenities?.includes("wifi") && <Image
+                                    source={require('@/assets/images/wifi-icon.png')}
+                                    style={{ width: 30, height: 30, marginHorizontal: 5 }}
+                                />}
+                                {bus?.amenities?.includes("blanket") && <Image
+                                    source={require('@/assets/images/blanket.png')}
+                                    style={{ width: 30, height: 30, marginHorizontal: 5 }}
+                                />}
+                                {bus?.amenities?.includes("bottle") && <Image
+                                    source={require('@/assets/images/bottle.png')}
+                                    style={{ width: 30, height: 30, marginHorizontal: 5 }}
+                                />}
+                                {bus?.amenities?.includes("charger") && <Image
+                                    source={require('@/assets/images/charger.png')}
+                                    style={{ width: 30, height: 30, marginHorizontal: 5 }}
+                                />}
+                                {bus?.amenities?.includes("meal") && <Image
+                                    source={require('@/assets/images/meal.png')}
+                                    style={{ width: 30, height: 30, marginHorizontal: 5 }}
+                                />}
+                                {bus?.amenities?.includes("pillow") && <Image
+                                    source={require('@/assets/images/pillow.png')}
+                                    style={{ width: 30, height: 30, marginHorizontal: 5 }}
+                                />}
+                                {bus?.amenities?.includes("tv") && <Image
+                                    source={require('@/assets/images/tv.png')}
+                                    style={{ width: 30, height: 30, marginHorizontal: 5 }}
+                                />}
+                            </View>
                             <TouchableOpacity style={styles.viewPhotoButton} onPress={() => handleViewPhoto(bus.photos)}>
                                 <Text style={styles.viewPhotoButtonText}>View Photos</Text>
                             </TouchableOpacity>

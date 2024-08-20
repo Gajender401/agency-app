@@ -14,14 +14,13 @@ const holiday_yatra = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [tours, setTours] = useState([])
-  const { apiCaller, setRefresh } = useGlobalContext();
+  const { apiCaller, setRefresh, refresh } = useGlobalContext();
 
   const fetchTours = async () => {
     setIsLoading(true)
     try {
       const res = await apiCaller.get("/api/tour")
       setTours(res.data.data)
-      setRefresh(prev => !prev)
     } catch (error) {
       console.log(error);
       Alert.alert("Error", "Failed to add route. Please try again.");
@@ -30,9 +29,24 @@ const holiday_yatra = () => {
     }
   }
 
+  const handleDelete = async (tourId : string) => {
+    if (tourId) {
+      try {
+        await apiCaller.delete(`/api/tour?tourId=${tourId}`);
+        fetchTours()
+        setRefresh(prev => !prev)
+        Alert.alert("Success", "Holiday Yatra deleted")
+      } catch (err) {
+        console.error(err);
+        Alert.alert("Error", "Could not delete the holiday yatra")
+      }
+    }
+  };
+
+
   useEffect(() => {
     fetchTours()
-  }, [])
+  }, [refresh])
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -61,7 +75,7 @@ const holiday_yatra = () => {
               <ActivityIndicator size="large" color={Colors.darkBlue} />
             ) :
               tours.map((tour) => {
-                return <TourCard tour={tour} />
+                return <TourCard tour={tour} handleDelete={handleDelete} />
               })
           }
 
@@ -75,25 +89,20 @@ const holiday_yatra = () => {
 
 export default holiday_yatra;
 
-const TourCard = ({ tour } : any) => {
-
-  const { apiCaller, setEditData, setRefresh } = useGlobalContext();
+const TourCard = ({ tour, handleDelete } : any) => {
+  
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState<boolean>(false)
-  const handleDelete = async () => {
-    if (tour) {
-      try {
-        await apiCaller.delete(`/api/tour?tourId=${tour._id}`);
-        // fetchDailyRoutes();
-        setIsDeleteModalVisible(false);
-        setRefresh(prev => !prev)
-        Alert.alert("Success", "Holiday Yatra deleted")
-      } catch (err) {
-        console.error(err);
-        setIsDeleteModalVisible(false)
-        Alert.alert("Error", "Could not delete the holiday yatra")
-      }
-    }
-  };
+  const { setEditData } = useGlobalContext();
+
+  
+  const handleCloseModal = () => {
+    setIsDeleteModalVisible(false)
+  }
+
+  const handleOpenModal = () => {
+    setIsDeleteModalVisible(true)
+  }
+  
   return (
     <>
       <View style={styles.card}>
@@ -102,7 +111,7 @@ const TourCard = ({ tour } : any) => {
             <Text style={styles.editButtonText}>Edit Tour</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => { setIsDeleteModalVisible(true) }} style={styles.editButton}>
+          <TouchableOpacity onPress={handleOpenModal} style={styles.editButton}>
             {/* <MaterialIcons name="delete" size={24} color={Colors.darkBlue} /> */}
             <Text style={styles.editButtonText}>Delete</Text>
           </TouchableOpacity>
@@ -118,7 +127,7 @@ const TourCard = ({ tour } : any) => {
         <Text style={styles.cardText}>Location: <Text style={{ color: "black" }}>{tour?.location}</Text></Text>
       </View>
 
-      <ConfirmationModal actionBtnText='Delete' closeModal={() => setIsDeleteModalVisible(false)} handler={handleDelete} isVisible={isDeleteModalVisible} message='Are you sure you want to delete holiday yatra' />
+      <ConfirmationModal actionBtnText='Delete' closeModal={handleCloseModal} handler={()=> { handleDelete(tour._id); setIsDeleteModalVisible(false) } } isVisible={isDeleteModalVisible} message='Are you sure you want to delete holiday yatra' />
     </>
   )
 }

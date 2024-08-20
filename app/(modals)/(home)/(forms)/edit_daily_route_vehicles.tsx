@@ -95,10 +95,15 @@ const AddRouteScreen: React.FC = () => {
             setQR(editData.QR)
             setSeatingArrangement(editData.seatingArrangement)
             setOfficeAddress(editData.officeAddress)
-            setDoesBookTrainTickets(editData.doesBookTrainTickets)
-            setDoesProvideCourierService(editData.doesProvideCorierService)
-            setDoesCarryTwoWheelers(editData.doesCarryTwoWheelers)
-            setMobileNumbers(editData.mobileNumbers)
+            setDoesBookTrainTickets(editData.doesBookTrainTickets ? "true" : "false")
+            setDoesProvideCourierService(editData.doesProvideCorierService ? "true" : "false")
+            setDoesCarryTwoWheelers(editData.doesCarryTwoWheelers ? "true" : "false")
+            setMobileNumbers({
+                mobileNumber1: editData.mobileNumbers[0] || "",
+                mobileNumber2: editData.mobileNumbers[1] || "",
+                mobileNumber3: editData.mobileNumbers[2] || "",
+                mobileNumber4: editData.mobileNumbers[3] || "",
+            });
             setSelectedAmenities(editData.amenities)
         }
     }, [])
@@ -308,11 +313,15 @@ const AddRouteScreen: React.FC = () => {
                         </View>
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>Discount</Text>
-                            <TextInput
-                                style={styles.input}
-                                value={discount.toString() || ""}
-                                onChangeText={(text) => setDiscount(Number(text))}
-                            />
+                            <View style={{ ...styles.input, flexDirection: "row", justifyContent: "start", alignItems: "center" }}>
+                                <TextInput
+                                    style={{ flex: 1 }}
+                                    value={discount.toString() || "0"}
+                                    onChangeText={(text) => setDiscount(Number(text))}
+                                />
+                                <Text>%</Text>
+                                {/* <TouchableOpacity onPress={() => setIsPasswordVisible(prev => !prev)} style={{ backgroundColor: Colors.darkBlue, padding: 4, borderRadius: 5 }} ><Text style={[{ color: "#fff" }]}>{isPasswordVisible ? "Hide" : "Show"}</Text></TouchableOpacity> */}
+                            </View>
                         </View>
                         <View style={styles.featuresOuterContainer}>
                             <Text>Does it carry two wheelers?</Text>

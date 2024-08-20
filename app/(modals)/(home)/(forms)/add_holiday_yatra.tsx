@@ -67,9 +67,6 @@ const add_holiday_yatra = () => {
             Object.keys(tour).forEach((ele) => {
                 const key = ele as keyof Tour
                 if (tour[key] === "" || tour[key] === null) return;
-                // console.log({ ele: tour[key] });
-
-                // If the field is an image, handle it differently
                 if (ele === "photo") {
                     formData.append(ele, {
                         uri: tour[key].uri,
@@ -84,6 +81,7 @@ const add_holiday_yatra = () => {
             const res = await apiCaller.post('/api/tour', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
             setLoading(false)
             resetForm()
+            setRefresh(prev => !prev)
             Alert.alert("Success", "Tour added successfully!");
             router.back()
         } catch (error) {

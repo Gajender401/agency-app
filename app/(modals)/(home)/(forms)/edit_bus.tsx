@@ -27,10 +27,17 @@ const EditBusScreen: React.FC = () => {
   const [contactNo, setContactNo] = useState("");
   const [bodyType, setBodyType] = useState("");
   const [chassisBrand, setChassisBrand] = useState("");
-  const [selectedAC, setSelectedAC] = useState<string | null>(null); // State for AC/Non-AC selection
-  const [selectedForRent, setSelectedForRent] = useState<boolean>(false); // State for For Rent selection
-  const [selectedForSell, setSelectedForSell] = useState<boolean>(false); // State for For Sell selection
+  const [selectedAC, setSelectedAC] = useState<string | null>(null);
+  const [selectedForRent, setSelectedForRent] = useState<boolean>(false);
+  const [selectedForSell, setSelectedForSell] = useState<boolean>(false);
   const [busImages, setBusImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
+
+  const [isSeatPushBack, setIsSeatPushBack] = useState<string>("false")
+  const [isLuggageSpace, setIsLuggageSpace] = useState<string>("false")
+  const [curtain, setCurtain] = useState<string>("false")
+  const [amenities, setAmenities] = useState<string[]>([])
+  const [sellDescription, setSellDescription] = useState<string>("")
+
   const [loading, setLoading] = useState(false);
   const { apiCaller, editData, setRefresh } = useGlobalContext();
 
@@ -43,10 +50,15 @@ const EditBusScreen: React.FC = () => {
       setContactNo(editData.contactNumber);
       setBodyType(editData.bodyType);
       setChassisBrand(editData.chassisBrand);
-      setSelectedAC(editData.isAC?"AC":"NonAC");
+      setSelectedAC(editData.isAC ? "AC" : "NonAC");
       setSelectedForRent(editData.isForRent);
       setSelectedForSell(editData.isForSell);
       setBusImages(editData.photos);
+      setAmenities(editData.amenities)
+      setIsLuggageSpace(editData.isLuggageSpace ? "true" : "false")
+      setIsSeatPushBack(editData.isSeatPushBack ? "true" : "false")
+      setCurtain(editData.curtain ? "true" : "false")
+      setSellDescription(editData.sellDescription)
     }
   }, [editData]);
 
@@ -64,13 +76,21 @@ const EditBusScreen: React.FC = () => {
     formData.append('isForRent', selectedForRent ? 'true' : 'false');
     formData.append('isForSell', selectedForSell ? 'true' : 'false');
     formData.append('type', "BUS");
+    formData.append("isLuggageSpace", isLuggageSpace || "false")
+    formData.append("isSeatPushBack", isSeatPushBack || "false")
+    formData.append("curtain", curtain || "false")
 
     busImages.forEach((image, index) => {
-        formData.append('photos', {
-            uri: image.uri,
-            type: 'image/jpeg',
-            name: `photo${index}.jpg`
-        } as any);
+      if (!image.uri) return;
+      formData.append('photos', {
+        uri: image.uri,
+        type: 'image/jpeg',
+        name: `photo${index}.jpg`
+      } as any);
+    });
+
+    amenities?.forEach((amenity) => {
+      formData.append('amenities', amenity)
     });
 
     setLoading(true);
@@ -79,7 +99,7 @@ const EditBusScreen: React.FC = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setLoading(false);
-      setRefresh(prev=>!prev)
+      setRefresh(prev => !prev)
       resetForm();
       Alert.alert("Success", "Bus updated successfully!");
       router.back()
@@ -229,6 +249,51 @@ const EditBusScreen: React.FC = () => {
             </RadioButtonGroup>
           </View>
 
+          <View style={styles.featuresOuterContainer}>
+            <Text>Does seat push back?</Text>
+            <View style={styles.featuresContainer}>
+              <RadioButtonGroup
+                containerStyle={styles.radioButtonGroup}
+                selected={isSeatPushBack}
+                onSelected={(value: string) => setIsSeatPushBack(value)}
+                radioBackground={Colors.darkBlue}
+              >
+                <RadioButtonItem value={"true"} label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>Yes</Text>} style={styles.radioButtonItem} />
+                <RadioButtonItem value={"false"} label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>No</Text>} style={styles.radioButtonItem} />
+              </RadioButtonGroup>
+            </View>
+          </View>
+
+          <View style={styles.featuresOuterContainer}>
+            <Text>Do bus have luggage space?</Text>
+            <View style={styles.featuresContainer}>
+              <RadioButtonGroup
+                containerStyle={styles.radioButtonGroup}
+                selected={isLuggageSpace}
+                onSelected={(value: string) => setIsLuggageSpace(value)}
+                radioBackground={Colors.darkBlue}
+              >
+                <RadioButtonItem value={"true"} label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>Yes</Text>} style={styles.radioButtonItem} />
+                <RadioButtonItem value={"false"} label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>No</Text>} style={styles.radioButtonItem} />
+              </RadioButtonGroup>
+            </View>
+          </View>
+
+          <View style={styles.featuresOuterContainer}>
+            <Text>Do bus have curtain/seat covers?</Text>
+            <View style={styles.featuresContainer}>
+              <RadioButtonGroup
+                containerStyle={styles.radioButtonGroup}
+                selected={curtain}
+                onSelected={(value: string) => setCurtain(value)}
+                radioBackground={Colors.darkBlue}
+              >
+                <RadioButtonItem value={"true"} label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>Yes</Text>} style={styles.radioButtonItem} />
+                <RadioButtonItem value={"false"} label={<Text style={{ color: Colors.primary, fontWeight: "500" }}>No</Text>} style={styles.radioButtonItem} />
+              </RadioButtonGroup>
+            </View>
+          </View>
+
           {/* For Rent/For Sell Checkboxes */}
           <View style={styles.featuresContainer}>
             <TouchableOpacity
@@ -259,12 +324,21 @@ const EditBusScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
 
+          {selectedForSell && <View style={styles.inputGroup}>
+            <Text style={styles.label}>Sell Description</Text>
+            <TextInput
+              style={styles.input}
+              value={sellDescription}
+              onChangeText={(text) => setSellDescription(text)}
+            />
+          </View>}
+
           <TouchableOpacity style={styles.imagePicker} onPress={handleImagePicker}>
             <Text style={styles.imagePickerText}>Upload Car Images (Max 5)</Text>
           </TouchableOpacity>
           <View style={styles.imagePreviewContainer}>
             {busImages.map((image, index) => (
-              <Image key={index} source={{ uri: image.uri }} style={styles.previewImage} />
+              <Image key={index} source={{ uri: image.uri || image }} style={styles.previewImage} />
             ))}
           </View>
 

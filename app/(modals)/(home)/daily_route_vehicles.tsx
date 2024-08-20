@@ -77,9 +77,9 @@ const DailyRouteVehicles: React.FC = () => {
   const [inputHeight, setInputHeight] = useState(50);
   // const [modalVisible, setModalVisible] = useState(false);
 
-  const [isQRModalVisible, setIsQrModalVisible] = useState(null);
-  const [isDriverModalVisible, setIsDriverModalVisible] = useState(null);
-  const [isChartModalVisible, setIsChartModalVisible] = useState(null);
+  const [isQRModalVisible, setIsQrModalVisible] = useState<string | null>(null);
+  const [isDriverModalVisible, setIsDriverModalVisible] = useState<string | null>(null);
+  const [isChartModalVisible, setIsChartModalVisible] = useState<string | null>(null);
 
   const [discountAmount, setDiscountAmount] = useState('');
   const [modalVisible, setModalVisible] = useState(false);

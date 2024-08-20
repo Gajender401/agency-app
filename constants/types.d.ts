@@ -327,7 +327,13 @@ interface Cleaner {
 
 interface DailyRoute {
   _id: string;
-  vehicle: { number: string };
+  vehicle: {
+    number: string,
+    photos: string[];
+    isAC: boolean;
+    isSleeper: boolean;
+  };
+  agencyName: string;
   departurePlace: string;
   destinationPlace: string;
   primaryDriver: Driver | null;
@@ -340,6 +346,19 @@ interface DailyRoute {
   beforeJourneyNote: string;
   beforeJourneyPhotos: string[];
   afterJourneyPhotos: string[];
+  amenities: string[];
+  arrivalTime: string | date;
+  pickupPoint: string;
+  dropoffPoint: string;
+  ticketFare: number;
+  officeAddress: string;
+  phonepeNumber: string;
+  mobileNumbers: string[];
+  doesProvideCorierService: boolean;
+  doesBookTrainTickets: boolean;
+  doesCarryTwoWheelers: boolean;
+  QR: string;
+  seatingArrangement: string;
 }
 
 
